@@ -19,6 +19,7 @@ public class LayoutInfo {
 	public double minWidth;
 	public double maxWidth;
 	public boolean visible;
+	public boolean enabled;
 	public boolean area;
 	public int zoomVisibilityLimit;
 
@@ -59,7 +60,7 @@ public class LayoutInfo {
 		RAILWAY.visible = true;
 
 		MOTORWAY.zOrder = 200;
-		MOTORWAY.fgColor =  new Color(40, 118, 227);
+		MOTORWAY.fgColor = new Color(40, 118, 227);
 		MOTORWAY.bgColor = MOTORWAY.fgColor.darker();
 		MOTORWAY.minWidth = 1.5;
 		MOTORWAY.maxWidth = 20.0;
@@ -139,7 +140,19 @@ public class LayoutInfo {
 		ERROR.zoomVisibilityLimit = 20;
 	}
 
+	public static void setStreetsOnly(boolean s) {
+		ERROR.enabled = !s;
+		WATER_AREA.enabled = !s;
+		WATER_WAY.enabled = !s;
+		FOREST.enabled = !s;
+		LAND.enabled = !s;
+		CONSTRUCTION.enabled = !s;
+		RAILWAY.enabled = !s;
+		DEFAULT.enabled = !s;
+	}
+
 	private LayoutInfo() {
+		enabled = true;
 		infoList.add(this);
 	}
 
@@ -149,8 +162,6 @@ public class LayoutInfo {
 				l.width = Math.max(l.minWidth, l.maxWidth * scaleLat / 1852.0);
 				l.visible = l.width >= 0.5
 						&& zoomFactor >= l.zoomVisibilityLimit;
-				// l.width = l.minWidth + (l.maxWidth - l.minWidth) *
-				// zoomFactor;
 			}
 		}
 	}

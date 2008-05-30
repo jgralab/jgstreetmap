@@ -44,7 +44,7 @@ public class OsmImporter extends DefaultHandler {
 	public static void main(String[] args) {
 		System.out.println("OSM to TGraph");
 		System.out.println("=============");
-// 		new OsmImporter().importOsm("rheinland-pfalz.osm.xml");
+		// new OsmImporter().importOsm("rheinland-pfalz.osm.xml");
 		new OsmImporter().importOsm("map.osm.xml");
 	}
 

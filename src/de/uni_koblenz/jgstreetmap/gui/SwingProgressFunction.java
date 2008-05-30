@@ -64,15 +64,15 @@ public class SwingProgressFunction implements ProgressFunction, ActionListener {
 		wnd.getContentPane().add(lbl, BorderLayout.SOUTH);
 		wnd.getContentPane().add(new JPanel(), BorderLayout.WEST);
 		wnd.getContentPane().add(new JPanel(), BorderLayout.EAST);
-		wnd.pack();
-		wnd.setVisible(true);
 		startTime = System.currentTimeMillis();
 		setTimeText();
+		wnd.pack();
+		wnd.setVisible(true);
 	}
 
 	private void setTimeText() {
 		lbl
-				.setText("Elapsed time: "
+				.setText(steps + " elements, elapsed time: "
 						+ ((System.currentTimeMillis() - startTime) / 100)
 						/ 10.0 + "s");
 	}

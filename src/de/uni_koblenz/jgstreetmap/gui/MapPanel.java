@@ -12,6 +12,7 @@ import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
 import java.util.List;
 
 import javax.swing.BoundedRangeModel;
@@ -31,7 +32,7 @@ import de.uni_koblenz.jgstreetmap.osmschema.Way;
 public class MapPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
 
-	public static final int ZOOM_MAX = 45;
+	public static final int ZOOM_MAX = 40;
 	public static final int ZOOM_INIT = 30;
 	public static final int ZOOM_MIN = 0;
 
@@ -42,8 +43,13 @@ public class MapPanel extends JPanel {
 	private static final Color FRAME_FONT_COLOR = Color.BLUE;
 	private static final Color FRAME_SHADE_COLOR = Color.getHSBColor(0.59167f,
 			0.04f, 0.98f);
-
 	private static final Color MAP_BG_COLOR = new Color(255, 255, 224);
+	private static final Color NODE_COLOR = Color.GREEN.darker();
+	private static final Color END_COLOR = Color.RED;
+	private static final Color WAY_COLOR = Color.RED;
+	private static final Color EDGE_COLOR = Color.BLUE; // new Color(0, 0, 255,
+	// 128);
+	private static final Color NODE_FILLER = Color.WHITE;
 
 	private static final double MINUTE = 1.0 / 60.0;
 
@@ -52,19 +58,22 @@ public class MapPanel extends JPanel {
 	private double lonW, lonE; // E-W bounds of display area
 	private double latS, latN; // N-S bounds of display area
 	private double latC, lonC; // center of display area
-	private double scaleLat; // px / minute in N-S direction
-	private double scaleLon; // px / minute in E-W direction
+	private double scaleLat; // pixel/minute in N-S direction
+	private double scaleLon; // pixel/minute in E-W direction
 
 	private Point mousePos; // uses to save click positions
 
-	private RenderingHints antialiasOn; // antialiased painting hints
+	private RenderingHints antialiasOn; // anti-aliased painting hints
 	private RenderingHints antialiasOff; // simple painting hints
 
 	BooleanGraphMarker visibleElements; // marks elements to be painted
 
 	private BoundedRangeModel zoomLevel;
 
-	// private int zoom; // 10 * log_10 of scaleLat
+	private boolean showStreetsOnly = false;
+	private boolean showGraph = false;
+	private boolean showWaysInGraph = true;
+	private boolean showMap = true;
 
 	public MapPanel(AnnotatedOsmGraph graph) {
 		this.graph = graph;
@@ -102,8 +111,8 @@ public class MapPanel extends JPanel {
 				super.mousePressed(e);
 				mousePos.x = e.getX();
 				mousePos.y = e.getY();
-				System.out.println(formatLatitude(getLat(mousePos.y)) + " "
-						+ formatLongitude(getLon(mousePos.x)));
+				// System.out.println(formatLatitude(getLat(mousePos.y)) + " "
+				// + formatLongitude(getLon(mousePos.x)));
 			}
 
 			// Computes translation of the mouse coordinates and recenters the
@@ -112,9 +121,7 @@ public class MapPanel extends JPanel {
 				super.mouseReleased(e);
 				double deltaLat = getLat(e.getY()) - getLat(mousePos.y);
 				double deltaLon = getLon(e.getX()) - getLon(mousePos.x);
-				latC -= deltaLat;
-				lonC -= deltaLon;
-				repaint();
+				setCenter(latC - deltaLat, lonC - deltaLon);
 			}
 		});
 	}
@@ -128,7 +135,7 @@ public class MapPanel extends JPanel {
 	}
 
 	/**
-	 * Computes the x postion on this MapPanel for a given longitude
+	 * Computes the x position on this MapPanel for a given longitude
 	 * <code>lon</code>.
 	 * 
 	 * @param lon
@@ -142,7 +149,7 @@ public class MapPanel extends JPanel {
 	}
 
 	/**
-	 * Computes the y postion on this MapPanel for a given latitude
+	 * Computes the y position on this MapPanel for a given latitude
 	 * <code>lat</code>.
 	 * 
 	 * @param lat
@@ -157,7 +164,7 @@ public class MapPanel extends JPanel {
 	}
 
 	/**
-	 * Computes the latitude value for a given <code>y</code> postion on this
+	 * Computes the latitude value for a given <code>y</code> position on this
 	 * MapPanel.
 	 * 
 	 * @param y
@@ -170,8 +177,8 @@ public class MapPanel extends JPanel {
 	}
 
 	/**
-	 * Computes the longitude value for a given <code>x</code> postion on this
-	 * MapPanel.
+	 * Computes the longitude value for a given <code>x</code> position on
+	 * this MapPanel.
 	 * 
 	 * @param x
 	 *            an x position
@@ -187,7 +194,7 @@ public class MapPanel extends JPanel {
 	 */
 	@Override
 	public void paint(Graphics g) {
-		super.paint(g);
+		// super.paint(g);
 
 		// compute latitude boundaries w.r.t. the center position and the height
 		// of this panel
@@ -207,12 +214,29 @@ public class MapPanel extends JPanel {
 		lonE = lonC + deltaLon;
 
 		Graphics2D g2 = (Graphics2D) g;
-
-		// paint a frame with coordinates and grid
 		paintFrame(g2);
+		LayoutInfo.setStreetsOnly(showStreetsOnly);
 
-		// paint the map
-		paintMap(g2);
+		computeVisibleElements();
+		g.setClip(FRAMEWIDTH + 1, FRAMEWIDTH + 1, getWidth() - 2 * FRAMEWIDTH
+				- 1, getHeight() - 2 * FRAMEWIDTH - 1);
+		if (showMap) {
+			paintMap(g2);
+		}
+		if (showGraph) {
+			paintGraph(g2);
+		}
+
+		// draw center cross
+		g2.setRenderingHints(antialiasOff);
+		g2.setStroke(new BasicStroke(1.0f, BasicStroke.JOIN_BEVEL,
+				BasicStroke.CAP_BUTT));
+		int x = getPx(lonC);
+		int y = getPy(latC);
+		g2.setColor(Color.RED);
+		g2.drawLine(x, y - 20, x, y + 20);
+		g2.drawLine(x - 20, y, x + 20, y);
+
 	}
 
 	/**
@@ -224,38 +248,14 @@ public class MapPanel extends JPanel {
 	private void paintMap(Graphics2D g) {
 		long start = System.currentTimeMillis();
 
-		g.setClip(FRAMEWIDTH + 1, FRAMEWIDTH + 1, getWidth() - 2 * FRAMEWIDTH
-				- 1, getHeight() - 2 * FRAMEWIDTH - 1);
 		g.setRenderingHints(antialiasOn);
-
-		// determine which ways are (at least partly) visible
-		// this doesn't work for large zooms, because only visible nodes are
-		// determined, also doesn't work correctly for areas, but for
-		// demonstration purposes, the result is ok ;-)
-
-		// TODO: perform intersection test not for nodes (end-points) but for
-		// TODO: the whole line segment and/or the whole area
-		visibleElements.clear();
-		for (Node n : graph.getNodeVertices()) {
-			if (n.getLatitude() >= latS && n.getLatitude() <= latN
-					&& n.getLongitude() >= lonW && n.getLongitude() <= lonE) {
-				HasNode e = n.getFirstHasNode();
-				while (e != null) {
-					OsmPrimitive o = (OsmPrimitive) e.getThat();
-					visibleElements.mark(o);
-					e = e.getNextHasNode();
-				}
-			}
-		}
-
-		long stopCompute = System.currentTimeMillis();
 
 		// draw areas
 		for (List<Way> lst : graph.getOrderedWayVertices().values()) {
 			for (Way way : lst) {
-
 				LayoutInfo l = graph.getLayoutInfo(way);
-				if (l.visible && l.area && visibleElements.isMarked(way)) {
+				if (l.enabled && l.visible && l.area
+						&& visibleElements.isMarked(way)) {
 					Polygon poly = new Polygon();
 					for (Node n : way.getNodeList()) {
 						poly.addPoint(getPx(n.getLongitude()), getPy(n
@@ -271,7 +271,7 @@ public class MapPanel extends JPanel {
 		for (List<Way> lst : graph.getOrderedWayVertices().values()) {
 			for (Way way : lst) {
 				LayoutInfo l = graph.getLayoutInfo(way);
-				if (l.visible && l.bgColor != null && !l.area
+				if (l.enabled && l.visible && l.bgColor != null && !l.area
 						&& visibleElements.isMarked(way)) {
 					Polygon poly = new Polygon();
 					for (Node n : way.getNodeList()) {
@@ -288,7 +288,8 @@ public class MapPanel extends JPanel {
 			// draw foreground of ways
 			for (Way way : lst) {
 				LayoutInfo l = graph.getLayoutInfo(way);
-				if (l.visible && !l.area && visibleElements.isMarked(way)) {
+				if (l.enabled && l.visible && !l.area
+						&& visibleElements.isMarked(way)) {
 					Polygon poly = new Polygon();
 					for (Node n : way.getNodeList()) {
 						poly.addPoint(getPx(n.getLongitude()), getPy(n
@@ -302,18 +303,184 @@ public class MapPanel extends JPanel {
 			}
 		}
 
-		// draw center cross
-		g.setRenderingHints(antialiasOff);
-		g.setStroke(new BasicStroke(1.0f, BasicStroke.JOIN_BEVEL,
-				BasicStroke.CAP_BUTT));
-		int x = getPx(lonC);
-		int y = getPy(latC);
-		g.setColor(Color.RED);
-		g.drawLine(x, y - 20, x, y + 20);
-		g.drawLine(x - 20, y, x + 20, y);
 		long stop = System.currentTimeMillis();
-		System.out.println("time to compute:" + (stopCompute - start)
-				+ "ms, time to paint: " + (stop - stopCompute) + "ms");
+		System.out.println("time to paint map: " + (stop - start) + "ms");
+	}
+
+	private void computeVisibleElements() {
+		long start = System.currentTimeMillis();
+		// determine which ways are (at least partly) visible
+		// this doesn't work for large zooms, because only visible nodes are
+		// determined, also doesn't work correctly for areas, but for
+		// demonstration purposes, the result is ok ;-)
+
+		// TODO: perform intersection test not for nodes (end-points) but for
+		// TODO: the whole line segment and/or the whole area
+		visibleElements.clear();
+		for (Node n : graph.getNodeVertices()) {
+			if (n.getLatitude() >= latS && n.getLatitude() <= latN
+					&& n.getLongitude() >= lonW && n.getLongitude() <= lonE) {
+				visibleElements.mark(n);
+				HasNode e = n.getFirstHasNode();
+				while (e != null) {
+					OsmPrimitive o = (OsmPrimitive) e.getThat();
+					visibleElements.mark(o);
+					e = e.getNextHasNode();
+				}
+			}
+		}
+		long stop = System.currentTimeMillis();
+		System.out.println("time to compute visible elements: "
+				+ (stop - start) + "ms");
+	}
+
+	// TODO: display street edges correctly
+	// In Graph display, "street" edges are not visualized correctly. Those
+	// edges only connect end points of ways, not the intersections as it should
+	// be. This will be fixed as soon as the importer is ready to create
+	// "street" links.
+	private void paintGraph(Graphics2D g) {
+		if (zoomLevel.getValue() < 10) {
+			return;
+		}
+		long start = System.currentTimeMillis();
+		g.setRenderingHints(antialiasOn);
+
+		double diameter = Math.max(1.0, 10.0 * scaleLat / 1852.0);
+		double width = 0.25 * diameter;
+
+		BasicStroke outlineStroke = new BasicStroke((float) diameter,
+				BasicStroke.JOIN_ROUND, BasicStroke.CAP_ROUND);
+		BasicStroke fillerStroke = new BasicStroke((float) diameter * 0.75f,
+				BasicStroke.JOIN_ROUND, BasicStroke.CAP_ROUND);
+		BasicStroke edgeStroke = new BasicStroke((float) width,
+				BasicStroke.JOIN_ROUND, BasicStroke.CAP_ROUND);
+
+		Point alpha = new Point();
+		Point omega = new Point();
+		Point waypoint = new Point();
+		Point node = new Point();
+		for (Way way : graph.getWayVertices()) {
+			if (!visibleElements.isMarked(way)) {
+				continue;
+			}
+
+			LayoutInfo l = graph.getLayoutInfo(way);
+			if (l == null || !l.enabled || !l.visible) {
+				continue;
+			}
+
+			HasNode e = way.getFirstHasNode();
+			if (e == null) {
+				continue;
+			}
+
+			// determine begin and end position of the current way
+			Node n = (Node) e.getOmega();
+			alpha.x = getPx(n.getLongitude());
+			alpha.y = getPy(n.getLatitude());
+			while (e != null) {
+				n = (Node) e.getOmega();
+				e = e.getNextHasNode();
+			}
+			omega.x = getPx(n.getLongitude());
+			omega.y = getPy(n.getLatitude());
+
+			if (showWaysInGraph) {
+				// determine compute the location of the node representing the
+				// way by computing a point on the perpendicular in the
+				// middle of the segment alpha-omega. the distance of this point
+				// to the segment is limited to a length of 50 to 200 metres
+				// w.r.t. the scale of the display.
+				AffineTransform t = g.getTransform();
+				double dx = omega.x - alpha.x;
+				double dy = omega.y - alpha.y;
+				double len = Math.sqrt(dx * dx + dy * dy) / 2.0;
+				double theta = Math.atan2(dy, dx);
+				g.translate(alpha.x, alpha.y);
+				g.rotate(theta);
+				g.translate(len, 0);
+				g.rotate(Math.PI / 2.0);
+				len = Math.max(50.0 * scaleLat / 1852, Math.min(
+						200.0 * scaleLat / 1852, len));
+				Point2D.Double dst = new Point2D.Double(len, 0);
+				g.getTransform().transform(dst, dst);
+				waypoint.x = (int) dst.x;
+				waypoint.y = (int) dst.y;
+				g.setTransform(t);
+
+				// draw graph edges
+				e = way.getFirstHasNode();
+				while (e != null) {
+					n = (Node) e.getOmega();
+					int y = getPy(n.getLatitude());
+					int x = getPx(n.getLongitude());
+
+					// Edges from way position to member nodes
+					node.x = x;
+					node.y = y;
+					drawEdge(g, waypoint, node, diameter, edgeStroke);
+
+					// intermediate nodes
+					g.setColor(NODE_COLOR);
+					g.setStroke(outlineStroke);
+					g.drawLine(x, y, x, y);
+					if (zoomLevel.getValue() >= 20) {
+						g.setColor(NODE_FILLER);
+						g.setStroke(fillerStroke);
+						g.drawLine(x, y, x, y);
+					}
+					e = e.getNextHasNode();
+				}
+			} else {
+				// paint the edge connecting start and end node of a way
+				drawEdge(g, alpha, omega, diameter, edgeStroke);
+			}
+
+			// draw alpha and omega nodes and the waypoint, depending on current
+			// settings
+			g.setStroke(outlineStroke);
+			g.setColor(showWaysInGraph ? NODE_COLOR : END_COLOR);
+			g.drawLine(alpha.x, alpha.y, alpha.x, alpha.y);
+			g.drawLine(omega.x, omega.y, omega.x, omega.y);
+			if (showWaysInGraph) {
+				g.setColor(WAY_COLOR);
+				g.drawLine(waypoint.x, waypoint.y, waypoint.x, waypoint.y);
+			}
+			if (zoomLevel.getValue() >= 20) {
+				g.setColor(NODE_FILLER);
+				g.setStroke(fillerStroke);
+				g.drawLine(alpha.x, alpha.y, alpha.x, alpha.y);
+				g.drawLine(omega.x, omega.y, omega.x, omega.y);
+				if (showWaysInGraph) {
+					g.drawLine(waypoint.x, waypoint.y, waypoint.x, waypoint.y);
+				}
+			}
+
+		}
+		long stop = System.currentTimeMillis();
+		System.out.println("time to paint graph:" + (stop - start) + "ms");
+	}
+
+	private void drawEdge(Graphics2D g, Point alpha, Point omega,
+			double diameter, BasicStroke edgeStroke) {
+		// draw edge
+		g.setColor(EDGE_COLOR);
+		g.setStroke(edgeStroke);
+		g.drawLine(alpha.x, alpha.y, omega.x, omega.y);
+
+		// draw arrow head
+		AffineTransform t = g.getTransform();
+		double theta = Math.atan2(alpha.y - omega.y, alpha.x - omega.x);
+		int len = (int) (diameter);
+		g.translate(omega.x, omega.y);
+		g.rotate(theta);
+		g.translate(diameter / 2, 0);
+		g.rotate(-Math.PI / 3.0);
+		g.drawLine(0, 0, 0, len);
+		g.rotate(-Math.PI / 3.0);
+		g.drawLine(0, 0, 0, len);
+		g.setTransform(t);
 	}
 
 	/**
@@ -498,7 +665,7 @@ public class MapPanel extends JPanel {
 	 * @param lon
 	 *            longitude of the new center
 	 */
-	public void setCenter(double lat, double lon) {
+	private void setCenter(double lat, double lon) {
 		latC = lat;
 		lonC = lon;
 		if (isVisible()) {
@@ -524,5 +691,51 @@ public class MapPanel extends JPanel {
 
 	public BoundedRangeModel getZoomLevelModel() {
 		return zoomLevel;
+	}
+
+	public boolean isShowingStreetsOnly() {
+		return showStreetsOnly;
+	}
+
+	public void setShowStreetsOnly(boolean b) {
+		if (b != showStreetsOnly) {
+			showStreetsOnly = b;
+			repaint();
+		}
+	}
+
+	public boolean isShowingGraph() {
+		return showGraph;
+	}
+
+	public void setShowGraph(boolean b) {
+		if (b != showGraph) {
+			showGraph = b;
+			repaint();
+		}
+	}
+
+	public boolean isShowingWaysInGraph() {
+		return showWaysInGraph;
+	}
+
+	public void setShowWaysInGraph(boolean b) {
+		if (b != showWaysInGraph) {
+			showWaysInGraph = b;
+			if (showGraph) {
+				repaint();
+			}
+		}
+	}
+
+	public boolean isShowingMap() {
+		return showMap;
+	}
+
+	public void setShowMap(boolean b) {
+		if (b != showMap) {
+			showMap = b;
+			repaint();
+		}
 	}
 }

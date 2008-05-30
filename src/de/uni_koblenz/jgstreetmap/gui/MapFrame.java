@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -27,6 +28,14 @@ public class MapFrame extends JFrame {
 	private JSlider zoomSlider;
 	private JButton zahnButton;
 
+	private JCheckBox showMapButton;
+
+	private JCheckBox showNatureButton;
+
+	private JCheckBox showGraphButton;
+
+	private JCheckBox showWaysInGraphButton;
+
 	// private OsmGraph graph;
 
 	public MapFrame(AnnotatedOsmGraph graph) {
@@ -42,11 +51,50 @@ public class MapFrame extends JFrame {
 		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
 		getContentPane().add(buttonPanel, BorderLayout.WEST);
 
-		mapPanel.getZoomLevelModel().addChangeListener(new ChangeListener() {
+		JPanel detailPanel = new JPanel();
+		getContentPane().add(detailPanel, BorderLayout.SOUTH);
+
+		detailPanel.add(new JLabel("Visible details:"));
+
+		showMapButton = new JCheckBox("Map", mapPanel.isShowingMap());
+		detailPanel.add(showMapButton);
+		showMapButton.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				System.out
-						.println("Zoom=" + mapPanel.getZoomLevelModel().getValue());
+				mapPanel.setShowMap(showMapButton.isSelected());
+			}
+
+		});
+
+		showNatureButton = new JCheckBox("Nature", !mapPanel
+				.isShowingStreetsOnly());
+		detailPanel.add(showNatureButton);
+		showNatureButton.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				mapPanel
+						.setShowStreetsOnly(!showNatureButton.isSelected());
+			}
+		});
+
+		showGraphButton = new JCheckBox("Graph", mapPanel.isShowingGraph());
+		detailPanel.add(showGraphButton);
+		showGraphButton.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				mapPanel.setShowGraph(showGraphButton.isSelected());
+				showWaysInGraphButton.setEnabled(mapPanel.isShowingGraph());
+			}
+		});
+
+		showWaysInGraphButton = new JCheckBox("OSM Ways", mapPanel
+				.isShowingWaysInGraph());
+		showWaysInGraphButton.setEnabled(mapPanel.isShowingGraph());
+		detailPanel.add(showWaysInGraphButton);
+		showWaysInGraphButton.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				mapPanel.setShowWaysInGraph(showWaysInGraphButton.isSelected());
 			}
 		});
 
@@ -62,8 +110,9 @@ public class MapFrame extends JFrame {
 		zoomInButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				mapPanel.getZoomLevelModel().setValue(Math.min(mapPanel.getZoomLevelModel().getValue() + 5,
-						MapPanel.ZOOM_MAX));
+				mapPanel.getZoomLevelModel().setValue(
+						Math.min(mapPanel.getZoomLevelModel().getValue() + 5,
+								MapPanel.ZOOM_MAX));
 			}
 		});
 		buttonPanel.add(zoomInButton);
@@ -78,8 +127,9 @@ public class MapFrame extends JFrame {
 		zoomOutButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				mapPanel.getZoomLevelModel().setValue(Math.max(mapPanel.getZoomLevelModel().getValue() - 5,
-						MapPanel.ZOOM_MIN));
+				mapPanel.getZoomLevelModel().setValue(
+						Math.max(mapPanel.getZoomLevelModel().getValue() - 5,
+								MapPanel.ZOOM_MIN));
 			}
 		});
 		buttonPanel.add(zoomOutButton);
@@ -94,8 +144,8 @@ public class MapFrame extends JFrame {
 				mapPanel.setDefaultPosition();
 			}
 		});
-		buttonPanel.add(zahnButton);
 
+		buttonPanel.add(zahnButton);
 		pack();
 		setVisible(true);
 	}
