@@ -1,0 +1,9 @@
+Schema de.uni_koblenz.jgstreetmap.osmschema.OsmSchema;
+GraphClass OsmGraph;
+RecordDomain Tag ( key: String, value: String );
+abstract VertexClass OsmPrimitive { osmId: Long, tags: List<Tag>, timestamp: Long, user: String };
+VertexClass Node: OsmPrimitive { latitude: Double, longitude: Double };
+VertexClass Way: OsmPrimitive { area: Boolean, closed: Boolean };
+VertexClass Relation: OsmPrimitive;
+EdgeClass HasNode from Way (1,*) role way to Node (2,*) role node;
+EdgeClass HasMember from Relation (0,*) role relation to OsmPrimitive (0,*) role member { memberType: String, memberRole: String };
