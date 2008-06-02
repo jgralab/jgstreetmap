@@ -10,10 +10,14 @@
 	<!-- project directory -->
 	<property name="project.dir" value="../${projectname}" />
 
+	<property name="comlib.dir" value="../common/lib" />
+	
+	<property name="classes.dir" value="./build/classes"/>
 	<!-- classpath -->
 	<path id="classpath">
 		<pathelement location="${classes.dir}" />
 		<fileset dir="${project.dir}/lib" includes="**/*.jar" />
+		<fileset dir="${comlib.dir}" includes="**/*.jar" />
 	</path>
 
 	<!-- main class name -->
@@ -43,7 +47,7 @@
 	<target name="clean">
 		<!-- calls target clean in general ant file ${ant}/build.xml -->
 		<ant dir="${common.dir}" antfile="build.xml" target="clean" />
-		<delete dir="${src.dir}/de/uni_koblenz/${subprojectname}/osmschema" />
+		<delete dir="${src.dir}/de/uni_koblenz/${projectname}/osmschema" />
 	</target>
 
 	<!-- clean all -->
@@ -61,7 +65,16 @@
 			<property name="projectname" value="jgralab" />
 		</ant>
 	</target>
-
+	
+	<!--<target name="convertschema">
+		<java classname="net.sf.saxon.Transform" 
+		      classpathref="classpath">
+			<sysproperty key="javax.xml.parsers.SAXParserFactory"
+				     value="org.apache.xerces.jaxp.SAXParserFactoryImpl"/>
+			<arg line="-s:schema.xmi -xsl:../jgralab/src/de/uni_koblenz/jgralab/utilities/xmi2tgschema/XMI2TGSchema.xsl -o:src/de/uni_koblenz/jgstreetmap/OsmSchema.tg tool=ea schemaName=de.uni_koblenz.jgstreetmap.osmschema.OsmSchema"/>
+		</java>
+	</target>-->
+	
 	<!-- generateschema -->
 	<!-- generates schema sources -->
 	<target name="generateschema" depends="clean">
