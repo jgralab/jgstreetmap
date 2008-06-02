@@ -47,7 +47,7 @@
 	<target name="clean">
 		<!-- calls target clean in general ant file ${ant}/build.xml -->
 		<ant dir="${common.dir}" antfile="build.xml" target="clean" />
-		<delete dir="${src.dir}/de/uni_koblenz/${projectname}/osmschema" />
+		<delete dir="./src/de/uni_koblenz/jgstreetmap/osmschema" />
 	</target>
 
 	<!-- clean all -->
