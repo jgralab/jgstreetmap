@@ -54,8 +54,7 @@ public class KDTreeImpl extends VertexImpl implements de.uni_koblenz.jgralab.Ver
 	public YKey constructkdTreeY(LinkedList<Node> nodeList, int depth){
 		Collections.sort(nodeList, new YComparator());
 		YKey yk=new YKeyImpl(gId,g);
-		//TODO: Plus/Minus 1 für nodeList.size() nochmal kontrollieren
-		yk.setKeyValue(nodeList.get(nodeList.size()/2).getLatitude());
+		yk.setKeyValue(nodeList.get(nodeList.size()/2-1).getLatitude());
 		
 		if((depth+1==levels)||(nodeList.size()<=1)){//wenn zutreffend bekommt YKey NodeSet als Kind,
 			//wobei NodeSet alle Knoten enthält, die in der LinkedList bis
@@ -67,7 +66,7 @@ public class KDTreeImpl extends VertexImpl implements de.uni_koblenz.jgralab.Ver
 		else{
 			//Teilen der LinkedList
 			LinkedList<Node> leftList=new LinkedList<Node>();
-			for(int i=0; i<=nodeList.size()/2;i++){
+			for(int i=0; i<nodeList.size()/2;i++){
 				leftList.add(nodeList.poll());
 			}
 			
@@ -80,7 +79,7 @@ public class KDTreeImpl extends VertexImpl implements de.uni_koblenz.jgralab.Ver
 	public XKey constructkdTreeX(LinkedList<Node> nodeList, int depth){
 		Collections.sort(nodeList, new XComparator());
 		XKey xk=new XKeyImpl(gId,g);
-		xk.setKeyValue(nodeList.get(nodeList.size()/2).getLongitude());
+		xk.setKeyValue(nodeList.get(nodeList.size()/2-1).getLongitude());
 		
 		if((depth+1==levels)||(nodeList.size()<=1)){//wenn zutreffend bekommt XKey NodeSet als Kind,
 			//wobei NodeSet alle Knoten enthält, die in der LinkedList bis
@@ -92,7 +91,7 @@ public class KDTreeImpl extends VertexImpl implements de.uni_koblenz.jgralab.Ver
 		else{
 			//Teilen der LinkedList
 			LinkedList<Node> leftList=new LinkedList<Node>();
-			for(int i=0; i<=nodeList.size()/2;i++){
+			for(int i=0; i<nodeList.size()/2;i++){
 				leftList.add(nodeList.poll());
 			}
 	
