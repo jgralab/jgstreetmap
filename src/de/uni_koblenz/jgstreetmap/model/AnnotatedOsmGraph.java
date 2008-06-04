@@ -9,6 +9,7 @@ import java.util.TreeMap;
 
 import de.uni_koblenz.jgralab.GraphMarker;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmPrimitive;
+import de.uni_koblenz.jgstreetmap.osmschema.Tag;
 import de.uni_koblenz.jgstreetmap.osmschema.Way;
 import de.uni_koblenz.jgstreetmap.osmschema.impl.OsmGraphImpl;
 
@@ -48,6 +49,19 @@ public class AnnotatedOsmGraph extends OsmGraphImpl {
 
 	public LayoutInfo getLayoutInfo(OsmPrimitive o) {
 		return layoutInfo.getMark(o);
+	}
+
+	public static String getTag(OsmPrimitive o, String key) {
+		List<Tag> tagList = o.getTags();
+		if (tagList == null) {
+			return null;
+		}
+		for (Tag t : tagList) {
+			if (t.key.equals(key)) {
+				return t.value;
+			}
+		}
+		return null;
 	}
 
 }

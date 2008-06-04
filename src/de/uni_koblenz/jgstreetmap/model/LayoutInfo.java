@@ -4,8 +4,6 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.uni_koblenz.jgstreetmap.osmschema.OsmPrimitive;
-import de.uni_koblenz.jgstreetmap.osmschema.Tag;
 import de.uni_koblenz.jgstreetmap.osmschema.Way;
 
 public class LayoutInfo {
@@ -166,21 +164,8 @@ public class LayoutInfo {
 		}
 	}
 
-	private static String getTag(OsmPrimitive o, String key) {
-		List<Tag> tagList = o.getTags();
-		if (tagList == null) {
-			return null;
-		}
-		for (Tag t : tagList) {
-			if (t.key.equals(key)) {
-				return t.value;
-			}
-		}
-		return null;
-	}
-
 	public static LayoutInfo computeInfo(Way way) {
-		String t = getTag(way, "highway");
+		String t = AnnotatedOsmGraph.getTag(way, "highway");
 		if (t != null) {
 			if (t.equals("motorway") || t.equals("motorway_link")
 					|| t.equals("motorway_trunk")) {
@@ -214,24 +199,24 @@ public class LayoutInfo {
 			}
 		}
 
-		t = getTag(way, "waterway");
+		t = AnnotatedOsmGraph.getTag(way, "waterway");
 		if (t != null) {
 			return way.isClosed() ? WATER_AREA : WATER_WAY;
 		}
 
-		t = getTag(way, "cycleway");
+		t = AnnotatedOsmGraph.getTag(way, "cycleway");
 		if (t != null) {
 			return CYCLEWAY;
 		}
 
-		t = getTag(way, "railway");
+		t = AnnotatedOsmGraph.getTag(way, "railway");
 		if (t != null) {
 			if (t.equals("rail")) {
 				return RAILWAY;
 			}
 		}
 
-		t = getTag(way, "landuse");
+		t = AnnotatedOsmGraph.getTag(way, "landuse");
 		if (t != null) {
 			if (t.equals("forest")) {
 				return FOREST;
@@ -240,17 +225,17 @@ public class LayoutInfo {
 			}
 		}
 
-		t = getTag(way, "amenity");
+		t = AnnotatedOsmGraph.getTag(way, "amenity");
 		if (t != null) {
 			return INVISIBLE;
 		}
 
-		t = getTag(way, "place");
+		t = AnnotatedOsmGraph.getTag(way, "place");
 		if (t != null) {
 			return INVISIBLE;
 		}
 
-		t = getTag(way, "natural");
+		t = AnnotatedOsmGraph.getTag(way, "natural");
 		if (t != null) {
 			if (t.equals("water")) {
 				return way.isClosed() ? WATER_AREA : WATER_WAY;
