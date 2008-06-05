@@ -28,6 +28,7 @@ import de.uni_koblenz.jgstreetmap.osmschema.HasNode;
 import de.uni_koblenz.jgstreetmap.osmschema.Node;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmPrimitive;
 import de.uni_koblenz.jgstreetmap.osmschema.Way;
+import de.uni_koblenz.jgstreetmap.osmschema.routing.Segment;
 
 public class MapPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
@@ -360,36 +361,40 @@ public class MapPanel extends JPanel {
 		Point omega = new Point();
 		Point waypoint = new Point();
 		Point node = new Point();
-		for (Way way : graph.getWayVertices()) {
-			if (!visibleElements.isMarked(way)) {
-				continue;
-			}
 
-			LayoutInfo l = graph.getLayoutInfo(way);
-			if (l == null || !l.enabled || !l.visible) {
-				continue;
-			}
+		if (showWaysInGraph) {
+			// show ways, not segments
+			for (Way way : graph.getWayVertices()) {
+				if (!visibleElements.isMarked(way)) {
+					continue;
+				}
 
-			HasNode e = way.getFirstHasNode();
-			if (e == null) {
-				continue;
-			}
+				LayoutInfo l = graph.getLayoutInfo(way);
+				if (l == null || !l.enabled || !l.visible) {
+					continue;
+				}
 
-			// determine begin and end position of the current way
-			Node n = (Node) e.getOmega();
-			alpha.x = getPx(n.getLongitude());
-			alpha.y = getPy(n.getLatitude());
-			while (e != null) {
-				n = (Node) e.getOmega();
-				e = e.getNextHasNode();
-			}
-			omega.x = getPx(n.getLongitude());
-			omega.y = getPy(n.getLatitude());
+				HasNode e = way.getFirstHasNode();
+				if (e == null) {
+					continue;
+				}
 
-			if (showWaysInGraph) {
-				// determine compute the location of the node representing the
+				// determine begin and end position of the current way
+				Node n = (Node) e.getOmega();
+				alpha.x = getPx(n.getLongitude());
+				alpha.y = getPy(n.getLatitude());
+				while (e != null) {
+					n = (Node) e.getOmega();
+					e = e.getNextHasNode();
+				}
+				omega.x = getPx(n.getLongitude());
+				omega.y = getPy(n.getLatitude());
+
+				// determine compute the location of the node representing
+				// the
 				// way by computing a point on the perpendicular in the
-				// middle of the segment alpha-omega. the distance of this point
+				// middle of the segment alpha-omega. the distance of this
+				// point
 				// to the segment is limited to a length of 50 to 200 metres
 				// w.r.t. the scale of the display.
 				AffineTransform t = g.getTransform();
@@ -419,7 +424,7 @@ public class MapPanel extends JPanel {
 					// Edges from way position to member nodes
 					node.x = x;
 					node.y = y;
-					drawEdge(g, waypoint, node, diameter, edgeStroke);
+					drawEdge(g, waypoint, node, diameter, edgeStroke, true);
 
 					// intermediate nodes
 					g.setColor(NODE_COLOR);
@@ -432,43 +437,64 @@ public class MapPanel extends JPanel {
 					}
 					e = e.getNextHasNode();
 				}
-			} else {
-				// paint the edge connecting start and end node of a way
-				drawEdge(g, alpha, omega, diameter, edgeStroke);
-			}
 
-			// draw alpha and omega nodes and the waypoint, depending on current
-			// settings
-			g.setStroke(outlineStroke);
-			g.setColor(showWaysInGraph ? NODE_COLOR : END_COLOR);
-			g.drawLine(alpha.x, alpha.y, alpha.x, alpha.y);
-			g.drawLine(omega.x, omega.y, omega.x, omega.y);
-			if (showWaysInGraph) {
+				// draw the waypoint
+				g.setStroke(outlineStroke);
 				g.setColor(WAY_COLOR);
 				g.drawLine(waypoint.x, waypoint.y, waypoint.x, waypoint.y);
-			}
-			if (zoomLevel.getValue() >= 20) {
-				g.setColor(NODE_FILLER);
-				g.setStroke(fillerStroke);
-				g.drawLine(alpha.x, alpha.y, alpha.x, alpha.y);
-				g.drawLine(omega.x, omega.y, omega.x, omega.y);
-				if (showWaysInGraph) {
+				if (zoomLevel.getValue() >= 20) {
+					g.setColor(NODE_FILLER);
+					g.setStroke(fillerStroke);
 					g.drawLine(waypoint.x, waypoint.y, waypoint.x, waypoint.y);
 				}
 			}
+		} else {
+			// show segments, not ways
+			for (Segment s : graph.getSegmentVertices()) {
+				Node source = (Node) s.getFirstHasSource().getOmega();
+				if (!visibleElements.isMarked(source)) {
+					continue;
+				}
+				Node target = (Node) s.getFirstHasTarget().getOmega();
+				if (!visibleElements.isMarked(target)) {
+					continue;
+				}
+				alpha.x = getPx(source.getLongitude());
+				alpha.y = getPy(source.getLatitude());
+				omega.x = getPx(target.getLongitude());
+				omega.y = getPy(target.getLatitude());
 
+				// paint the edge connecting source and target of a segment
+				drawEdge(g, alpha, omega, diameter, edgeStroke, true); // s.isOneway());
+
+				// draw alpha and omega nodes
+				g.setStroke(outlineStroke);
+				g.setColor(END_COLOR);
+				g.drawLine(alpha.x, alpha.y, alpha.x, alpha.y);
+				g.drawLine(omega.x, omega.y, omega.x, omega.y);
+				if (zoomLevel.getValue() >= 20) {
+					g.setColor(NODE_FILLER);
+					g.setStroke(fillerStroke);
+					g.drawLine(alpha.x, alpha.y, alpha.x, alpha.y);
+					g.drawLine(omega.x, omega.y, omega.x, omega.y);
+				}
+			}
 		}
 		long stop = System.currentTimeMillis();
 		System.out.println("time to paint graph:" + (stop - start) + "ms");
 	}
 
 	private void drawEdge(Graphics2D g, Point alpha, Point omega,
-			double diameter, BasicStroke edgeStroke) {
+			double diameter, BasicStroke edgeStroke, boolean directed) {
 		// draw edge
 		g.setColor(EDGE_COLOR);
 		g.setStroke(edgeStroke);
 		g.drawLine(alpha.x, alpha.y, omega.x, omega.y);
 
+		if (!directed) {
+			return;
+		}
+		
 		// draw arrow head
 		AffineTransform t = g.getTransform();
 		double theta = Math.atan2(alpha.y - omega.y, alpha.x - omega.x);
