@@ -321,18 +321,53 @@ public class MapPanel extends JPanel {
 		// TODO: perform intersection test not for nodes (end-points) but for
 		// TODO: the whole line segment and/or the whole area
 		visibleElements.clear();
-		for (Node n : graph.getNodeVertices()) {
-			if (n.getLatitude() >= latS && n.getLatitude() <= latN
-					&& n.getLongitude() >= lonW && n.getLongitude() <= lonE) {
-				visibleElements.mark(n);
-				HasNode e = n.getFirstHasNode();
-				while (e != null) {
-					OsmPrimitive o = (OsmPrimitive) e.getThat();
-					visibleElements.mark(o);
-					e = e.getNextHasNode();
+		for (Way w : graph.getWayVertices()) {
+			HasNode e = w.getFirstHasNode();
+			if (e == null) {
+				continue;
+			}
+			Node a = (Node) e.getThat();
+			e = e.getNextHasNode();
+			while (e != null) {
+				Node b = (Node) e.getThat();
+				e = e.getNextHasNode();
+				double maxLat = Math.max(a.getLatitude(), b.getLatitude());
+				if (maxLat < latS) {
+					a = b;
+					continue;
 				}
+				double minLat = Math.min(a.getLatitude(), b.getLatitude());
+				if (minLat > latN) {
+					a = b;
+					continue;
+				}
+				double maxLon = Math.max(a.getLongitude(), b.getLongitude());
+				if (maxLon < lonW) {
+					a = b;
+					continue;
+				}
+				double minLon = Math.min(a.getLongitude(), b.getLongitude());
+				if (minLon > lonE) {
+					a = b;
+					continue;
+				}
+				visibleElements.mark(w);
+				a = b;
 			}
 		}
+
+		// for (Node n : graph.getNodeVertices()) {
+		// if (n.getLatitude() >= latS && n.getLatitude() <= latN
+		// && n.getLongitude() >= lonW && n.getLongitude() <= lonE) {
+		// visibleElements.mark(n);
+		// HasNode e = n.getFirstHasNode();
+		// while (e != null) {
+		// OsmPrimitive o = (OsmPrimitive) e.getThat();
+		// visibleElements.mark(o);
+		// e = e.getNextHasNode();
+		// }
+		// }
+		// }
 		long stop = System.currentTimeMillis();
 		System.out.println("time to compute visible elements: "
 				+ (stop - start) + "ms");
@@ -454,11 +489,16 @@ public class MapPanel extends JPanel {
 		} else {
 			// show segments, not ways
 			for (Segment s : graph.getSegmentVertices()) {
-				Node source = (Node) s.getFirstHasSource().getOmega();
-				Node target = (Node) s.getFirstHasTarget().getOmega();
-				if (!visibleElements.isMarked(source) && !visibleElements.isMarked(target)) {
+				Way w = (Way) s.getFirstHasSegment().getThat();
+				if (!visibleElements.isMarked(w)) {
 					continue;
 				}
+				Node source = (Node) s.getFirstHasSource().getOmega();
+				Node target = (Node) s.getFirstHasTarget().getOmega();
+				// if (!visibleElements.isMarked(source)
+				// && !visibleElements.isMarked(target)) {
+				// continue;
+				// }
 				alpha.x = getPx(source.getLongitude());
 				alpha.y = getPy(source.getLatitude());
 				omega.x = getPx(target.getLongitude());
