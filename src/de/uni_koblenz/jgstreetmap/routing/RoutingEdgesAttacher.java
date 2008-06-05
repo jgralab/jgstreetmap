@@ -31,7 +31,7 @@ import static java.lang.Math.sqrt;
  *   the nodes that form junctions between relevant ways (check with SegmentType)
  *   create a list containing tuples (Way, ListOfNodesForOneSegment)
  * + Create Segment "edges" (this includes embedding them in the graph
- * - calculate the length between neighboring nodes and create the sum.
+ * + calculate the length between neighboring nodes and create the sum.
  *    and use it as attribute for length (in meters).
  * + check if the segment belongs to a oneway-Way and store this information in
  *   the segment.
@@ -51,7 +51,7 @@ public class RoutingEdgesAttacher {
 			segmentNodes = new LinkedList<Node>();
 		}
 
-		public int getAmount() {
+		public int getNodeCount() {
 			return segmentNodes.size();
 		}
 
@@ -143,7 +143,8 @@ public class RoutingEdgesAttacher {
 		if (oneway != null
 				&& (oneway.equalsIgnoreCase("yes") || oneway
 						.equalsIgnoreCase("true")))
-			return true;
+			{System.out.println(".");
+			return true;}
 		else
 			return false;
 	}
@@ -159,9 +160,13 @@ public class RoutingEdgesAttacher {
 		Way currentWay = s.getWay();
 		newSegment.setLength(s.getLength());
 		newSegment.setOneway(isOneway(currentWay));
-		newSegment.setOneway(false);
 		newSegment.setWayType(currentWay.getWayType());
 		currentWay.addSegment(newSegment);
+		int count = 0;
+		if (s.getNodeCount() <= 1) {
+			System.out.println("Warning: segment with only " + s.getNodeCount()
+					+ " node(s) found!");
+		}
 		newSegment.addSource(s.getStart());
 		newSegment.addTarget(s.getEnd());
 	}
@@ -170,24 +175,23 @@ public class RoutingEdgesAttacher {
 			List<Way> relevantWays) {
 		List<Segmentation> output = new LinkedList<Segmentation>();
 		for (Way currentWay : relevantWays) {
-			boolean open = false;
+			// boolean open = false;
 			Segmentation currentSeg = new Segmentation(currentWay);
-			for (Node currentNode : currentWay.getNodeList()) {
-				if (!open) {
-					open = true;
+			Iterator<? extends Node> iter = currentWay.getNodeList().iterator();
+			Node currentNode = iter.next();
+			currentSeg.addNode(currentNode);
+			while (iter.hasNext()) {
+				currentNode = iter.next();
+
+				if (isIntersection(currentNode)) {
+					// open = false;
 					currentSeg.addNode(currentNode);
-				} else {
-					if (isIntersection(currentNode)) {
-						open = false;
-						currentSeg.addNode(currentNode);
-						output.add(currentSeg);
-						currentSeg = new Segmentation(currentWay);
-					} else {
-						currentSeg.addNode(currentNode);
-					}
+					output.add(currentSeg);
+					currentSeg = new Segmentation(currentWay);
 				}
+				currentSeg.addNode(currentNode);
 			}
-			if (currentSeg.getAmount() > 0) {
+			if (currentSeg.getNodeCount() >= 2) {
 				output.add(currentSeg);
 			}
 		}
@@ -197,15 +201,12 @@ public class RoutingEdgesAttacher {
 	private static boolean isIntersection(Node currentNode) {
 		int relevantWayAmount = 0;
 		for (Way currentWay : currentNode.getWayList()) {
-			if (!currentWay.getWayType().equals(SegmentType.NOWAY)) {
+			if (currentWay.getWayType() != SegmentType.NOWAY) {
 				relevantWayAmount++;
 			}
 		}
-		if (relevantWayAmount > 1) {
-			return true;
-		} else {
-			return false;
-		}
+		return (relevantWayAmount >= 2);
+
 	}
 
 	private static List<Way> computeRelevantWays(Iterable<Vertex> vertices) {

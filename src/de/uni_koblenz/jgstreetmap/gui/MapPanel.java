@@ -455,11 +455,8 @@ public class MapPanel extends JPanel {
 			// show segments, not ways
 			for (Segment s : graph.getSegmentVertices()) {
 				Node source = (Node) s.getFirstHasSource().getOmega();
-				if (!visibleElements.isMarked(source)) {
-					continue;
-				}
 				Node target = (Node) s.getFirstHasTarget().getOmega();
-				if (!visibleElements.isMarked(target)) {
+				if (!visibleElements.isMarked(source) && !visibleElements.isMarked(target)) {
 					continue;
 				}
 				alpha.x = getPx(source.getLongitude());
@@ -468,7 +465,7 @@ public class MapPanel extends JPanel {
 				omega.y = getPy(target.getLatitude());
 
 				// paint the edge connecting source and target of a segment
-				drawEdge(g, alpha, omega, diameter, edgeStroke, true); // s.isOneway());
+				drawEdge(g, alpha, omega, diameter, edgeStroke, s.isOneway());
 
 				// draw alpha and omega nodes
 				g.setStroke(outlineStroke);
