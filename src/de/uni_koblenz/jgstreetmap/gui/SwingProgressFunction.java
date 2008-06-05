@@ -20,7 +20,7 @@ public class SwingProgressFunction implements ProgressFunction, ActionListener {
 	private JProgressBar pb;
 	private String title;
 	private String label;
-	private int steps;
+	private long steps;
 	private BoundedRangeModel brm;
 	private JLabel lbl;
 	private long startTime;
@@ -40,12 +40,12 @@ public class SwingProgressFunction implements ProgressFunction, ActionListener {
 	}
 
 	@Override
-	public int getInterval() {
+	public long getInterval() {
 		return brm.getMaximum() > steps ? 1 : steps / brm.getMaximum();
 	}
 
 	@Override
-	public void init(int steps) {
+	public void init(long steps) {
 		this.steps = steps;
 		wnd = new JFrame(title);
 		wnd.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -78,7 +78,7 @@ public class SwingProgressFunction implements ProgressFunction, ActionListener {
 	}
 
 	@Override
-	public void progress(int progress) {
+	public void progress(long progress) {
 		if (brm.getValue() < brm.getMaximum()) {
 			brm.setValue(brm.getValue() + 1);
 			setTimeText();
