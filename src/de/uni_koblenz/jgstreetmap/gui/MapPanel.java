@@ -29,6 +29,7 @@ import de.uni_koblenz.jgstreetmap.osmschema.Node;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmPrimitive;
 import de.uni_koblenz.jgstreetmap.osmschema.Way;
 import de.uni_koblenz.jgstreetmap.osmschema.routing.Segment;
+import de.uni_koblenz.jgstreetmap.osmschema.routing.SegmentType;
 
 public class MapPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
@@ -273,7 +274,8 @@ public class MapPanel extends JPanel {
 			for (Way way : lst) {
 				LayoutInfo l = graph.getLayoutInfo(way);
 				if (l.enabled && l.visible && l.bgColor != null && !l.area
-						&& visibleElements.isMarked(way)) {
+						&& visibleElements.isMarked(way)
+						&& way.getWayType() != SegmentType.NOWAY) {
 					Polygon poly = new Polygon();
 					for (Node n : way.getNodeList()) {
 						poly.addPoint(getPx(n.getLongitude()), getPy(n
@@ -290,7 +292,8 @@ public class MapPanel extends JPanel {
 			for (Way way : lst) {
 				LayoutInfo l = graph.getLayoutInfo(way);
 				if (l.enabled && l.visible && !l.area
-						&& visibleElements.isMarked(way)) {
+						&& visibleElements.isMarked(way)
+						&& way.getWayType() != SegmentType.NOWAY) {
 					Polygon poly = new Polygon();
 					for (Node n : way.getNodeList()) {
 						poly.addPoint(getPx(n.getLongitude()), getPy(n
@@ -494,7 +497,7 @@ public class MapPanel extends JPanel {
 		if (!directed) {
 			return;
 		}
-		
+
 		// draw arrow head
 		AffineTransform t = g.getTransform();
 		double theta = Math.atan2(alpha.y - omega.y, alpha.x - omega.x);

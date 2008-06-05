@@ -269,7 +269,7 @@ public class RoutingEdgesAttacher {
 		} else if (highwayValue.equals("construction")) {
 			return SegmentType.NOWAY;
 		} else if (highwayValue.equals("unclassified")) {
-			return SegmentType.NOWAY;
+			return SegmentType.TERTIARY;
 		} else if (highwayValue.equals("service")) {
 			return SegmentType.SERVICE;
 		} else {
