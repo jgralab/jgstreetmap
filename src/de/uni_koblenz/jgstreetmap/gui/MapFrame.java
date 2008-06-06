@@ -36,6 +36,8 @@ public class MapFrame extends JFrame {
 
 	private JCheckBox showWaysInGraphButton;
 
+	private JCheckBox showLengthButton;
+
 	// private OsmGraph graph;
 
 	public MapFrame(AnnotatedOsmGraph graph) {
@@ -66,14 +68,14 @@ public class MapFrame extends JFrame {
 
 		});
 
-		showNatureButton = new JCheckBox("Nature", !mapPanel
+		showNatureButton = new JCheckBox("Streets only", mapPanel
 				.isShowingStreetsOnly());
 		detailPanel.add(showNatureButton);
 		showNatureButton.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				mapPanel
-						.setShowStreetsOnly(!showNatureButton.isSelected());
+						.setShowStreetsOnly(showNatureButton.isSelected());
 			}
 		});
 
@@ -84,6 +86,7 @@ public class MapFrame extends JFrame {
 			public void stateChanged(ChangeEvent e) {
 				mapPanel.setShowGraph(showGraphButton.isSelected());
 				showWaysInGraphButton.setEnabled(mapPanel.isShowingGraph());
+				showLengthButton.setEnabled(mapPanel.isShowingGraph() && !mapPanel.isShowingWaysInGraph());
 			}
 		});
 
@@ -95,6 +98,18 @@ public class MapFrame extends JFrame {
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				mapPanel.setShowWaysInGraph(showWaysInGraphButton.isSelected());
+				showLengthButton.setEnabled(mapPanel.isShowingGraph() && !mapPanel.isShowingWaysInGraph());
+			}
+		});
+
+		showLengthButton = new JCheckBox("Length", mapPanel
+				.isShowingLength());
+		showLengthButton.setEnabled(mapPanel.isShowingGraph() && !mapPanel.isShowingWaysInGraph());
+		detailPanel.add(showLengthButton);
+		showLengthButton.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				mapPanel.setShowLength(showLengthButton.isSelected());
 			}
 		});
 

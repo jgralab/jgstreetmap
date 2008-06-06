@@ -1,6 +1,8 @@
 package de.uni_koblenz.jgstreetmap.model;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Stroke;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +22,9 @@ public class LayoutInfo {
 	public boolean enabled;
 	public boolean area;
 	public int zoomVisibilityLimit;
-
+	public Stroke bgStroke;
+	public Stroke fgStroke;
+	
 	private static final LayoutInfo ERROR = new LayoutInfo();
 	private static final LayoutInfo INVISIBLE = new LayoutInfo();
 	private static final LayoutInfo DEFAULT = new LayoutInfo();
@@ -44,7 +48,15 @@ public class LayoutInfo {
 	private static final LayoutInfo WATER_WAY = new LayoutInfo();
 	private static final LayoutInfo WATER_AREA = new LayoutInfo();
 
+	private static final LayoutInfo ROUTE = new LayoutInfo();
+	
 	static {
+		ROUTE.zOrder = 1000;
+		ROUTE.bgColor = new Color(0, 255, 0, 128);
+		ROUTE.minWidth = 3.0;
+		ROUTE.maxWidth = 30.0;
+		ROUTE.visible = true;
+
 		DEFAULT.zOrder = 50;
 		DEFAULT.fgColor = Color.MAGENTA;
 		DEFAULT.minWidth = 1.0;
@@ -138,28 +150,33 @@ public class LayoutInfo {
 		ERROR.zoomVisibilityLimit = 20;
 	}
 
-	public static void setStreetsOnly(boolean s) {
-		ERROR.enabled = !s;
-		WATER_AREA.enabled = !s;
-		WATER_WAY.enabled = !s;
-		FOREST.enabled = !s;
-		LAND.enabled = !s;
-		CONSTRUCTION.enabled = !s;
-		RAILWAY.enabled = !s;
-		DEFAULT.enabled = !s;
-	}
-
 	private LayoutInfo() {
 		enabled = true;
 		infoList.add(this);
 	}
 
-	public static void updateLayoutInfo(int zoomFactor, double scaleLat) {
+	public static void updateLayoutInfo(java.awt.Graphics2D g, int zoomFactor,
+			double scaleLat, boolean showStreetsOnly) {
+		ERROR.enabled = !showStreetsOnly;
+		WATER_AREA.enabled = !showStreetsOnly;
+		WATER_WAY.enabled = !showStreetsOnly;
+		FOREST.enabled = !showStreetsOnly;
+		LAND.enabled = !showStreetsOnly;
+		CONSTRUCTION.enabled = !showStreetsOnly;
+		RAILWAY.enabled = !showStreetsOnly;
+		DEFAULT.enabled = !showStreetsOnly;
+
 		for (LayoutInfo l : infoList) {
 			if (!l.area) {
 				l.width = Math.max(l.minWidth, l.maxWidth * scaleLat / 1852.0);
 				l.visible = l.width >= 0.5
 						&& zoomFactor >= l.zoomVisibilityLimit;
+				if (l.visible) {
+					l.bgStroke = new BasicStroke((float) l.width,
+							BasicStroke.JOIN_ROUND, BasicStroke.CAP_ROUND);
+					l.fgStroke = new BasicStroke((float) l.width * 0.75f,
+							BasicStroke.JOIN_ROUND, BasicStroke.CAP_ROUND);
+				}
 			}
 		}
 	}

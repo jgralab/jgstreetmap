@@ -2,6 +2,7 @@ package de.uni_koblenz.jgstreetmap.gui;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -26,7 +27,6 @@ import de.uni_koblenz.jgstreetmap.model.AnnotatedOsmGraph;
 import de.uni_koblenz.jgstreetmap.model.LayoutInfo;
 import de.uni_koblenz.jgstreetmap.osmschema.HasNode;
 import de.uni_koblenz.jgstreetmap.osmschema.Node;
-import de.uni_koblenz.jgstreetmap.osmschema.OsmPrimitive;
 import de.uni_koblenz.jgstreetmap.osmschema.Way;
 import de.uni_koblenz.jgstreetmap.osmschema.routing.Segment;
 import de.uni_koblenz.jgstreetmap.osmschema.routing.SegmentType;
@@ -49,8 +49,8 @@ public class MapPanel extends JPanel {
 	private static final Color NODE_COLOR = Color.GREEN.darker();
 	private static final Color END_COLOR = Color.RED;
 	private static final Color WAY_COLOR = Color.RED;
-	private static final Color EDGE_COLOR = Color.BLUE; // new Color(0, 0, 255,
-	// 128);
+	private static final Color EDGE_COLOR = new Color(0, 0, 255, 128);
+
 	private static final Color NODE_FILLER = Color.WHITE;
 
 	private static final double MINUTE = 1.0 / 60.0;
@@ -76,6 +76,7 @@ public class MapPanel extends JPanel {
 	private boolean showGraph = false;
 	private boolean showWaysInGraph = true;
 	private boolean showMap = true;
+	private boolean showLength = false;
 
 	public MapPanel(AnnotatedOsmGraph graph) {
 		this.graph = graph;
@@ -97,11 +98,12 @@ public class MapPanel extends JPanel {
 		zoomLevel.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				zoomChanged();
+				if (isVisible()) {
+					repaint();
+				}
 			}
 		});
 
-		zoomChanged();
 		setDefaultPosition();
 
 		mousePos = new Point();
@@ -113,6 +115,7 @@ public class MapPanel extends JPanel {
 				super.mousePressed(e);
 				mousePos.x = e.getX();
 				mousePos.y = e.getY();
+				setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 				// System.out.println(formatLatitude(getLat(mousePos.y)) + " "
 				// + formatLongitude(getLon(mousePos.x)));
 			}
@@ -123,6 +126,7 @@ public class MapPanel extends JPanel {
 				super.mouseReleased(e);
 				double deltaLat = getLat(e.getY()) - getLat(mousePos.y);
 				double deltaLon = getLon(e.getX()) - getLon(mousePos.x);
+				setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 				setCenter(latC - deltaLat, lonC - deltaLon);
 			}
 		});
@@ -196,10 +200,9 @@ public class MapPanel extends JPanel {
 	 */
 	@Override
 	public void paint(Graphics g) {
-		// super.paint(g);
-
 		// compute latitude boundaries w.r.t. the center position and the height
 		// of this panel
+		scaleLat = Math.pow(10.0, zoomLevel.getValue() / 10.0);
 		double mapHeight = getHeight() - 2 * FRAMEWIDTH;
 		double deltaLat = MINUTE * mapHeight / scaleLat / 2.0;
 		latS = latC - deltaLat;
@@ -217,7 +220,9 @@ public class MapPanel extends JPanel {
 
 		Graphics2D g2 = (Graphics2D) g;
 		paintFrame(g2);
-		LayoutInfo.setStreetsOnly(showStreetsOnly);
+
+		LayoutInfo.updateLayoutInfo(g2, zoomLevel.getValue(), scaleLat,
+				showStreetsOnly);
 
 		computeVisibleElements();
 		g.setClip(FRAMEWIDTH + 1, FRAMEWIDTH + 1, getWidth() - 2 * FRAMEWIDTH
@@ -273,16 +278,19 @@ public class MapPanel extends JPanel {
 		for (List<Way> lst : graph.getOrderedWayVertices().values()) {
 			for (Way way : lst) {
 				LayoutInfo l = graph.getLayoutInfo(way);
-				if (l.enabled && l.visible && l.bgColor != null && !l.area
+				if (l.enabled
+						&& l.visible
+						&& l.bgColor != null
+						&& !l.area
+						&& l.bgColor != null
 						&& visibleElements.isMarked(way)
-						&& way.getWayType() != SegmentType.NOWAY) {
+						&& (!showStreetsOnly || way.getWayType() != SegmentType.NOWAY)) {
 					Polygon poly = new Polygon();
 					for (Node n : way.getNodeList()) {
 						poly.addPoint(getPx(n.getLongitude()), getPy(n
 								.getLatitude()));
 					}
-					g.setStroke(new BasicStroke((float) l.width,
-							BasicStroke.JOIN_ROUND, BasicStroke.CAP_ROUND));
+					g.setStroke(l.bgStroke);
 					g.setColor(l.bgColor);
 					g.drawPolyline(poly.xpoints, poly.ypoints, poly.npoints);
 				}
@@ -291,16 +299,18 @@ public class MapPanel extends JPanel {
 			// draw foreground of ways
 			for (Way way : lst) {
 				LayoutInfo l = graph.getLayoutInfo(way);
-				if (l.enabled && l.visible && !l.area
+				if (l.enabled
+						&& l.visible
+						&& !l.area
 						&& visibleElements.isMarked(way)
-						&& way.getWayType() != SegmentType.NOWAY) {
+						&& l.fgColor != null
+						&& (!showStreetsOnly || way.getWayType() != SegmentType.NOWAY)) {
 					Polygon poly = new Polygon();
 					for (Node n : way.getNodeList()) {
 						poly.addPoint(getPx(n.getLongitude()), getPy(n
 								.getLatitude()));
 					}
-					g.setStroke(new BasicStroke((float) l.width * 0.75f,
-							BasicStroke.JOIN_ROUND, BasicStroke.CAP_ROUND));
+					g.setStroke(l.fgStroke);
 					g.setColor(l.fgColor);
 					g.drawPolyline(poly.xpoints, poly.ypoints, poly.npoints);
 				}
@@ -489,6 +499,35 @@ public class MapPanel extends JPanel {
 					g.drawLine(alpha.x, alpha.y, alpha.x, alpha.y);
 					g.drawLine(omega.x, omega.y, omega.x, omega.y);
 				}
+
+				if (showLength && zoomLevel.getValue() >= 30) {
+					// draw length
+					AffineTransform t = g.getTransform();
+					int dy = omega.y - alpha.y;
+					int dx = omega.x - alpha.x;
+					double theta = Math.atan2(dy, dx);
+					g.translate(alpha.x, alpha.y);
+					g.rotate(theta);
+					g.setColor(Color.MAGENTA.darker());
+					long len = Math.round(Math.sqrt(dy * dy + dx * dx));
+					long d = Math.round(s.getLength());
+					String lbl = d + "m";
+					// String lbl =
+					// Double.toString(Math.round(theta*100.0)/100.0);
+					int textWidth = g.getFontMetrics().stringWidth(lbl);
+					g.setColor(Color.MAGENTA.darker());
+					if (Math.abs(theta) >= Math.PI / 2) {
+						g.rotate(Math.PI);
+						g.translate(-(len + textWidth) / 2, -getFont()
+								.getSize());
+					} else {
+						g
+								.translate((len - textWidth) / 2, -getFont()
+										.getSize());
+					}
+					g.drawString(lbl, 0, 0);
+					g.setTransform(t);
+				}
 			}
 		}
 		long stop = System.currentTimeMillis();
@@ -527,7 +566,7 @@ public class MapPanel extends JPanel {
 	 *            graphics context for paint operations
 	 */
 	private void paintFrame(Graphics2D g) {
-		g.setRenderingHints(antialiasOff);
+		g.setRenderingHints(antialiasOn);
 
 		// draw background of frame
 		g.setColor(FRAME_BG_COLOR);
@@ -710,22 +749,6 @@ public class MapPanel extends JPanel {
 		}
 	}
 
-	/**
-	 * Computes the new latitude scale (pixel per angle minute) as follows:
-	 * scaleLat = 10 ^ (zoom/10) and repaints the map if needed.
-	 */
-	private void zoomChanged() {
-		int zoom = zoomLevel.getValue();
-		scaleLat = Math.pow(10.0, zoom / 10.0);
-
-		// adjust visibility and line widths of layout information
-		LayoutInfo.updateLayoutInfo(zoom, scaleLat);
-
-		if (isVisible()) {
-			repaint();
-		}
-	}
-
 	public BoundedRangeModel getZoomLevelModel() {
 		return zoomLevel;
 	}
@@ -737,7 +760,9 @@ public class MapPanel extends JPanel {
 	public void setShowStreetsOnly(boolean b) {
 		if (b != showStreetsOnly) {
 			showStreetsOnly = b;
-			repaint();
+			if (isVisible()) {
+				repaint();
+			}
 		}
 	}
 
@@ -748,7 +773,9 @@ public class MapPanel extends JPanel {
 	public void setShowGraph(boolean b) {
 		if (b != showGraph) {
 			showGraph = b;
-			repaint();
+			if (isVisible()) {
+				repaint();
+			}
 		}
 	}
 
@@ -759,7 +786,7 @@ public class MapPanel extends JPanel {
 	public void setShowWaysInGraph(boolean b) {
 		if (b != showWaysInGraph) {
 			showWaysInGraph = b;
-			if (showGraph) {
+			if (isVisible()) {
 				repaint();
 			}
 		}
@@ -772,7 +799,22 @@ public class MapPanel extends JPanel {
 	public void setShowMap(boolean b) {
 		if (b != showMap) {
 			showMap = b;
-			repaint();
+			if (isVisible()) {
+				repaint();
+			}
+		}
+	}
+
+	public boolean isShowingLength() {
+		return showLength;
+	}
+
+	public void setShowLength(boolean b) {
+		if (b != showLength) {
+			showLength = b;
+			if (isVisible()) {
+				repaint();
+			}
 		}
 	}
 }
