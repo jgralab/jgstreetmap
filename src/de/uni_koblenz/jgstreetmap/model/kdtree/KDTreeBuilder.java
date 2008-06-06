@@ -31,7 +31,6 @@ public class KDTreeBuilder {
 			LinkedList<Node> nodeList, int depth) {
 		Collections.sort(nodeList, new YComparator());
 		YKey yk = g.createYKey();
-		yk.setKeyValue(nodeList.get(nodeList.size() / 2 - 1).getLatitude());
 
 		// if the depth of the tree is equal to the number of levels which are
 		// allowed
@@ -40,9 +39,12 @@ public class KDTreeBuilder {
 		// NodeSet is assigned to YKey as the child of YKey
 		if ((depth == g.getKDTree().getLevels()) || (nodeList.size() <= 1)) {
 			NodeSet set = g.createNodeSet();
-			set.getElementList();
 			yk.addSet(set);
+			for (Node n : nodeList) {
+				set.addElement(n);
+			}
 		} else {
+			yk.setKeyValue(nodeList.get(nodeList.size() / 2 - 1).getLatitude());
 			// List of nodes is split into two lists, the nodes contained in
 			// leftList
 			// will be part of the left subtree, the nodes left in nodeList will
@@ -64,13 +66,17 @@ public class KDTreeBuilder {
 			LinkedList<Node> nodeList, int depth) {
 		Collections.sort(nodeList, new XComparator());
 		XKey xk = g.createXKey();
-		xk.setKeyValue(nodeList.get(nodeList.size() / 2 - 1).getLongitude());
 
 		if ((depth == g.getKDTree().getLevels()) || (nodeList.size() <= 1)) {
 			NodeSet set = g.createNodeSet();
-			set.getElementList();
 			xk.addSet(set);
+			for (Node n : nodeList) {
+				set.addElement(n);
+			}
 		} else {
+			xk
+					.setKeyValue(nodeList.get(nodeList.size() / 2 - 1)
+							.getLongitude());
 			LinkedList<Node> leftList = new LinkedList<Node>();
 			for (int i = 0; i < nodeList.size() / 2; i++) {
 				leftList.add(nodeList.poll());
@@ -88,7 +94,7 @@ public class KDTreeBuilder {
 		LinkedList<Node> includedNodes = new LinkedList<Node>();
 		double keyVal = key.getKeyValue();
 		if (key.getChildList().size() == 0) { // is true whenever key has no
-												// XKey children,
+			// XKey children,
 			// therefore the only child of key is a NodeSet
 			rangeQuery(g, topLeftLong, topLeftLat, bottomRightLong,
 					bottomRightLat, key.getSetList().get(0));
@@ -126,7 +132,7 @@ public class KDTreeBuilder {
 		double keyVal = key.getKeyValue();
 
 		if (key.getChildList().size() == 0) { // is true, when key has a
-												// NodeSet as a child
+			// NodeSet as a child
 			rangeQuery(g, topLeftLong, topLeftLat, bottomRightLong,
 					bottomRightLat, key.getSetList().get(0));
 		} else {

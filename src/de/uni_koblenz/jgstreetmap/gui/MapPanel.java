@@ -321,41 +321,59 @@ public class MapPanel extends JPanel {
 		System.out.println("time to paint map: " + (stop - start) + "ms");
 	}
 
+	private boolean intersects(Node a, Node b) {
+		// test if the rectangle defined by the segment a-b
+		// has a non-empty intersection with the display area
+		double maxLat = Math.max(a.getLatitude(), b.getLatitude());
+		if (maxLat < latS) {
+			return false;
+		}
+		double minLat = Math.min(a.getLatitude(), b.getLatitude());
+		if (minLat > latN) {
+			return false;
+		}
+		double maxLon = Math.max(a.getLongitude(), b.getLongitude());
+		if (maxLon < lonW) {
+			return false;
+		}
+		double minLon = Math.min(a.getLongitude(), b.getLongitude());
+		if (minLon > lonE) {
+			return false;
+		}
+		return true;
+	}
+
 	private void computeVisibleElements() {
 		long start = System.currentTimeMillis();
 		visibleElements.clear();
-		for (Way w : graph.getWayVertices()) {
-			HasNode e = w.getFirstHasNode();
-			if (e == null) {
-				continue;
-			}
-			Node b = (Node) e.getThat();
-			Node a;
-			e = e.getNextHasNode();
-			while (e != null) {
-				a = b;
-				b = (Node) e.getThat();
+		if (showWaysInGraph || showMap) {
+			WAY: for (Way w : graph.getWayVertices()) {
+				HasNode e = w.getFirstHasNode();
+				if (e == null) {
+					continue;
+				}
+				Node b = (Node) e.getThat();
+				Node a;
 				e = e.getNextHasNode();
-				// test if the rectangle defined by the segment a-b
-				// has a non-empty intersection with the display area
-				double maxLat = Math.max(a.getLatitude(), b.getLatitude());
-				if (maxLat < latS) {
-					continue;
+				while (e != null) {
+					a = b;
+					b = (Node) e.getThat();
+					e = e.getNextHasNode();
+					if (intersects(a, b)) {
+						visibleElements.mark(w);
+						continue WAY;
+					}
 				}
-				double minLat = Math.min(a.getLatitude(), b.getLatitude());
-				if (minLat > latN) {
-					continue;
+			}
+		}
+		
+		if (showGraph && !showWaysInGraph) {
+			for (Segment s : graph.getSegmentVertices()) {
+				Node a = (Node) s.getFirstHasSource().getThat();
+				Node b = (Node) s.getFirstHasTarget().getThat();
+				if (intersects(a, b)) {
+					visibleElements.mark(s);
 				}
-				double maxLon = Math.max(a.getLongitude(), b.getLongitude());
-				if (maxLon < lonW) {
-					continue;
-				}
-				double minLon = Math.min(a.getLongitude(), b.getLongitude());
-				if (minLon > lonE) {
-					continue;
-				}
-				// non-empty intersection exists
-				visibleElements.mark(w);
 			}
 		}
 
@@ -473,8 +491,7 @@ public class MapPanel extends JPanel {
 		} else {
 			// show segments, not ways
 			for (Segment s : graph.getSegmentVertices()) {
-				Way w = (Way) s.getFirstHasSegment().getThat();
-				if (!visibleElements.isMarked(w)) {
+				if (!visibleElements.isMarked(s)) {
 					continue;
 				}
 				Node source = (Node) s.getFirstHasSource().getOmega();

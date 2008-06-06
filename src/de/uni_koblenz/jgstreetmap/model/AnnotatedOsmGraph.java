@@ -7,8 +7,11 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.Stack;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import de.uni_koblenz.jgralab.GraphMarker;
+import de.uni_koblenz.jgralab.Vertex;
+import de.uni_koblenz.jgstreetmap.model.kdtree.KDTreeBuilder;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmPrimitive;
 import de.uni_koblenz.jgstreetmap.osmschema.Tag;
 import de.uni_koblenz.jgstreetmap.osmschema.Way;
@@ -33,7 +36,6 @@ public class AnnotatedOsmGraph extends OsmGraphImpl {
 
 	@Override
 	public void loadingCompleted() {
-		System.out.println("AnnotatedOsmGraph.loadingComplete()");
 		for (OsmPrimitive o : getOsmPrimitiveVertices()) {
 			osmIdMap.put(o.getOsmId(), o);
 		}
@@ -46,6 +48,31 @@ public class AnnotatedOsmGraph extends OsmGraphImpl {
 				orderedWays.put(l.zOrder, lst);
 			}
 			lst.add(way);
+		}
+		
+		KDTreeBuilder.buildTree(this, 10);
+		
+		// Mengengerüst berechnen
+		Map<String, Integer> m = new HashMap<String, Integer>();
+		for (Vertex v = getFirstVertex(); v != null; v = v.getNextVertex()) {
+			String n = "V " + v.getM1Class().getSimpleName();
+			if (m.containsKey(n)) {
+				m.put(n, m.get(n) + 1);
+			} else {
+				m.put(n, 1);
+			}
+		}
+		for (de.uni_koblenz.jgralab.Edge e = getFirstEdgeInGraph(); e != null; e = e
+				.getNextEdgeInGraph()) {
+			String n = "E " + e.getM1Class().getSimpleName();
+			if (m.containsKey(n)) {
+				m.put(n, m.get(n) + 1);
+			} else {
+				m.put(n, 1);
+			}
+		}
+		for (String n : new TreeSet<String>(m.keySet())) {
+			System.err.println(m.get(n) + "\t" + n);
 		}
 	}
 
