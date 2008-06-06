@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
+import java.util.Stack;
 import java.util.TreeMap;
 
 import de.uni_koblenz.jgralab.GraphMarker;
@@ -12,6 +13,11 @@ import de.uni_koblenz.jgstreetmap.osmschema.OsmPrimitive;
 import de.uni_koblenz.jgstreetmap.osmschema.Tag;
 import de.uni_koblenz.jgstreetmap.osmschema.Way;
 import de.uni_koblenz.jgstreetmap.osmschema.impl.OsmGraphImpl;
+import de.uni_koblenz.jgstreetmap.osmschema.kdtree.KDTree;
+import de.uni_koblenz.jgstreetmap.osmschema.kdtree.Key;
+import de.uni_koblenz.jgstreetmap.osmschema.kdtree.NodeSet;
+import de.uni_koblenz.jgstreetmap.osmschema.kdtree.XKey;
+import de.uni_koblenz.jgstreetmap.osmschema.kdtree.YKey;
 
 public class AnnotatedOsmGraph extends OsmGraphImpl {
 	private Map<Long, OsmPrimitive> osmIdMap;
@@ -62,6 +68,45 @@ public class AnnotatedOsmGraph extends OsmGraphImpl {
 			}
 		}
 		return null;
+	}
+
+	public boolean hasKDTree() {
+		return getFirstKDTree() != null;
+	}
+
+	public void deleteKDTree() {
+		if (!hasKDTree()) {
+			return;
+		}
+		KDTree tree = getKDTree();
+		Stack<Key> s = new Stack<Key>();
+		s.push((Key) tree.getFirstHasRoot().getThat());
+		while (!s.empty()) {
+			Key current = s.pop();
+			NodeSet ns = (NodeSet) current.getFirstHasSet().getThat();
+			if (ns != null) {
+				ns.delete();
+			} else {
+				if (current instanceof XKey) {
+					for (Key k : ((XKey) current).getChildList()) {
+						s.push(k);
+					}
+				} else {
+					for (Key k : ((YKey) current).getChildList()) {
+						s.push(k);
+					}
+				}
+				current.delete();
+			}
+		}
+	}
+
+	public KDTree getKDTree() {
+		KDTree tree = getFirstKDTree();
+		if (tree == null) {
+			tree = createKDTree();
+		}
+		return tree;
 	}
 
 }

@@ -313,71 +313,47 @@ public class MapPanel extends JPanel {
 
 	private void computeVisibleElements() {
 		long start = System.currentTimeMillis();
-		// determine which ways are (at least partly) visible
-		// this doesn't work for large zooms, because only visible nodes are
-		// determined, also doesn't work correctly for areas, but for
-		// demonstration purposes, the result is ok ;-)
-
-		// TODO: perform intersection test not for nodes (end-points) but for
-		// TODO: the whole line segment and/or the whole area
 		visibleElements.clear();
 		for (Way w : graph.getWayVertices()) {
 			HasNode e = w.getFirstHasNode();
 			if (e == null) {
 				continue;
 			}
-			Node a = (Node) e.getThat();
+			Node b = (Node) e.getThat();
+			Node a;
 			e = e.getNextHasNode();
 			while (e != null) {
-				Node b = (Node) e.getThat();
+				a = b;
+				b = (Node) e.getThat();
 				e = e.getNextHasNode();
+				// test if the rectangle defined by the segment a-b
+				// has a non-empty intersection with the display area
 				double maxLat = Math.max(a.getLatitude(), b.getLatitude());
 				if (maxLat < latS) {
-					a = b;
 					continue;
 				}
 				double minLat = Math.min(a.getLatitude(), b.getLatitude());
 				if (minLat > latN) {
-					a = b;
 					continue;
 				}
 				double maxLon = Math.max(a.getLongitude(), b.getLongitude());
 				if (maxLon < lonW) {
-					a = b;
 					continue;
 				}
 				double minLon = Math.min(a.getLongitude(), b.getLongitude());
 				if (minLon > lonE) {
-					a = b;
 					continue;
 				}
+				// non-empty intersection exists
 				visibleElements.mark(w);
-				a = b;
 			}
 		}
 
-		// for (Node n : graph.getNodeVertices()) {
-		// if (n.getLatitude() >= latS && n.getLatitude() <= latN
-		// && n.getLongitude() >= lonW && n.getLongitude() <= lonE) {
-		// visibleElements.mark(n);
-		// HasNode e = n.getFirstHasNode();
-		// while (e != null) {
-		// OsmPrimitive o = (OsmPrimitive) e.getThat();
-		// visibleElements.mark(o);
-		// e = e.getNextHasNode();
-		// }
-		// }
-		// }
 		long stop = System.currentTimeMillis();
 		System.out.println("time to compute visible elements: "
 				+ (stop - start) + "ms");
 	}
 
-	// TODO: display street edges correctly
-	// In Graph display, "street" edges are not visualized correctly. Those
-	// edges only connect end points of ways, not the intersections as it should
-	// be. This will be fixed as soon as the importer is ready to create
-	// "street" links.
 	private void paintGraph(Graphics2D g) {
 		if (zoomLevel.getValue() < 10) {
 			return;
@@ -429,12 +405,10 @@ public class MapPanel extends JPanel {
 				omega.y = getPy(n.getLatitude());
 
 				// determine compute the location of the node representing
-				// the
-				// way by computing a point on the perpendicular in the
+				// the way by computing a point on the perpendicular in the
 				// middle of the segment alpha-omega. the distance of this
-				// point
-				// to the segment is limited to a length of 50 to 200 metres
-				// w.r.t. the scale of the display.
+				// point to the segment is limited to a length of 50 to 200
+				// metres w.r.t. the scale of the display.
 				AffineTransform t = g.getTransform();
 				double dx = omega.x - alpha.x;
 				double dy = omega.y - alpha.y;
@@ -495,10 +469,7 @@ public class MapPanel extends JPanel {
 				}
 				Node source = (Node) s.getFirstHasSource().getOmega();
 				Node target = (Node) s.getFirstHasTarget().getOmega();
-				// if (!visibleElements.isMarked(source)
-				// && !visibleElements.isMarked(target)) {
-				// continue;
-				// }
+
 				alpha.x = getPx(source.getLongitude());
 				alpha.y = getPy(source.getLatitude());
 				omega.x = getPx(target.getLongitude());
