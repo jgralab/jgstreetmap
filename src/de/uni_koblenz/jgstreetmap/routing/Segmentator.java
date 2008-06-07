@@ -41,65 +41,6 @@ public class Segmentator {
 	private static OsmGraph theGraph;
 	public static final int MINUTEMETER = 1852;
 
-	// private static class Segmentation {
-	// private Way way;
-	// private List<Node> segmentNodes;
-	// private Node last;
-	//
-	// public Segmentation(Way way) {
-	// this.way = way;
-	// segmentNodes = new LinkedList<Node>();
-	// }
-	//
-	// public int getNodeCount() {
-	// return segmentNodes.size();
-	// }
-	//
-	// private double distance(Node n1, Node n2) {
-	// double deltaLat = abs(n1.getLatitude() - n2.getLatitude());
-	// double deltaLon = abs(n1.getLongitude() - n2.getLongitude());
-	// double latMiddle = (n1.getLatitude() + n2.getLatitude()) / 2.0;
-	// double k1 = deltaLat * 60 * MINUTEMETER;
-	// double k2 = deltaLon * 60 * MINUTEMETER * cos(toRadians(latMiddle));
-	// return sqrt(k1 * k1 + k2 * k2);
-	// }
-	//
-	// public double getLength() {
-	// Iterator<Node> nodeIterator = segmentNodes.iterator();
-	// Node currentNode = null;
-	// Node newNode = null;
-	// try {
-	// currentNode = nodeIterator.next();
-	// } catch (NoSuchElementException e) {
-	// return 0;
-	// }
-	// double length = 0;
-	// while (nodeIterator.hasNext()) {
-	// newNode = nodeIterator.next();
-	// length += distance(currentNode, newNode);
-	// currentNode = newNode;
-	// }
-	// return length;
-	// }
-	//
-	// public void addNode(Node n) {
-	// segmentNodes.add(n);
-	// last = n;
-	// }
-	//
-	// public Way getWay() {
-	// return way;
-	// }
-	//
-	// public Node getStart() {
-	// return segmentNodes.get(0);
-	// }
-	//
-	// public Node getEnd() {
-	// return last;
-	// }
-	// }
-
 	public static double distance(Node n1, Node n2) {
 		double deltaLat = abs(n1.getLatitude() - n2.getLatitude());
 		double deltaLon = abs(n1.getLongitude() - n2.getLongitude());
@@ -127,30 +68,17 @@ public class Segmentator {
 					.vertices(Way.class));
 			System.out.println("done");
 
-			// System.out.print("Dividing Ways into Segments...");
-			// List<Segmentation> segmentations =
-			// computeSegmentations(relevantWays);
-			// System.out.println("done");
-			// System.out
-			// .println("Created " + segmentations.size() + " segments.");
-
 			System.out.println("Segmentating Ways...");
-			// TODO
 			int c = segmentate(relevantWays);
 			System.out.println("done");
 			
 			System.out.println(c + " segments created.");
-
-			System.out.print("Creating edges from Segments...");
-			// createSegmentEdges(segmentations);
-			System.out.println("done");
 
 			System.out.println("Storing the graph...");
 			GraphIO.saveGraphToFile(targetGraphFilename, theGraph,
 					new ProgressFunctionImpl());
 
 		} catch (GraphIOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -199,51 +127,6 @@ public class Segmentator {
 		return (oneway != null && w.getWayType() != SegmentType.NOWAY && (oneway
 				.equalsIgnoreCase("yes") || oneway.equalsIgnoreCase("true")));
 	}
-
-	// private static void createSegmentEdges(List<Segmentation> segmentations)
-	// {
-	// for (Segmentation currentSegmentation : segmentations) {
-	// createSegmentEdge(currentSegmentation);
-	// }
-	// }
-
-	// private static void createSegmentEdge(Segmentation s) {
-	// Segment newSegment = theGraph.createSegment();
-	// Way currentWay = s.getWay();
-	// newSegment.setLength(s.getLength());
-	// newSegment.setOneway(isOneway(currentWay));
-	// newSegment.setWayType(currentWay.getWayType());
-	// currentWay.addSegment(newSegment);
-	// newSegment.addSource(s.getStart());
-	// newSegment.addTarget(s.getEnd());
-	// }
-
-	// private static List<Segmentation> computeSegmentations(
-	// List<Way> relevantWays) {
-	// List<Segmentation> output = new LinkedList<Segmentation>();
-	// for (Way currentWay : relevantWays) {
-	// // boolean open = false;
-	// Segmentation currentSeg = new Segmentation(currentWay);
-	// Iterator<? extends Node> iter = currentWay.getNodeList().iterator();
-	// Node currentNode = iter.next();
-	// currentSeg.addNode(currentNode);
-	// while (iter.hasNext()) {
-	// currentNode = iter.next();
-	//
-	// if (isIntersection(currentNode)) {
-	// // open = false;
-	// currentSeg.addNode(currentNode);
-	// output.add(currentSeg);
-	// if (iter.hasNext()) {
-	// currentSeg = new Segmentation(currentWay);
-	// }
-	// }
-	// if (currentSeg.getNodeCount() >= 2)
-	// currentSeg.addNode(currentNode);
-	// }
-	// }
-	// return output;
-	// }
 
 	public static boolean isIntersection(Node currentNode) {
 		int relevantWayAmount = 0;
