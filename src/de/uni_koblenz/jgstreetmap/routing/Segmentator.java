@@ -1,9 +1,13 @@
 package de.uni_koblenz.jgstreetmap.routing;
 
+import static java.lang.Math.abs;
+import static java.lang.Math.cos;
+import static java.lang.Math.sqrt;
+import static java.lang.Math.toRadians;
+
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import de.uni_koblenz.jgralab.GraphIO;
 import de.uni_koblenz.jgralab.GraphIOException;
@@ -16,10 +20,6 @@ import de.uni_koblenz.jgstreetmap.osmschema.OsmSchema;
 import de.uni_koblenz.jgstreetmap.osmschema.Way;
 import de.uni_koblenz.jgstreetmap.osmschema.routing.Segment;
 import de.uni_koblenz.jgstreetmap.osmschema.routing.SegmentType;
-import static java.lang.Math.abs;
-import static java.lang.Math.cos;
-import static java.lang.Math.toRadians;
-import static java.lang.Math.sqrt;
 
 /*
  * Plan:
@@ -36,68 +36,77 @@ import static java.lang.Math.sqrt;
  * + check if the segment belongs to a oneway-Way and store this information in
  *   the segment.
  */
-public class RoutingEdgesAttacher {
+public class Segmentator {
 
 	private static OsmGraph theGraph;
 	public static final int MINUTEMETER = 1852;
 
-	private static class Segmentation {
-		private Way way;
-		private List<Node> segmentNodes;
-		private Node last;
+	// private static class Segmentation {
+	// private Way way;
+	// private List<Node> segmentNodes;
+	// private Node last;
+	//
+	// public Segmentation(Way way) {
+	// this.way = way;
+	// segmentNodes = new LinkedList<Node>();
+	// }
+	//
+	// public int getNodeCount() {
+	// return segmentNodes.size();
+	// }
+	//
+	// private double distance(Node n1, Node n2) {
+	// double deltaLat = abs(n1.getLatitude() - n2.getLatitude());
+	// double deltaLon = abs(n1.getLongitude() - n2.getLongitude());
+	// double latMiddle = (n1.getLatitude() + n2.getLatitude()) / 2.0;
+	// double k1 = deltaLat * 60 * MINUTEMETER;
+	// double k2 = deltaLon * 60 * MINUTEMETER * cos(toRadians(latMiddle));
+	// return sqrt(k1 * k1 + k2 * k2);
+	// }
+	//
+	// public double getLength() {
+	// Iterator<Node> nodeIterator = segmentNodes.iterator();
+	// Node currentNode = null;
+	// Node newNode = null;
+	// try {
+	// currentNode = nodeIterator.next();
+	// } catch (NoSuchElementException e) {
+	// return 0;
+	// }
+	// double length = 0;
+	// while (nodeIterator.hasNext()) {
+	// newNode = nodeIterator.next();
+	// length += distance(currentNode, newNode);
+	// currentNode = newNode;
+	// }
+	// return length;
+	// }
+	//
+	// public void addNode(Node n) {
+	// segmentNodes.add(n);
+	// last = n;
+	// }
+	//
+	// public Way getWay() {
+	// return way;
+	// }
+	//
+	// public Node getStart() {
+	// return segmentNodes.get(0);
+	// }
+	//
+	// public Node getEnd() {
+	// return last;
+	// }
+	// }
 
-		public Segmentation(Way way) {
-			this.way = way;
-			segmentNodes = new LinkedList<Node>();
-		}
-
-		public int getNodeCount() {
-			return segmentNodes.size();
-		}
-
-		private double distance(Node n1, Node n2) {
-			double deltaLat = abs(n1.getLatitude() - n2.getLatitude());
-			double deltaLon = abs(n1.getLongitude() - n2.getLongitude());
-			double latMiddle = (n1.getLatitude() + n2.getLatitude()) / 2.0;
-			double k1 = deltaLat * 60 * MINUTEMETER;
-			double k2 = deltaLon * 60 * MINUTEMETER * cos(toRadians(latMiddle));
-			return sqrt(k1 * k1 + k2 * k2);
-		}
-
-		public double getLength() {
-			Iterator<Node> nodeIterator = segmentNodes.iterator();
-			Node currentNode = null;
-			Node newNode = null;
-			try {
-				currentNode = nodeIterator.next();
-			} catch (NoSuchElementException e) {
-				return 0;
-			}
-			double length = 0;
-			while (nodeIterator.hasNext()) {
-				newNode = nodeIterator.next();
-				length += distance(currentNode, newNode);
-				currentNode = newNode;
-			}
-			return length;
-		}
-
-		public void addNode(Node n) {
-			segmentNodes.add(n);
-			last = n;
-		}
-
-		public Way getWay() {
-			return way;
-		}
-
-		public Node getStart() {
-			return segmentNodes.get(0);
-		}
-
-		public Node getEnd() {
-			return last;
-		}
+	public static double distance(Node n1, Node n2) {
+		double deltaLat = abs(n1.getLatitude() - n2.getLatitude());
+		double deltaLon = abs(n1.getLongitude() - n2.getLongitude());
+		double latMiddle = (n1.getLatitude() + n2.getLatitude()) / 2.0;
+		double k1 = deltaLat * 60 * MINUTEMETER;
+		double k2 = deltaLon * 60 * MINUTEMETER * cos(toRadians(latMiddle));
+		return sqrt(k1 * k1 + k2 * k2);
 	}
 
 	public static void main(String[] args) {
@@ -117,14 +126,25 @@ public class RoutingEdgesAttacher {
 			List<Way> relevantWays = computeRelevantWays(theGraph
 					.vertices(Way.class));
 			System.out.println("done");
-			System.out.print("Dividing Ways into Segments...");
-			List<Segmentation> segmentations = computeSegmentations(relevantWays);
+
+			// System.out.print("Dividing Ways into Segments...");
+			// List<Segmentation> segmentations =
+			// computeSegmentations(relevantWays);
+			// System.out.println("done");
+			// System.out
+			// .println("Created " + segmentations.size() + " segments.");
+
+			System.out.println("Segmentating Ways...");
+			// TODO
+			int c = segmentate(relevantWays);
 			System.out.println("done");
-			System.out
-					.println("Created " + segmentations.size() + " segments.");
+			
+			System.out.println(c + " segments created.");
+
 			System.out.print("Creating edges from Segments...");
-			createSegmentEdges(segmentations);
+			// createSegmentEdges(segmentations);
 			System.out.println("done");
+
 			System.out.println("Storing the graph...");
 			GraphIO.saveGraphToFile(targetGraphFilename, theGraph,
 					new ProgressFunctionImpl());
@@ -138,55 +158,92 @@ public class RoutingEdgesAttacher {
 
 	}
 
-	public static boolean isOneway(Way w) {
+	private static int segmentate(List<Way> relevantWays) {
+		int out = 0;
+		for (Way currentWay : relevantWays) {
+			out += segmentateWay(currentWay);
+		}
+		return out;
+	}
+
+	private static int segmentateWay(Way currentWay) {
+		int out = 0;
+		Iterator<? extends Node> iter = currentWay.getNodeList().iterator();
+		Node source, target;
+		if (iter.hasNext()) {
+			boolean oneway = isOneway(currentWay);
+			source = iter.next();
+			while (iter.hasNext()) {
+				target = iter.next();
+				createSegment(source, target, currentWay, oneway);
+				out++;
+				source = target;
+			}
+		}
+		return out;
+	}
+
+	private static void createSegment(Node source, Node target, Way currentWay,
+			boolean oneway) {
+		Segment newSegment = theGraph.createSegment();
+		newSegment.setLength(distance(source, target));
+		newSegment.setOneway(oneway);
+		newSegment.setWayType(currentWay.getWayType());
+		currentWay.addSegment(newSegment);
+		newSegment.addSource(source);
+		newSegment.addTarget(target);
+	}
+
+	private static boolean isOneway(Way w) {
 		String oneway = AnnotatedOsmGraph.getTag(w, "oneway");
 		return (oneway != null && w.getWayType() != SegmentType.NOWAY && (oneway
 				.equalsIgnoreCase("yes") || oneway.equalsIgnoreCase("true")));
 	}
 
-	private static void createSegmentEdges(List<Segmentation> segmentations) {
-		for (Segmentation currentSegmentation : segmentations) {
-			createSegmentEdge(currentSegmentation);
-		}
-	}
+	// private static void createSegmentEdges(List<Segmentation> segmentations)
+	// {
+	// for (Segmentation currentSegmentation : segmentations) {
+	// createSegmentEdge(currentSegmentation);
+	// }
+	// }
 
-	private static void createSegmentEdge(Segmentation s) {
-		Segment newSegment = theGraph.createSegment();
-		Way currentWay = s.getWay();
-		newSegment.setLength(s.getLength());
-		newSegment.setOneway(isOneway(currentWay));
-		newSegment.setWayType(currentWay.getWayType());
-		currentWay.addSegment(newSegment);
-		newSegment.addSource(s.getStart());
-		newSegment.addTarget(s.getEnd());
-	}
+	// private static void createSegmentEdge(Segmentation s) {
+	// Segment newSegment = theGraph.createSegment();
+	// Way currentWay = s.getWay();
+	// newSegment.setLength(s.getLength());
+	// newSegment.setOneway(isOneway(currentWay));
+	// newSegment.setWayType(currentWay.getWayType());
+	// currentWay.addSegment(newSegment);
+	// newSegment.addSource(s.getStart());
+	// newSegment.addTarget(s.getEnd());
+	// }
 
-	private static List<Segmentation> computeSegmentations(
-			List<Way> relevantWays) {
-		List<Segmentation> output = new LinkedList<Segmentation>();
-		for (Way currentWay : relevantWays) {
-			// boolean open = false;
-			Segmentation currentSeg = new Segmentation(currentWay);
-			Iterator<? extends Node> iter = currentWay.getNodeList().iterator();
-			Node currentNode = iter.next();
-			currentSeg.addNode(currentNode);
-			while (iter.hasNext()) {
-				currentNode = iter.next();
-
-				if (isIntersection(currentNode)) {
-					// open = false;
-					currentSeg.addNode(currentNode);
-					output.add(currentSeg);
-					if (iter.hasNext()) {
-						currentSeg = new Segmentation(currentWay);
-					}
-				}
-				if (currentSeg.getNodeCount() >= 2)
-					currentSeg.addNode(currentNode);
-			}
-		}
-		return output;
-	}
+	// private static List<Segmentation> computeSegmentations(
+	// List<Way> relevantWays) {
+	// List<Segmentation> output = new LinkedList<Segmentation>();
+	// for (Way currentWay : relevantWays) {
+	// // boolean open = false;
+	// Segmentation currentSeg = new Segmentation(currentWay);
+	// Iterator<? extends Node> iter = currentWay.getNodeList().iterator();
+	// Node currentNode = iter.next();
+	// currentSeg.addNode(currentNode);
+	// while (iter.hasNext()) {
+	// currentNode = iter.next();
+	//
+	// if (isIntersection(currentNode)) {
+	// // open = false;
+	// currentSeg.addNode(currentNode);
+	// output.add(currentSeg);
+	// if (iter.hasNext()) {
+	// currentSeg = new Segmentation(currentWay);
+	// }
+	// }
+	// if (currentSeg.getNodeCount() >= 2)
+	// currentSeg.addNode(currentNode);
+	// }
+	// }
+	// return output;
+	// }
 
 	public static boolean isIntersection(Node currentNode) {
 		int relevantWayAmount = 0;
