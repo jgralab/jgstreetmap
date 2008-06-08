@@ -27,4 +27,4 @@ AggregationClass kdtree.HasRoot from kdtree.KDTree (0,1) role tree to kdtree.Key
 EdgeClass kdtree.HasSet from kdtree.Key (1,1) role key to kdtree.NodeSet (0,1) role set;
 AggregationClass kdtree.HasYChild from kdtree.XKey (1,1) role parent to kdtree.YKey (0,2) role child aggregate from;
 AggregationClass kdtree.HasXChild from kdtree.YKey (1,1) role parent to kdtree.XKey (0,2) role child aggregate from;
-AggregationClass routing.ContainsSegment from routing.Route (0,*) to routing.Segment (0,*) role segment aggregate from {reversed: Boolean};
+AggregationClass routing.ContainsSegment from routing.Route (0,*) to routing.Segment (0,*) role segment aggregate from { opposite: Boolean};

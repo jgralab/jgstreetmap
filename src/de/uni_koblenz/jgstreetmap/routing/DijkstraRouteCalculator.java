@@ -221,10 +221,10 @@ public class DijkstraRouteCalculator implements RouteCalculator {
 			currentSegment = routesegments.pop();
 			currentEdge = r.addSegment(currentSegment);
 			if (currentSegment.getSourceList().get(0) == currentNode) {
-				currentEdge.setReversed(false);
+				currentEdge.setOpposite(false);
 				currentNode = currentSegment.getTargetList().get(0);
 			} else {
-				currentEdge.setReversed(true);
+				currentEdge.setOpposite(true);
 				currentNode = currentSegment.getSourceList().get(0);
 			}
 		}

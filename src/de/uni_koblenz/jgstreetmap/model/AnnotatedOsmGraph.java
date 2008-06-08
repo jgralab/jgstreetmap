@@ -1,5 +1,6 @@
 package de.uni_koblenz.jgstreetmap.model;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.TreeSet;
 
 import de.uni_koblenz.jgralab.GraphMarker;
 import de.uni_koblenz.jgralab.Vertex;
-import de.uni_koblenz.jgstreetmap.model.kdtree.KDTreeBuilder;
+import de.uni_koblenz.jgstreetmap.osmschema.Node;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmPrimitive;
 import de.uni_koblenz.jgstreetmap.osmschema.Tag;
 import de.uni_koblenz.jgstreetmap.osmschema.Way;
@@ -49,9 +50,9 @@ public class AnnotatedOsmGraph extends OsmGraphImpl {
 			}
 			lst.add(way);
 		}
-		
-		KDTreeBuilder.buildTree(this, 10);
-		
+
+		// KDTreeBuilder.buildTree(this, 10);
+
 		// Mengengerüst berechnen
 		Map<String, Integer> m = new HashMap<String, Integer>();
 		for (Vertex v = getFirstVertex(); v != null; v = v.getNextVertex()) {
@@ -82,6 +83,10 @@ public class AnnotatedOsmGraph extends OsmGraphImpl {
 
 	public LayoutInfo getLayoutInfo(OsmPrimitive o) {
 		return layoutInfo.getMark(o);
+	}
+
+	public OsmPrimitive getOsmPrimitiveById(long osmId) {
+		return osmIdMap.get(osmId);
 	}
 
 	public static String getTag(OsmPrimitive o, String key) {
@@ -134,6 +139,53 @@ public class AnnotatedOsmGraph extends OsmGraphImpl {
 			tree = createKDTree();
 		}
 		return tree;
+	}
+
+	public class Neighbour implements Comparable<Neighbour> {
+		private Node n;
+		private double d;
+
+		public Neighbour(Node n, double d) {
+			this.setN(n);
+			this.setD(d);
+		}
+
+		@Override
+		public int compareTo(Neighbour o) {
+			return (getD() < o.getD()) ? -1 : (getD() > o.getD()) ? 1 : 0;
+		}
+
+		public void setN(Node n) {
+			this.n = n;
+		}
+
+		public Node getN() {
+			return n;
+		}
+
+		public void setD(double d) {
+			this.d = d;
+		}
+
+		public double getD() {
+			return d;
+		}
+	}
+
+	public List<Neighbour> neighbours(double lat, double lon, double maxDistance) {
+		List<Neighbour> l = new LinkedList<Neighbour>();
+		for (Node n : getNodeVertices()) {
+			double dy = 1852.0 * (n.getLatitude() - lat) * 60.0;
+			double dx = Math.cos(Math.toRadians((n.getLatitude() + lat) / 2))
+					* 1852.0 * (n.getLongitude() - lon) * 60.0;
+			double dist = Math.sqrt(dx * dx + dy * dy);
+			if (dist < maxDistance
+					&& (n.getFirstHasSource() != null || n.getFirstHasTarget() != null)) {
+				l.add(new Neighbour(n, dist));
+			}
+		}
+		Collections.sort(l);
+		return l;
 	}
 
 }

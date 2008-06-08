@@ -48,7 +48,7 @@ public class LayoutInfo {
 	private static final LayoutInfo WATER_WAY = new LayoutInfo();
 	private static final LayoutInfo WATER_AREA = new LayoutInfo();
 
-	private static final LayoutInfo ROUTE = new LayoutInfo();
+	public static final LayoutInfo ROUTE = new LayoutInfo();
 	
 	static {
 		ROUTE.zOrder = 1000;
