@@ -142,33 +142,25 @@ public class AnnotatedOsmGraph extends OsmGraphImpl {
 	}
 
 	public class Neighbour implements Comparable<Neighbour> {
-		private Node n;
-		private double d;
+		private Node node;
+		private double distance;
 
 		public Neighbour(Node n, double d) {
-			this.setN(n);
-			this.setD(d);
+			node = n;
+			distance = d;
 		}
 
 		@Override
 		public int compareTo(Neighbour o) {
-			return (getD() < o.getD()) ? -1 : (getD() > o.getD()) ? 1 : 0;
+			return (distance < o.distance) ? -1 : (distance > o.distance) ? 1 : 0;
 		}
 
-		public void setN(Node n) {
-			this.n = n;
+		public Node getNode() {
+			return node;
 		}
 
-		public Node getN() {
-			return n;
-		}
-
-		public void setD(double d) {
-			this.d = d;
-		}
-
-		public double getD() {
-			return d;
+		public double getDistance() {
+			return distance;
 		}
 	}
 

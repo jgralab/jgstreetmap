@@ -38,6 +38,10 @@ public class MapFrame extends JFrame {
 
 	private JCheckBox showLengthButton;
 
+	private JCheckBox showWayIdsButton;
+
+	private JCheckBox showNodeIdsButton;
+
 	// private OsmGraph graph;
 
 	public MapFrame(AnnotatedOsmGraph graph) {
@@ -85,26 +89,41 @@ public class MapFrame extends JFrame {
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				mapPanel.setShowGraph(showGraphButton.isSelected());
-				showWaysInGraphButton.setEnabled(mapPanel.isShowingGraph());
-				showLengthButton.setEnabled(mapPanel.isShowingGraph() && !mapPanel.isShowingWaysInGraph());
 			}
 		});
 
 		showWaysInGraphButton = new JCheckBox("OSM Ways", mapPanel
 				.isShowingWaysInGraph());
-		showWaysInGraphButton.setEnabled(mapPanel.isShowingGraph());
 		detailPanel.add(showWaysInGraphButton);
 		showWaysInGraphButton.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				mapPanel.setShowWaysInGraph(showWaysInGraphButton.isSelected());
-				showLengthButton.setEnabled(mapPanel.isShowingGraph() && !mapPanel.isShowingWaysInGraph());
+			}
+		});
+
+		showWayIdsButton = new JCheckBox("Way names", mapPanel
+				.isShowingWayIds());
+		detailPanel.add(showWayIdsButton);
+		showWayIdsButton.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				mapPanel.setShowWayIds(showWayIdsButton.isSelected());
+			}
+		});
+
+		showNodeIdsButton = new JCheckBox("Node IDs", mapPanel
+				.isShowingNodeIds());
+		detailPanel.add(showNodeIdsButton);
+		showNodeIdsButton.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				mapPanel.setShowNodeIds(showNodeIdsButton.isSelected());
 			}
 		});
 
 		showLengthButton = new JCheckBox("Length", mapPanel
 				.isShowingLength());
-		showLengthButton.setEnabled(mapPanel.isShowingGraph() && !mapPanel.isShowingWaysInGraph());
 		detailPanel.add(showLengthButton);
 		showLengthButton.addChangeListener(new ChangeListener() {
 			@Override

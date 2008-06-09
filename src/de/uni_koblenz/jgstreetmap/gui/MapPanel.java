@@ -50,7 +50,7 @@ public class MapPanel extends JPanel {
 	private static final Color END_COLOR = Color.RED;
 	private static final Color WAY_COLOR = Color.RED;
 	private static final Color EDGE_COLOR = new Color(0, 0, 255, 128);
-
+	private static final Color LABEL_COLOR = Color.MAGENTA.darker();
 	private static final Color NODE_FILLER = Color.WHITE;
 
 	private static final double MINUTE = 1.0 / 60.0;
@@ -77,6 +77,8 @@ public class MapPanel extends JPanel {
 	private boolean showWaysInGraph = true;
 	private boolean showMap = true;
 	private boolean showLength = false;
+	private boolean showWayIds = true;
+	private boolean showNodeIds = false;
 
 	public MapPanel(AnnotatedOsmGraph graph) {
 		this.graph = graph;
@@ -366,7 +368,7 @@ public class MapPanel extends JPanel {
 				}
 			}
 		}
-		
+
 		if (showGraph && !showWaysInGraph) {
 			for (Segment s : graph.getSegmentEdges()) {
 				Node a = (Node) s.getAlpha();
@@ -487,6 +489,16 @@ public class MapPanel extends JPanel {
 					g.setStroke(fillerStroke);
 					g.drawLine(waypoint.x, waypoint.y, waypoint.x, waypoint.y);
 				}
+				if (showWayIds && zoomLevel.getValue() >= 30) {
+					g.setColor(LABEL_COLOR);
+					String name = AnnotatedOsmGraph.getTag(way, "name");
+					if (name == null || name.length() == 0) {
+						name = Long.toString(way.getOsmId());
+					}
+					g.drawString(name, waypoint.x + 12
+							* outlineStroke.getLineWidth() / 20, waypoint.y
+							+ getFont().getSize() / 2);
+				}
 			}
 		} else {
 			// show segments, not ways
@@ -507,9 +519,18 @@ public class MapPanel extends JPanel {
 
 				// draw alpha and omega nodes
 				g.setStroke(outlineStroke);
-				g.setColor(END_COLOR);
+				g.setColor(NODE_COLOR);
 				g.drawLine(alpha.x, alpha.y, alpha.x, alpha.y);
 				g.drawLine(omega.x, omega.y, omega.x, omega.y);
+				if (showNodeIds && zoomLevel.getValue() >= 35) {
+					g.setColor(LABEL_COLOR);
+					g.drawString(Long.toString(source.getOsmId()), alpha.x + 12
+							* outlineStroke.getLineWidth() / 20, alpha.y
+							+ getFont().getSize() / 2);
+					g.drawString(Long.toString(target.getOsmId()), omega.x + 12
+							* outlineStroke.getLineWidth() / 20, omega.y
+							+ getFont().getSize() / 2);
+				}
 				if (zoomLevel.getValue() >= 20) {
 					g.setColor(NODE_FILLER);
 					g.setStroke(fillerStroke);
@@ -525,14 +546,13 @@ public class MapPanel extends JPanel {
 					double theta = Math.atan2(dy, dx);
 					g.translate(alpha.x, alpha.y);
 					g.rotate(theta);
-					g.setColor(Color.MAGENTA.darker());
+					g.setColor(LABEL_COLOR);
 					long len = Math.round(Math.sqrt(dy * dy + dx * dx));
 					long d = Math.round(s.getLength());
 					String lbl = d + "m";
 					// String lbl =
 					// Double.toString(Math.round(theta*100.0)/100.0);
 					int textWidth = g.getFontMetrics().stringWidth(lbl);
-					g.setColor(Color.MAGENTA.darker());
 					if (Math.abs(theta) >= Math.PI / 2) {
 						g.rotate(Math.PI);
 						g.translate(-(len + textWidth) / 2, -getFont()
@@ -829,9 +849,35 @@ public class MapPanel extends JPanel {
 	public void setShowLength(boolean b) {
 		if (b != showLength) {
 			showLength = b;
-			if (isVisible()) {
+			if (isVisible() && showGraph && !showWaysInGraph) {
 				repaint();
 			}
 		}
 	}
+	public boolean isShowingWayIds() {
+		return showWayIds;
+	}
+
+	public void setShowWayIds(boolean b) {
+		if (b != showWayIds) {
+			showWayIds = b;
+			if (isVisible() && showGraph && showWaysInGraph) {
+				repaint();
+			}
+		}
+	}
+
+	public void setShowNodeIds(boolean b) {
+		if (b != showNodeIds) {
+			showNodeIds = b;
+			if (isVisible() && showGraph && !showWaysInGraph) {
+				repaint();
+			}
+		}
+	}
+
+	public boolean isShowingNodeIds() {
+		return showNodeIds;
+	}
+
 }
