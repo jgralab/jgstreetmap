@@ -48,14 +48,21 @@ public class LayoutInfo {
 	private static final LayoutInfo WATER_WAY = new LayoutInfo();
 	private static final LayoutInfo WATER_AREA = new LayoutInfo();
 
-	public static final LayoutInfo ROUTE = new LayoutInfo();
+	public static final LayoutInfo SHORTEST_ROUTE = new LayoutInfo();
+	public static final LayoutInfo FASTEST_ROUTE = new LayoutInfo();
 	
 	static {
-		ROUTE.zOrder = 1000;
-		ROUTE.bgColor = new Color(0, 255, 0, 128);
-		ROUTE.minWidth = 3.0;
-		ROUTE.maxWidth = 30.0;
-		ROUTE.visible = true;
+		SHORTEST_ROUTE.zOrder = 1000;
+		SHORTEST_ROUTE.bgColor = new Color(0, 255, 0, 128);
+		SHORTEST_ROUTE.minWidth = 3.0;
+		SHORTEST_ROUTE.maxWidth = 30.0;
+		SHORTEST_ROUTE.visible = true;
+
+		FASTEST_ROUTE.zOrder = 1000;
+		FASTEST_ROUTE.bgColor = new Color(0, 0, 255, 128);
+		FASTEST_ROUTE.minWidth = 3.0;
+		FASTEST_ROUTE.maxWidth = 30.0;
+		FASTEST_ROUTE.visible = true;
 
 		DEFAULT.zOrder = 50;
 		DEFAULT.fgColor = Color.MAGENTA;

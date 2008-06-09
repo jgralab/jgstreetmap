@@ -12,6 +12,7 @@ import java.awt.Polygon;
 import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.util.List;
@@ -25,11 +26,15 @@ import javax.swing.event.ChangeListener;
 import de.uni_koblenz.jgralab.BooleanGraphMarker;
 import de.uni_koblenz.jgstreetmap.model.AnnotatedOsmGraph;
 import de.uni_koblenz.jgstreetmap.model.LayoutInfo;
+import de.uni_koblenz.jgstreetmap.model.AnnotatedOsmGraph.Neighbour;
 import de.uni_koblenz.jgstreetmap.osmschema.HasNode;
 import de.uni_koblenz.jgstreetmap.osmschema.Node;
 import de.uni_koblenz.jgstreetmap.osmschema.Way;
 import de.uni_koblenz.jgstreetmap.osmschema.routing.Segment;
 import de.uni_koblenz.jgstreetmap.osmschema.routing.SegmentType;
+import de.uni_koblenz.jgstreetmap.routing.DijkstraRouteCalculator;
+import de.uni_koblenz.jgstreetmap.routing.DijkstraRouteCalculator.EdgeRating;
+import de.uni_koblenz.jgstreetmap.routing.DijkstraRouteCalculator.RoutingRestriction;
 
 public class MapPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
@@ -64,6 +69,7 @@ public class MapPanel extends JPanel {
 	private double scaleLon; // pixel/minute in E-W direction
 
 	private Point mousePos; // uses to save click positions
+	private boolean mouseDragged;
 
 	private RenderingHints antialiasOn; // anti-aliased painting hints
 	private RenderingHints antialiasOff; // simple painting hints
@@ -80,9 +86,27 @@ public class MapPanel extends JPanel {
 	private boolean showWayIds = true;
 	private boolean showNodeIds = false;
 
+	private DijkstraRouteCalculator fastestRouteCalculator;
+	private DijkstraRouteCalculator shortestRouteCalculator;
+	private boolean showRoute = true;
+	private List<Segment> fastestRoute = null;
+	private List<Segment> shortestRoute = null;
+
 	public MapPanel(AnnotatedOsmGraph graph) {
 		this.graph = graph;
 		visibleElements = new BooleanGraphMarker(graph);
+
+		fastestRouteCalculator = new DijkstraRouteCalculator(graph);
+		fastestRouteCalculator.setRestriction(RoutingRestriction.CAR);
+		fastestRouteCalculator.setStart((Node) graph
+				.getOsmPrimitiveById(30432771));
+		fastestRouteCalculator.calculateShortestRoutes(EdgeRating.TIME);
+
+		shortestRouteCalculator = new DijkstraRouteCalculator(graph);
+		shortestRouteCalculator.setRestriction(RoutingRestriction.CAR);
+		shortestRouteCalculator.setStart((Node) graph
+				.getOsmPrimitiveById(30432771));
+		shortestRouteCalculator.calculateShortestRoutes(EdgeRating.LENGTH);
 
 		antialiasOff = new RenderingHints(RenderingHints.KEY_ANTIALIASING,
 				RenderingHints.VALUE_ANTIALIAS_OFF);
@@ -110,26 +134,57 @@ public class MapPanel extends JPanel {
 
 		mousePos = new Point();
 
+		addMouseMotionListener(new MouseMotionListener() {
+
+			@Override
+			public void mouseDragged(MouseEvent e) {
+				setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+				mouseDragged = true;
+			}
+
+			@Override
+			public void mouseMoved(MouseEvent e) {
+				// TODO Auto-generated method stub
+
+			}
+
+		});
 		addMouseListener(new MouseAdapter() {
 			// Stores mouse position on click.
 			@Override
 			public void mousePressed(MouseEvent e) {
 				super.mousePressed(e);
+				mouseDragged = false;
 				mousePos.x = e.getX();
 				mousePos.y = e.getY();
-				setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-				// System.out.println(formatLatitude(getLat(mousePos.y)) + " "
-				// + formatLongitude(getLon(mousePos.x)));
+
+				// System.out.println(formatLatitude(lat) + " "
+				// + formatLongitude(lon));
 			}
 
 			// Computes translation of the mouse coordinates and recenters the
 			// map to the new position
 			public void mouseReleased(MouseEvent e) {
 				super.mouseReleased(e);
-				double deltaLat = getLat(e.getY()) - getLat(mousePos.y);
-				double deltaLon = getLon(e.getX()) - getLon(mousePos.x);
-				setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-				setCenter(latC - deltaLat, lonC - deltaLon);
+				if (mouseDragged) {
+					double deltaLat = getLat(e.getY()) - getLat(mousePos.y);
+					double deltaLon = getLon(e.getX()) - getLon(mousePos.x);
+					setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+					setCenter(latC - deltaLat, lonC - deltaLon);
+				} else {
+					double lat = getLat(mousePos.y);
+					double lon = getLon(mousePos.x);
+					List<Neighbour> neighbours = MapPanel.this.graph
+							.neighbours(lat, lon, 50.0);
+					if (neighbours != null && neighbours.size() >= 1) {
+						Node dest = neighbours.get(0).getNode();
+						fastestRoute = fastestRouteCalculator.getRoute(dest);
+						shortestRoute = shortestRouteCalculator.getRoute(dest);
+						if (showRoute) {
+							repaint();
+						}
+					}
+				}
 			}
 		});
 	}
@@ -235,6 +290,10 @@ public class MapPanel extends JPanel {
 		if (showGraph) {
 			paintGraph(g2);
 		}
+		if (showRoute) {
+			paintRoute(g2, fastestRoute, LayoutInfo.FASTEST_ROUTE);
+			paintRoute(g2, shortestRoute, LayoutInfo.SHORTEST_ROUTE);
+		}
 
 		// draw center cross
 		g2.setRenderingHints(antialiasOff);
@@ -246,6 +305,26 @@ public class MapPanel extends JPanel {
 		g2.drawLine(x, y - 20, x, y + 20);
 		g2.drawLine(x - 20, y, x + 20, y);
 
+	}
+
+	private void paintRoute(Graphics2D g, List<Segment> route, LayoutInfo l) {
+		if (route == null || route.size() < 1) {
+			return;
+		}
+		Polygon poly = new Polygon();
+		Segment lastSeg = null;
+		for (Segment s : route) {
+			Node n = (Node) s.getThis();
+			poly.addPoint(getPx(n.getLongitude()), getPy(n.getLatitude()));
+			lastSeg = s;
+		}
+		if (lastSeg != null) {
+			Node n = (Node) lastSeg.getThat();
+			poly.addPoint(getPx(n.getLongitude()), getPy(n.getLatitude()));
+		}
+		g.setStroke(l.bgStroke);
+		g.setColor(l.bgColor);
+		g.drawPolyline(poly.xpoints, poly.ypoints, poly.npoints);
 	}
 
 	/**
@@ -854,6 +933,7 @@ public class MapPanel extends JPanel {
 			}
 		}
 	}
+
 	public boolean isShowingWayIds() {
 		return showWayIds;
 	}
