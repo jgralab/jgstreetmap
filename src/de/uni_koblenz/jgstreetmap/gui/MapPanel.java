@@ -17,7 +17,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.util.List;
 
-import javax.print.attribute.PrintRequestAttribute;
 import javax.swing.BoundedRangeModel;
 import javax.swing.DefaultBoundedRangeModel;
 import javax.swing.JPanel;
