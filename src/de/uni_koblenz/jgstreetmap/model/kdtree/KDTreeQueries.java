@@ -1,15 +1,34 @@
 package de.uni_koblenz.jgstreetmap.model.kdtree;
 
 import java.util.LinkedList;
+import java.util.List;
 
 import de.uni_koblenz.jgstreetmap.model.AnnotatedOsmGraph;
+import de.uni_koblenz.jgstreetmap.model.AnnotatedOsmGraph.Neighbour;
 import de.uni_koblenz.jgstreetmap.osmschema.Node;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.Key;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.NodeSet;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.XKey;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.YKey;
+import de.uni_koblenz.jgstreetmap.routing.Segmentator;
 
 public class KDTreeQueries {
+
+	public static List<Neighbour> neighboursKD(AnnotatedOsmGraph g, double lat,
+			double lon, double maxrange) {
+		double tlon, tlat, blon, blat, height, width;
+		height = maxrange / (Segmentator.MINUTEMETER * 60);
+		double f = Math.cos(Math.toRadians(lat));
+		width = maxrange / (Segmentator.MINUTEMETER * 60 * f);
+		tlon = lon - height / 2.0;
+		tlat = lat - width / 2.0;
+		blon = lon + height / 2.0;
+		blat = lat + height / 2.0;
+		List<Neighbour> l = new LinkedList<Neighbour>();
+		rangeQuery(g, tlon, tlat, blon, blat,
+				(Key) g.getKDTree().getFirstHasRoot().getThat());
+		return l;
+	}
 
 	public static LinkedList<Node> rangeQuery(AnnotatedOsmGraph g,
 			double topLeftLong, double topLeftLat, double bottomRightLong,
