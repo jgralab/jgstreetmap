@@ -111,9 +111,9 @@ public class Segmentator {
 		}
 	}
 
-	private static void createSegment(OsmGraph theGraph, Node source, Node target, Way currentWay,
-			boolean oneway) {
-		Segment newSegment = theGraph.createSegment(source,target);
+	private static void createSegment(OsmGraph theGraph, Node source,
+			Node target, Way currentWay, boolean oneway) {
+		Segment newSegment = theGraph.createSegment(source, target);
 		newSegment.setLength(distance(source, target));
 		newSegment.setOneway(oneway);
 		newSegment.setWayType(currentWay.getWayType());
@@ -121,9 +121,20 @@ public class Segmentator {
 	}
 
 	public static double distance(Node n1, Node n2) {
-		double deltaLat = abs(n1.getLatitude() - n2.getLatitude());
-		double deltaLon = abs(n1.getLongitude() - n2.getLongitude());
-		double latMiddle = (n1.getLatitude() + n2.getLatitude()) / 2.0;
+		return distance(n1.getLatitude(), n2.getLatitude(),n1.getLongitude(), n2.getLongitude());
+		// double deltaLat = abs(n1.getLatitude() - n2.getLatitude());
+		// double deltaLon = abs(n1.getLongitude() - n2.getLongitude());
+		// double latMiddle = (n1.getLatitude() + n2.getLatitude()) / 2.0;
+		// double k1 = deltaLat * 60 * MINUTEMETER;
+		// double k2 = deltaLon * 60 * MINUTEMETER * cos(toRadians(latMiddle));
+		//		return sqrt(k1 * k1 + k2 * k2);
+	}
+
+	public static double distance(double lat1, double lat2, double lon1,
+			double lon2) {
+		double deltaLat = abs(lat1 - lat2);
+		double deltaLon = abs(lon1 - lon2);
+		double latMiddle = (lat1 + lat2) / 2.0;
 		double k1 = deltaLat * 60 * MINUTEMETER;
 		double k2 = deltaLon * 60 * MINUTEMETER * cos(toRadians(latMiddle));
 		return sqrt(k1 * k1 + k2 * k2);
@@ -190,7 +201,7 @@ public class Segmentator {
 		System.out.println("Segmentating Ways...");
 		int c = segmentate(theGraph, relevantWays);
 		System.out.println("done");
-		
+
 		System.out.println(c + " segments created.");
 	}
 

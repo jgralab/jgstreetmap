@@ -103,10 +103,10 @@ public class DijkstraRouteCalculator {
 		CAR, BIKE, FOOT
 	}
 
-	public class SegmentDirectionTuple {
-		public Segment segment;
-		public Direction direction;
-	}
+	// public class SegmentDirectionTuple {
+	// public Segment segment;
+	// public Direction direction;
+	//	}
 
 	public class Speed {
 		public double cycle = 15;
@@ -259,7 +259,7 @@ public class DijkstraRouteCalculator {
 		return out;
 	}
 
-	public List<SegmentDirectionTuple> getRoute(Node target) {
+	public List<Segment> getRoute(Node target) {
 		if (!routesCalculated) {
 			throw new IllegalStateException(
 					"Routes must be calculatet before invoking this method.");
@@ -278,21 +278,15 @@ public class DijkstraRouteCalculator {
 			currentNode = dijkstraMarker.getPreviousNode(currentNode);
 		}
 
-		List<SegmentDirectionTuple> out = new LinkedList<SegmentDirectionTuple>();
+		List<Segment> out = new LinkedList<Segment>();
 
 		// Segment currentSegment;
 		currentNode = start;
-		SegmentDirectionTuple currentTuple;
+		Segment currentSegment;
 		while (routesegments.size() > 0) {
-			currentTuple = new SegmentDirectionTuple();
-			currentTuple.segment = routesegments.pop();
-			if (currentTuple.segment.isNormal()) {
-				currentTuple.direction = Direction.NORMAL;
-			} else {
-				currentTuple.direction = Direction.REVERSED;
-			}
-			currentNode = (Node) currentTuple.segment.getThat();
-			out.add(currentTuple);
+			currentSegment = routesegments.pop();
+			currentNode = (Node) currentSegment.getThat();
+			out.add(currentSegment);
 		}
 		return out;
 	}

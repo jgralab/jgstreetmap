@@ -12,6 +12,7 @@ import java.util.TreeSet;
 
 import de.uni_koblenz.jgralab.GraphMarker;
 import de.uni_koblenz.jgralab.Vertex;
+import de.uni_koblenz.jgstreetmap.model.kdtree.KDTreeQueries;
 import de.uni_koblenz.jgstreetmap.osmschema.Node;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmPrimitive;
 import de.uni_koblenz.jgstreetmap.osmschema.Tag;
@@ -176,6 +177,20 @@ public class AnnotatedOsmGraph extends OsmGraphImpl {
 			}
 		}
 		Collections.sort(l);
+		return l;
+	}
+
+	public List<Neighbour> neighboursKD(double lat, double lon, double width,
+			double height) {
+		// specify rectangle with center, width and height in degree.
+		double tlon, tlat, blon, blat;
+		tlon = lon - height / 2.0;
+		tlat = lat - width / 2.0;
+		blon = lon + height / 2.0;
+		blat = lat + height / 2.0;
+		List<Neighbour> l = new LinkedList<Neighbour>();
+		KDTreeQueries.rangeQuery(this, tlon, tlat, blon, blat,
+				(Key) getKDTree().getFirstHasRoot().getThat());
 		return l;
 	}
 }

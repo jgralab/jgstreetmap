@@ -5,9 +5,9 @@ import de.uni_koblenz.jgralab.impl.ProgressFunctionImpl;
 import de.uni_koblenz.jgstreetmap.osmschema.Node;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmGraph;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmSchema;
+import de.uni_koblenz.jgstreetmap.osmschema.routing.Segment;
 import de.uni_koblenz.jgstreetmap.routing.DijkstraRouteCalculator.EdgeRating;
 import de.uni_koblenz.jgstreetmap.routing.DijkstraRouteCalculator.RoutingRestriction;
-import de.uni_koblenz.jgstreetmap.routing.DijkstraRouteCalculator.SegmentDirectionTuple;
 
 public class TryRouting {
 
@@ -32,8 +32,8 @@ public class TryRouting {
 		d.setStart(start);
 		d.setRestriction(RoutingRestriction.CAR);
 		d.calculateShortestRoutes(EdgeRating.LENGTH);
-		for(SegmentDirectionTuple currentTuple : d.getRoute(target)){
-			System.out.println(currentTuple.segment);
+		for(Segment currentSegment : d.getRoute(target)){
+			System.out.println(currentSegment);
 		}
 		// double distance = d.dijkstra(start, target);
 		// System.out.println("Distance: " + distance);
