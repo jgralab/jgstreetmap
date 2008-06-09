@@ -368,9 +368,9 @@ public class MapPanel extends JPanel {
 		}
 		
 		if (showGraph && !showWaysInGraph) {
-			for (Segment s : graph.getSegmentVertices()) {
-				Node a = (Node) s.getFirstHasSource().getThat();
-				Node b = (Node) s.getFirstHasTarget().getThat();
+			for (Segment s : graph.getSegmentEdges()) {
+				Node a = (Node) s.getAlpha();
+				Node b = (Node) s.getOmega();
 				if (intersects(a, b)) {
 					visibleElements.mark(s);
 				}
@@ -490,12 +490,12 @@ public class MapPanel extends JPanel {
 			}
 		} else {
 			// show segments, not ways
-			for (Segment s : graph.getSegmentVertices()) {
+			for (Segment s : graph.getSegmentEdges()) {
 				if (!visibleElements.isMarked(s)) {
 					continue;
 				}
-				Node source = (Node) s.getFirstHasSource().getOmega();
-				Node target = (Node) s.getFirstHasTarget().getOmega();
+				Node source = (Node) s.getAlpha();
+				Node target = (Node) s.getOmega();
 
 				alpha.x = getPx(source.getLongitude());
 				alpha.y = getPy(source.getLatitude());

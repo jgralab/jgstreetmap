@@ -179,13 +179,11 @@ public class AnnotatedOsmGraph extends OsmGraphImpl {
 			double dx = Math.cos(Math.toRadians((n.getLatitude() + lat) / 2))
 					* 1852.0 * (n.getLongitude() - lon) * 60.0;
 			double dist = Math.sqrt(dx * dx + dy * dy);
-			if (dist < maxDistance
-					&& (n.getFirstHasSource() != null || n.getFirstHasTarget() != null)) {
+			if (dist < maxDistance && n.getFirstSegment() != null) {
 				l.add(new Neighbour(n, dist));
 			}
 		}
 		Collections.sort(l);
 		return l;
 	}
-
 }
