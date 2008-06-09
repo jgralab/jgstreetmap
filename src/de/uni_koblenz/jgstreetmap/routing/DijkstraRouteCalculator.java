@@ -106,7 +106,7 @@ public class DijkstraRouteCalculator {
 	// public class SegmentDirectionTuple {
 	// public Segment segment;
 	// public Direction direction;
-	//	}
+	// }
 
 	public class Speed {
 		public double cycle = 15;
@@ -143,6 +143,7 @@ public class DijkstraRouteCalculator {
 	}
 
 	public void calculateShortestRoutes(EdgeRating r) {
+		long timestamp1 = System.currentTimeMillis();
 		if (start == null) {
 			throw new IllegalStateException(
 					"start must be set before invoking this method!");
@@ -210,6 +211,9 @@ public class DijkstraRouteCalculator {
 				// currentEdge = parameters.getNextEdge(currentEdge);
 			}
 		}
+		long timestamp2 = System.currentTimeMillis();
+		System.out.println("Dijkstra calculation completed in "
+				+ (timestamp2 - timestamp1) / 1000.0 + " seconds.");
 		// System.out.println(dijkstraMarker.getDistance(end));
 		// return traceback(start, end);
 		startChanged = false;
