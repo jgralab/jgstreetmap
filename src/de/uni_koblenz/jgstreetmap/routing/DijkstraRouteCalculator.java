@@ -179,9 +179,11 @@ public class DijkstraRouteCalculator {
 		});
 
 		// add all vertices into priority queue
-		for (Node currentNode : theGraph.getNodeVertices()) {
-			queue.add(currentNode);
-		}
+		// for (Node currentNode : theGraph.getNodeVertices()) {
+		// queue.add(currentNode);
+		// }
+
+		queue.add(start);
 
 		// dijkstra algorithm main loop
 		while (!queue.isEmpty()) {
