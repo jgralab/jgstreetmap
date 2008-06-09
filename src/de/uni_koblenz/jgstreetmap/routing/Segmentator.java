@@ -113,13 +113,11 @@ public class Segmentator {
 
 	private static void createSegment(Node source, Node target, Way currentWay,
 			boolean oneway) {
-		Segment newSegment = theGraph.createSegment();
+		Segment newSegment = theGraph.createSegment(source,target);
 		newSegment.setLength(distance(source, target));
 		newSegment.setOneway(oneway);
 		newSegment.setWayType(currentWay.getWayType());
-		currentWay.addSegment(newSegment);
-		newSegment.addSource(source);
-		newSegment.addTarget(target);
+		newSegment.setWayId(currentWay.getOsmId());
 	}
 
 	private static boolean isOneway(Way w) {

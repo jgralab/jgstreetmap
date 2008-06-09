@@ -42,10 +42,11 @@ public class OsmImporter extends DefaultHandler {
 	}
 
 	public static void main(String[] args) {
+		String filename = (args.length > 0) ? args[0] : "map.osm.xml";
 		System.out.println("OSM to TGraph");
 		System.out.println("=============");
 		// new OsmImporter().importOsm("rheinland-pfalz.osm.xml");
-		new OsmImporter().importOsm("map.osm.xml");
+		new OsmImporter().importOsm(filename);
 	}
 
 	public void importOsm(String fileName) {
