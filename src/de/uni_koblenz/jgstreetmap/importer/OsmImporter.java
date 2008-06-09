@@ -15,6 +15,8 @@ import org.xml.sax.helpers.DefaultHandler;
 import de.uni_koblenz.jgralab.GraphIO;
 import de.uni_koblenz.jgralab.GraphIOException;
 import de.uni_koblenz.jgralab.impl.ProgressFunctionImpl;
+import de.uni_koblenz.jgstreetmap.model.AnnotatedOsmGraph;
+import de.uni_koblenz.jgstreetmap.model.kdtree.KDTreeBuilder;
 import de.uni_koblenz.jgstreetmap.osmschema.HasMember;
 import de.uni_koblenz.jgstreetmap.osmschema.Node;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmGraph;
@@ -23,6 +25,7 @@ import de.uni_koblenz.jgstreetmap.osmschema.OsmSchema;
 import de.uni_koblenz.jgstreetmap.osmschema.Relation;
 import de.uni_koblenz.jgstreetmap.osmschema.Tag;
 import de.uni_koblenz.jgstreetmap.osmschema.Way;
+import de.uni_koblenz.jgstreetmap.routing.Segmentator;
 
 public class OsmImporter extends DefaultHandler {
 	private enum State {
@@ -32,7 +35,7 @@ public class OsmImporter extends DefaultHandler {
 	private State state;
 	private long startTime;
 	private Map<Long, OsmPrimitive> osmIdMap;
-	private OsmGraph graph;
+	private AnnotatedOsmGraph graph;
 	private SimpleDateFormat dateFormat;
 	private OsmPrimitive currentPrimitive;
 	private List<Tag> currentTagList;
@@ -46,6 +49,8 @@ public class OsmImporter extends DefaultHandler {
 		System.out.println("OSM to TGraph");
 		System.out.println("=============");
 		// new OsmImporter().importOsm("rheinland-pfalz.osm.xml");
+		OsmSchema.instance().getGraphFactory().setGraphImplementationClass(
+				OsmGraph.class, AnnotatedOsmGraph.class);
 		new OsmImporter().importOsm(filename);
 	}
 
@@ -66,12 +71,14 @@ public class OsmImporter extends DefaultHandler {
 	public void startDocument() throws SAXException {
 		System.out.println("Converting...");
 		startTime = System.currentTimeMillis();
-		graph = OsmSchema.instance().createOsmGraph(16000, 16000);
+		graph = (AnnotatedOsmGraph) OsmSchema.instance().createOsmGraph(16000, 16000);
 		osmIdMap = new HashMap<Long, OsmPrimitive>();
 	}
 
 	@Override
 	public void endDocument() throws SAXException {
+		Segmentator.segmentateGraph(graph);
+		KDTreeBuilder.buildTree(graph, 8);
 		try {
 			GraphIO.saveGraphToFile("OsmGraph.tg", graph,
 					new ProgressFunctionImpl());

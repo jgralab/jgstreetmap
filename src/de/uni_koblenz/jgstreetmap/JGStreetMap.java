@@ -10,7 +10,7 @@ public class JGStreetMap {
 	public static void main(String[] args) {
 		try {
 			OsmSchema.instance().getGraphFactory().setGraphImplementationClass(OsmGraph.class, AnnotatedOsmGraph.class);
-			OsmGraph graph = OsmSchema.instance().loadOsmGraph("OsmGraphRouting.tg", new SwingProgressFunction("jgStreetMap", "Loading Map..."));
+			OsmGraph graph = OsmSchema.instance().loadOsmGraph("OsmGraph.tg", new SwingProgressFunction("jgStreetMap", "Loading Map..."));
 			new MapFrame((AnnotatedOsmGraph)graph);
 		} catch (GraphIOException e) {
 			// TODO Auto-generated catch block

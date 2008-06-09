@@ -60,19 +60,7 @@ public class Segmentator {
 			System.out.println("Loading graph...");
 			theGraph = OsmSchema.instance().loadOsmGraph(sourceGraphFilename,
 					new ProgressFunctionImpl());
-			System.out.print("Computing tags for the ways...");
-			computeTags(theGraph.vertices(Way.class));
-			System.out.println("done");
-			System.out.print("Computing relevant Ways...");
-			List<Way> relevantWays = computeRelevantWays(theGraph
-					.vertices(Way.class));
-			System.out.println("done");
-
-			System.out.println("Segmentating Ways...");
-			int c = segmentate(relevantWays);
-			System.out.println("done");
-			
-			System.out.println(c + " segments created.");
+			segmentateGraph(theGraph);
 
 			System.out.println("Storing the graph...");
 			GraphIO.saveGraphToFile(targetGraphFilename, theGraph,
@@ -86,15 +74,31 @@ public class Segmentator {
 
 	}
 
-	private static int segmentate(List<Way> relevantWays) {
+	public static void segmentateGraph(OsmGraph theGraph) {
+		System.out.print("Computing tags for the ways...");
+		computeTags(theGraph.vertices(Way.class));
+		System.out.println("done");
+		System.out.print("Computing relevant Ways...");
+		List<Way> relevantWays = computeRelevantWays(theGraph
+				.vertices(Way.class));
+		System.out.println("done");
+
+		System.out.println("Segmentating Ways...");
+		int c = segmentate(theGraph, relevantWays);
+		System.out.println("done");
+		
+		System.out.println(c + " segments created.");
+	}
+
+	private static int segmentate(OsmGraph theGraph, List<Way> relevantWays) {
 		int out = 0;
 		for (Way currentWay : relevantWays) {
-			out += segmentateWay(currentWay);
+			out += segmentateWay(theGraph, currentWay);
 		}
 		return out;
 	}
 
-	private static int segmentateWay(Way currentWay) {
+	private static int segmentateWay(OsmGraph theGraph, Way currentWay) {
 		int out = 0;
 		Iterator<? extends Node> iter = currentWay.getNodeList().iterator();
 		Node source, target;
@@ -103,7 +107,7 @@ public class Segmentator {
 			source = iter.next();
 			while (iter.hasNext()) {
 				target = iter.next();
-				createSegment(source, target, currentWay, oneway);
+				createSegment(theGraph, source, target, currentWay, oneway);
 				out++;
 				source = target;
 			}
@@ -111,7 +115,7 @@ public class Segmentator {
 		return out;
 	}
 
-	private static void createSegment(Node source, Node target, Way currentWay,
+	private static void createSegment(OsmGraph theGraph, Node source, Node target, Way currentWay,
 			boolean oneway) {
 		Segment newSegment = theGraph.createSegment(source,target);
 		newSegment.setLength(distance(source, target));
