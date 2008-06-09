@@ -17,74 +17,12 @@ import de.uni_koblenz.jgstreetmap.osmschema.routing.SegmentType;
 
 public class DijkstraRouteCalculator {
 
-	protected OsmGraph theGraph;
-	protected OsmDijkstraMarker dijkstraMarker;
-	// protected RoutingRestriction rest;
-	protected Set<SegmentType> relevantTypes;
-	protected Node start;
-	protected boolean routesCalculated;
-	protected boolean startChanged;
-
-	public Node getStart() {
-		return start;
-	}
-
-	public void setStart(Node start) {
-		this.start = start;
-		this.startChanged = true;
-		// calculateShortestRoute();
-	}
-
-	public DijkstraRouteCalculator(OsmGraph g) {
-		dijkstraMarker = null;
-		theGraph = g;
-		relevantTypes = new TreeSet<SegmentType>();
-		setRestriction(RoutingRestriction.CAR);
-		startChanged = false;
-		routesCalculated = false;
-	}
-
-	public enum RoutingRestriction {
-		CAR, BIKE, FOOT
-	}
-
-	public void setRestriction(RoutingRestriction rest) {
-
-		if (rest == RoutingRestriction.CAR) {
-			relevantTypes.add(SegmentType.MOTORWAY);
-			relevantTypes.add(SegmentType.PRIMARY);
-			relevantTypes.add(SegmentType.SECONDARY);
-			relevantTypes.add(SegmentType.TERTIARY);
-			relevantTypes.add(SegmentType.RESIDENTIAL);
-			relevantTypes.add(SegmentType.WORMHOLE);
-			relevantTypes.add(SegmentType.SERVICE);
-			relevantTypes.add(SegmentType.UNSURFACED);
-		} else if (rest == RoutingRestriction.BIKE) {
-			relevantTypes.add(SegmentType.CYCLEWAY);
-			relevantTypes.add(SegmentType.UNSURFACED);
-			relevantTypes.add(SegmentType.RESIDENTIAL);
-			relevantTypes.add(SegmentType.TERTIARY);
-			relevantTypes.add(SegmentType.SECONDARY);
-			relevantTypes.add(SegmentType.WORMHOLE);
-			relevantTypes.add(SegmentType.SERVICE);
-		} else if (rest == RoutingRestriction.FOOT) {
-			relevantTypes.add(SegmentType.CYCLEWAY);
-			relevantTypes.add(SegmentType.UNSURFACED);
-			relevantTypes.add(SegmentType.RESIDENTIAL);
-			relevantTypes.add(SegmentType.TERTIARY);
-			relevantTypes.add(SegmentType.SERVICE);
-			relevantTypes.add(SegmentType.WORMHOLE);
-			relevantTypes.add(SegmentType.FOOTWAY);
-		}
-
+	public enum Direction {
+		NORMAL, REVERSED;
 	}
 
 	protected class OsmDijkstraMarker extends
 			GraphMarker<OsmDijkstraMarker.Marker> {
-
-		public OsmDijkstraMarker() {
-			super(theGraph);
-		}
 
 		/** Marker class for temporary attributes of Dijkstra algorithm */
 		private class Marker {
@@ -101,31 +39,8 @@ public class DijkstraRouteCalculator {
 
 		}
 
-		/** Initializes a vertex with a new Marker. */
-		public void init(Vertex v) {
-			mark(v, new Marker());
-		}
-
-		/**
-		 * Sets the distance at Vertex <code>v</code> to
-		 * <code>newDistance</code> and stores the possibly new predecessor<code>previousVertex</code>
-		 * in the path from the start vertex.
-		 */
-		public void setNewDistance(Node v, double newDistance,
-				Node previousVertex, Segment sourceSegment) {
-			Marker m = getMark(v);
-			m.distance = newDistance;
-			m.prev = previousVertex;
-			m.sourceSegment = sourceSegment;
-		}
-
-		/**
-		 * Checks if the Vertex <code>v</code> is already done.
-		 * 
-		 * @return true if the Vertex was already handled.
-		 */
-		public boolean isDone(Node v) {
-			return getMark(v).done;
+		public OsmDijkstraMarker() {
+			super(theGraph);
 		}
 
 		/** Marks the Vertex <code>v</code> as "done". */
@@ -151,6 +66,63 @@ public class DijkstraRouteCalculator {
 		public Segment getPreviousSegment(Node v) {
 			return getMark(v).sourceSegment;
 		}
+
+		/** Initializes a vertex with a new Marker. */
+		public void init(Vertex v) {
+			mark(v, new Marker());
+		}
+
+		/**
+		 * Checks if the Vertex <code>v</code> is already done.
+		 * 
+		 * @return true if the Vertex was already handled.
+		 */
+		public boolean isDone(Node v) {
+			return getMark(v).done;
+		}
+
+		/**
+		 * Sets the distance at Vertex <code>v</code> to
+		 * <code>newDistance</code> and stores the possibly new predecessor<code>previousVertex</code>
+		 * in the path from the start vertex.
+		 */
+		public void setNewDistance(Node v, double newDistance,
+				Node previousVertex, Segment sourceSegment) {
+			Marker m = getMark(v);
+			m.distance = newDistance;
+			m.prev = previousVertex;
+			m.sourceSegment = sourceSegment;
+		}
+	}
+
+	public enum RoutingRestriction {
+		CAR, BIKE, FOOT
+	}
+
+	public class SegmentDirectionTuple {
+		public Segment segment;
+		public Direction direction;
+	}
+
+	protected OsmGraph theGraph;
+	protected OsmDijkstraMarker dijkstraMarker;
+
+	// protected RoutingRestriction rest;
+	protected Set<SegmentType> relevantTypes;
+
+	protected Node start;
+
+	protected boolean routesCalculated;
+
+	protected boolean startChanged;
+
+	public DijkstraRouteCalculator(OsmGraph g) {
+		dijkstraMarker = null;
+		theGraph = g;
+		relevantTypes = new TreeSet<SegmentType>();
+		setRestriction(RoutingRestriction.CAR);
+		startChanged = false;
+		routesCalculated = false;
 	}
 
 	public void calculateShortestRoutes() {
@@ -227,13 +199,33 @@ public class DijkstraRouteCalculator {
 		routesCalculated = true;
 	}
 
-	public class SegmentDirectionTuple {
-		public Segment segment;
-		public Direction direction;
+	private Node getNextVertex(Node v, Segment e) {
+		if (e.getSourceList().get(0) == v) {
+			// System.out.println("n");
+			return e.getTargetList().get(0);
+		} else if (e.getTargetList().get(0) == v) {
+			// System.out.println("r");
+			return e.getSourceList().get(0);
+		}
+		return null;
 	}
 
-	public enum Direction {
-		NORMAL, REVERSED;
+	private List<Segment> getRelevantEdges(Node n) {
+		List<Segment> out = new LinkedList<Segment>();
+		// all edges in normal direction
+		for (Segment currentSegment : n.getSegmentToTargetList()) {
+			if (relevantTypes.contains(currentSegment.getWayType())) {
+				out.add(currentSegment);
+			}
+		}
+		// all edges in reversed direction if not oneway
+		for (Segment currentSegment : n.getSegmentToSourceList()) {
+			if (!currentSegment.isOneway()
+					&& relevantTypes.contains(currentSegment.getWayType())) {
+				out.add(currentSegment);
+			}
+		}
+		return out;
 	}
 
 	public List<SegmentDirectionTuple> getRoute(Node target) {
@@ -275,33 +267,45 @@ public class DijkstraRouteCalculator {
 		return out;
 	}
 
-	private List<Segment> getRelevantEdges(Node n) {
-		List<Segment> out = new LinkedList<Segment>();
-		// all edges in normal direction
-		for (Segment currentSegment : n.getSegmentToTargetList()) {
-			if (relevantTypes.contains(currentSegment.getWayType())) {
-				out.add(currentSegment);
-			}
-		}
-		// all edges in reversed direction if not oneway
-		for (Segment currentSegment : n.getSegmentToSourceList()) {
-			if (!currentSegment.isOneway()
-					&& relevantTypes.contains(currentSegment.getWayType())) {
-				out.add(currentSegment);
-			}
-		}
-		return out;
+	public Node getStart() {
+		return start;
 	}
 
-	private Node getNextVertex(Node v, Segment e) {
-		if (e.getSourceList().get(0) == v) {
-			// System.out.println("n");
-			return e.getTargetList().get(0);
-		} else if (e.getTargetList().get(0) == v) {
-			// System.out.println("r");
-			return e.getSourceList().get(0);
+	public void setRestriction(RoutingRestriction rest) {
+
+		if (rest == RoutingRestriction.CAR) {
+			relevantTypes.add(SegmentType.MOTORWAY);
+			relevantTypes.add(SegmentType.PRIMARY);
+			relevantTypes.add(SegmentType.SECONDARY);
+			relevantTypes.add(SegmentType.TERTIARY);
+			relevantTypes.add(SegmentType.RESIDENTIAL);
+			relevantTypes.add(SegmentType.WORMHOLE);
+			relevantTypes.add(SegmentType.SERVICE);
+			relevantTypes.add(SegmentType.UNSURFACED);
+		} else if (rest == RoutingRestriction.BIKE) {
+			relevantTypes.add(SegmentType.CYCLEWAY);
+			relevantTypes.add(SegmentType.UNSURFACED);
+			relevantTypes.add(SegmentType.RESIDENTIAL);
+			relevantTypes.add(SegmentType.TERTIARY);
+			relevantTypes.add(SegmentType.SECONDARY);
+			relevantTypes.add(SegmentType.WORMHOLE);
+			relevantTypes.add(SegmentType.SERVICE);
+		} else if (rest == RoutingRestriction.FOOT) {
+			relevantTypes.add(SegmentType.CYCLEWAY);
+			relevantTypes.add(SegmentType.UNSURFACED);
+			relevantTypes.add(SegmentType.RESIDENTIAL);
+			relevantTypes.add(SegmentType.TERTIARY);
+			relevantTypes.add(SegmentType.SERVICE);
+			relevantTypes.add(SegmentType.WORMHOLE);
+			relevantTypes.add(SegmentType.FOOTWAY);
 		}
-		return null;
+
+	}
+
+	public void setStart(Node start) {
+		this.start = start;
+		this.startChanged = true;
+		// calculateShortestRoute();
 	}
 
 }
