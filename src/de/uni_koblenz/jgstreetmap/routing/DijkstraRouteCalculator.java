@@ -142,6 +142,21 @@ public class DijkstraRouteCalculator {
 		speeds = new Speed();
 	}
 
+	public double calculateCompleteWeight(List<Segment> list, EdgeRating r) {
+		double out = 0;
+		for (Segment currentSegment : list) {
+			switch (r) {
+			case LENGTH:
+				out += currentSegment.getLength();
+				break;
+			case TIME:
+				out += currentSegment.getLength()
+						* computeFactor(currentSegment);
+			}
+		}
+		return out;
+	}
+
 	public void calculateShortestRoutes(EdgeRating r) {
 		long timestamp1 = System.currentTimeMillis();
 		if (start == null) {
