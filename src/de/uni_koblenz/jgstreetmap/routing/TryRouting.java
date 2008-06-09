@@ -5,8 +5,8 @@ import de.uni_koblenz.jgralab.impl.ProgressFunctionImpl;
 import de.uni_koblenz.jgstreetmap.osmschema.Node;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmGraph;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmSchema;
-import de.uni_koblenz.jgstreetmap.osmschema.routing.Route;
-import de.uni_koblenz.jgstreetmap.osmschema.routing.Segment;
+import de.uni_koblenz.jgstreetmap.routing.DijkstraRouteCalculator.RoutingRestriction;
+import de.uni_koblenz.jgstreetmap.routing.DijkstraRouteCalculator.SegmentDirectionTuple;
 
 public class TryRouting {
 
@@ -25,12 +25,14 @@ public class TryRouting {
 			throw new RuntimeException("Graph could not be loaded.");
 		}
 		// OsmParameters params = new OsmParameters(theGraph);
-		RouteCalculator d = new DijkstraRouteCalculator(theGraph, RoutingRestriction.CAR);
+		DijkstraRouteCalculator d = new DijkstraRouteCalculator(theGraph);
 		Node start = (Node) theGraph.getVertex(23);
 		Node target = (Node) theGraph.getVertex(50);
-		Route r = d.calculateShortestRoute(start, target);
-		for(Segment currentSegment : r.getSegmentList()){
-			System.out.println(currentSegment);
+		d.setStart(start);
+		d.setRestriction(RoutingRestriction.CAR);
+		d.calculateShortestRoutes();
+		for(SegmentDirectionTuple currentTuple : d.getRoute(target)){
+			System.out.println(currentTuple.segment);
 		}
 		// double distance = d.dijkstra(start, target);
 		// System.out.println("Distance: " + distance);

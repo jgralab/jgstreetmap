@@ -12,23 +12,40 @@ import de.uni_koblenz.jgralab.GraphMarker;
 import de.uni_koblenz.jgralab.Vertex;
 import de.uni_koblenz.jgstreetmap.osmschema.Node;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmGraph;
-import de.uni_koblenz.jgstreetmap.osmschema.routing.ContainsSegment;
-import de.uni_koblenz.jgstreetmap.osmschema.routing.Route;
 import de.uni_koblenz.jgstreetmap.osmschema.routing.Segment;
 import de.uni_koblenz.jgstreetmap.osmschema.routing.SegmentType;
 
-public class DijkstraRouteCalculator implements RouteCalculator {
+public class DijkstraRouteCalculator {
 
 	protected OsmGraph theGraph;
 	protected OsmDijkstraMarker dijkstraMarker;
 	// protected RoutingRestriction rest;
 	protected Set<SegmentType> relevantTypes;
+	protected Node start;
+	protected boolean routesCalculated;
+	protected boolean startChanged;
 
-	public DijkstraRouteCalculator(OsmGraph g, RoutingRestriction rest) {
+	public Node getStart() {
+		return start;
+	}
+
+	public void setStart(Node start) {
+		this.start = start;
+		this.startChanged = true;
+		// calculateShortestRoute();
+	}
+
+	public DijkstraRouteCalculator(OsmGraph g) {
 		dijkstraMarker = null;
 		theGraph = g;
 		relevantTypes = new TreeSet<SegmentType>();
-		setRestriction(rest);
+		setRestriction(RoutingRestriction.CAR);
+		startChanged = false;
+		routesCalculated = false;
+	}
+
+	public enum RoutingRestriction {
+		CAR, BIKE, FOOT
 	}
 
 	public void setRestriction(RoutingRestriction rest) {
@@ -48,6 +65,7 @@ public class DijkstraRouteCalculator implements RouteCalculator {
 			relevantTypes.add(SegmentType.RESIDENTIAL);
 			relevantTypes.add(SegmentType.TERTIARY);
 			relevantTypes.add(SegmentType.SECONDARY);
+			relevantTypes.add(SegmentType.WORMHOLE);
 			relevantTypes.add(SegmentType.SERVICE);
 		} else if (rest == RoutingRestriction.FOOT) {
 			relevantTypes.add(SegmentType.CYCLEWAY);
@@ -55,6 +73,7 @@ public class DijkstraRouteCalculator implements RouteCalculator {
 			relevantTypes.add(SegmentType.RESIDENTIAL);
 			relevantTypes.add(SegmentType.TERTIARY);
 			relevantTypes.add(SegmentType.SERVICE);
+			relevantTypes.add(SegmentType.WORMHOLE);
 			relevantTypes.add(SegmentType.FOOTWAY);
 		}
 
@@ -134,8 +153,11 @@ public class DijkstraRouteCalculator implements RouteCalculator {
 		}
 	}
 
-	@Override
-	public Route calculateShortestRoute(Node start, Node end) {
+	public void calculateShortestRoutes() {
+		if (start == null) {
+			throw new IllegalStateException(
+					"start must be set before invoking this method!");
+		}
 		dijkstraMarker = new OsmDijkstraMarker();
 		for (Node currentNode : theGraph.getNodeVertices()) {
 			dijkstraMarker.init(currentNode);
@@ -199,11 +221,30 @@ public class DijkstraRouteCalculator implements RouteCalculator {
 				// currentEdge = parameters.getNextEdge(currentEdge);
 			}
 		}
-		System.out.println(dijkstraMarker.getDistance(end));
-		return traceback(start, end);
+		// System.out.println(dijkstraMarker.getDistance(end));
+		// return traceback(start, end);
+		startChanged = false;
+		routesCalculated = true;
 	}
 
-	private Route traceback(Node start, Node target) {
+	public class SegmentDirectionTuple {
+		public Segment segment;
+		public Direction direction;
+	}
+
+	public enum Direction {
+		NORMAL, REVERSED;
+	}
+
+	public List<SegmentDirectionTuple> getRoute(Node target) {
+		if (!routesCalculated) {
+			throw new IllegalStateException(
+					"Routes must be calculatet before invoking this method.");
+		}
+		if (startChanged) {
+			throw new IllegalStateException(
+					"start must not be changed after calculating the routes.");
+		}
 		Stack<Segment> routesegments = new Stack<Segment>();
 		if (dijkstraMarker.getPreviousSegment(target) == null) {
 			return null;
@@ -213,22 +254,25 @@ public class DijkstraRouteCalculator implements RouteCalculator {
 			routesegments.push(dijkstraMarker.getPreviousSegment(currentNode));
 			currentNode = dijkstraMarker.getPreviousNode(currentNode);
 		}
-		Route r = theGraph.createRoute();
-		ContainsSegment currentEdge;
-		Segment currentSegment;
+
+		List<SegmentDirectionTuple> out = new LinkedList<SegmentDirectionTuple>();
+
+		// Segment currentSegment;
 		currentNode = start;
+		SegmentDirectionTuple currentTuple;
 		while (routesegments.size() > 0) {
-			currentSegment = routesegments.pop();
-			currentEdge = r.addSegment(currentSegment);
-			if (currentSegment.getSourceList().get(0) == currentNode) {
-				currentEdge.setOpposite(false);
-				currentNode = currentSegment.getTargetList().get(0);
+			currentTuple = new SegmentDirectionTuple();
+			currentTuple.segment = routesegments.pop();
+			if (currentTuple.segment.getSourceList().get(0) == currentNode) {
+				currentTuple.direction = Direction.NORMAL;
+				currentNode = currentTuple.segment.getTargetList().get(0);
 			} else {
-				currentEdge.setOpposite(true);
-				currentNode = currentSegment.getSourceList().get(0);
+				currentTuple.direction = Direction.REVERSED;
+				currentNode = currentTuple.segment.getSourceList().get(0);
 			}
+			out.add(currentTuple);
 		}
-		return r;
+		return out;
 	}
 
 	private List<Segment> getRelevantEdges(Node n) {
