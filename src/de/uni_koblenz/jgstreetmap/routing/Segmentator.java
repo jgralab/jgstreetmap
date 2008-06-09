@@ -59,17 +59,12 @@ public class Segmentator {
 	}
 
 	public static SegmentType computeSegmentType(String highwayValue) {
-		if (highwayValue.equals("motorway")
-				|| highwayValue.equals("motorway_link")
-				|| highwayValue.equals("motorway_trunk")) {
+		if (highwayValue.startsWith("motorway")) {
 			return SegmentType.MOTORWAY;
-		} else if (highwayValue.equals("primary")
-				|| highwayValue.equals("primary_link")
-				|| highwayValue.equals("trunk")
-				|| highwayValue.equals("trunk_link")) {
+		} else if (highwayValue.startsWith("primary")
+				|| highwayValue.startsWith("trunk")) {
 			return SegmentType.PRIMARY;
-		} else if (highwayValue.equals("secondary")
-				|| highwayValue.equals("secondary_link")) {
+		} else if (highwayValue.startsWith("secondary")) {
 			return SegmentType.SECONDARY;
 		} else if (highwayValue.equals("tertiary")) {
 			return SegmentType.TERTIARY;
@@ -77,13 +72,16 @@ public class Segmentator {
 				|| highwayValue.equals("living_street")
 				|| highwayValue.equals("minor")) {
 			return SegmentType.RESIDENTIAL;
-		} else if (highwayValue.equals("footway")
-				|| highwayValue.equals("cycleway")
+		} else if (highwayValue.startsWith("foot")
+				|| highwayValue.equals("bridleway")
 				|| highwayValue.equals("pedestrian")
 				|| highwayValue.equals("steps") || highwayValue.equals("track")
-				|| highwayValue.equals("foot")) {
+				|| highwayValue.equals("trak") || highwayValue.equals("tr")) {
 			return SegmentType.FOOTWAY;
-		} else if (highwayValue.equals("unsurfaced")) {
+		} else if (highwayValue.startsWith("cycle")) {
+			return SegmentType.CYCLEWAY;
+		} else if (highwayValue.equals("unsurfaced")
+				|| highwayValue.equals("unsealed")) {
 			return SegmentType.UNSURFACED;
 		} else if (highwayValue.equals("construction")) {
 			return SegmentType.NOWAY;
@@ -105,6 +103,9 @@ public class Segmentator {
 			currentValue = AnnotatedOsmGraph.getTag(currentWay, "highway");
 			if (currentValue != null) {
 				currentWay.setWayType(computeSegmentType(currentValue));
+			} else if (AnnotatedOsmGraph.getTag(currentWay, "cycleway") != null) {
+				currentWay.setWayType(SegmentType.CYCLEWAY);
+
 			} else {
 				currentWay.setWayType(SegmentType.NOWAY);
 			}
@@ -121,13 +122,14 @@ public class Segmentator {
 	}
 
 	public static double distance(Node n1, Node n2) {
-		return distance(n1.getLatitude(), n2.getLatitude(),n1.getLongitude(), n2.getLongitude());
+		return distance(n1.getLatitude(), n2.getLatitude(), n1.getLongitude(),
+				n2.getLongitude());
 		// double deltaLat = abs(n1.getLatitude() - n2.getLatitude());
 		// double deltaLon = abs(n1.getLongitude() - n2.getLongitude());
 		// double latMiddle = (n1.getLatitude() + n2.getLatitude()) / 2.0;
 		// double k1 = deltaLat * 60 * MINUTEMETER;
 		// double k2 = deltaLon * 60 * MINUTEMETER * cos(toRadians(latMiddle));
-		//		return sqrt(k1 * k1 + k2 * k2);
+		// return sqrt(k1 * k1 + k2 * k2);
 	}
 
 	public static double distance(double lat1, double lat2, double lon1,

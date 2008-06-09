@@ -110,10 +110,10 @@ public class DijkstraRouteCalculator {
 
 	public class Speed {
 		public double cycle = 15;
-		public double motorway = 130;
-		public double countryroad = 80;
+		public double motorway = 110;
+		public double countryroad = 60;
 		public double residential = 40;
-		public double footway = 6;
+		public double footway = 5;
 		public double unsurfaced = 20;
 		public double service = 10;
 	}
@@ -240,23 +240,23 @@ public class DijkstraRouteCalculator {
 	private double computeFactor(Segment s) {
 		switch (s.getWayType()) {
 		case CYCLEWAY:
-			return 1.0 / speeds.cycle;
+			return 3.6 / speeds.cycle;
 		case MOTORWAY:
-			return 1.0 / speeds.motorway;
+			return 3.6 / speeds.motorway;
 		case PRIMARY:
-			return 1.0 / speeds.countryroad;
+			return 3.6 / speeds.countryroad;
 		case SECONDARY:
-			return 1.0 / speeds.countryroad;
+			return 3.6 / speeds.countryroad;
 		case TERTIARY:
-			return 1.0 / speeds.residential;
+			return 3.6 / speeds.residential;
 		case RESIDENTIAL:
-			return 1.0 / speeds.residential;
+			return 3.6 / speeds.residential;
 		case FOOTWAY:
-			return 1.0 / speeds.footway;
+			return 3.6 / speeds.footway;
 		case UNSURFACED:
-			return 1.0 / speeds.unsurfaced;
+			return 3.6 / speeds.unsurfaced;
 		case SERVICE:
-			return 1.0 / speeds.service;
+			return 3.6 / speeds.service;
 		case WORMHOLE:
 			return 0;
 		default:

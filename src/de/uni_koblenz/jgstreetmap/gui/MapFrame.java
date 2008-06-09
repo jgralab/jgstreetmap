@@ -23,6 +23,7 @@ public class MapFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
 
 	private MapPanel mapPanel;
+	private ResultPanel resultPanel;
 	private JButton zoomInButton;
 	private JButton zoomOutButton;
 	private JSlider zoomSlider;
@@ -49,9 +50,11 @@ public class MapFrame extends JFrame {
 		// this.graph = graph;
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setLayout(new BorderLayout());
-		mapPanel = new MapPanel(graph);
+		resultPanel = new ResultPanel();
+		mapPanel = new MapPanel(graph, resultPanel);
 
 		getContentPane().add(mapPanel, BorderLayout.CENTER);
+		getContentPane().add(resultPanel, BorderLayout.EAST);
 
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));

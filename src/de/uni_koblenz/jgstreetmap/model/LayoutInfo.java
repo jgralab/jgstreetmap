@@ -24,7 +24,7 @@ public class LayoutInfo {
 	public int zoomVisibilityLimit;
 	public Stroke bgStroke;
 	public Stroke fgStroke;
-	
+
 	private static final LayoutInfo ERROR = new LayoutInfo();
 	private static final LayoutInfo INVISIBLE = new LayoutInfo();
 	private static final LayoutInfo DEFAULT = new LayoutInfo();
@@ -50,7 +50,7 @@ public class LayoutInfo {
 
 	public static final LayoutInfo SHORTEST_ROUTE = new LayoutInfo();
 	public static final LayoutInfo FASTEST_ROUTE = new LayoutInfo();
-	
+
 	static {
 		SHORTEST_ROUTE.zOrder = 1000;
 		SHORTEST_ROUTE.bgColor = new Color(0, 255, 0, 128);
@@ -191,24 +191,25 @@ public class LayoutInfo {
 	public static LayoutInfo computeInfo(Way way) {
 		String t = AnnotatedOsmGraph.getTag(way, "highway");
 		if (t != null) {
-			if (t.equals("motorway") || t.equals("motorway_link")
-					|| t.equals("motorway_trunk")) {
+			if (t.startsWith("motorway")) {
 				return MOTORWAY;
-			} else if (t.equals("primary") || t.equals("primary_link")
-					|| t.equals("trunk") || t.equals("trunk_link")) {
+			} else if (t.startsWith("primary") || t.startsWith("trunk")) {
 				return PRIMARY;
-			} else if (t.equals("secondary") || t.equals("secondary_link")) {
+			} else if (t.startsWith("secondary")) {
 				return SECONDARY;
 			} else if (t.equals("tertiary")) {
 				return TERTIARY;
 			} else if (t.equals("residential") || t.equals("living_street")
 					|| t.equals("minor")) {
 				return RESIDENTIAL;
-			} else if (t.equals("footway") || t.equals("cycleway")
-					|| t.equals("pedestrian") || t.equals("steps")
-					|| t.equals("track") || t.equals("foot")) {
+			} else if (t.startsWith("foot") || t.equals("pedestrian")
+					|| t.equals("steps") || t.equals("track")
+					|| t.equals("bridleway") || t.equals("trak")
+					|| t.equals("tr")) {
 				return FOOTWAY;
-			} else if (t.equals("unsurfaced")) {
+			} else if (t.startsWith("cycleway")) {
+				return CYCLEWAY;
+			} else if (t.equals("unsurfaced") || t.equals("unsealed")) {
 				return UNSURFACED;
 			} else if (t.equals("construction")) {
 				return CONSTRUCTION;
@@ -272,9 +273,9 @@ public class LayoutInfo {
 			}
 		}
 
-		System.out.println("No layout information for " + way);
-		System.out.println(way.getTags());
-		System.out.println();
+		// System.out.println("No layout information for " + way);
+		// System.out.println(way.getTags());
+		// System.out.println();
 		return ERROR;
 	}
 }

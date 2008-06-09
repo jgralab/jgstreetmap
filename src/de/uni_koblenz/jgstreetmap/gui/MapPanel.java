@@ -17,6 +17,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.util.List;
 
+import javax.print.attribute.PrintRequestAttribute;
 import javax.swing.BoundedRangeModel;
 import javax.swing.DefaultBoundedRangeModel;
 import javax.swing.JPanel;
@@ -52,7 +53,7 @@ public class MapPanel extends JPanel {
 			0.04f, 0.98f);
 	private static final Color MAP_BG_COLOR = new Color(255, 255, 224);
 	private static final Color NODE_COLOR = Color.GREEN.darker();
-	private static final Color END_COLOR = Color.RED;
+	// private static final Color END_COLOR = Color.RED;
 	private static final Color WAY_COLOR = Color.RED;
 	private static final Color EDGE_COLOR = new Color(0, 0, 255, 128);
 	private static final Color LABEL_COLOR = Color.MAGENTA.darker();
@@ -91,21 +92,26 @@ public class MapPanel extends JPanel {
 	private boolean showRoute = true;
 	private List<Segment> fastestRoute = null;
 	private List<Segment> shortestRoute = null;
+	private Node startNode = null;
 
-	public MapPanel(AnnotatedOsmGraph graph) {
+	private ResultPanel resultPanel;
+
+	public MapPanel(AnnotatedOsmGraph graph, ResultPanel respnl) {
 		this.graph = graph;
+		this.resultPanel = respnl;
+
 		visibleElements = new BooleanGraphMarker(graph);
+
+		startNode = (Node) graph.getOsmPrimitiveById(30432771);
 
 		fastestRouteCalculator = new DijkstraRouteCalculator(graph);
 		fastestRouteCalculator.setRestriction(RoutingRestriction.CAR);
-		fastestRouteCalculator.setStart((Node) graph
-				.getOsmPrimitiveById(30432771));
+		fastestRouteCalculator.setStart(startNode);
 		fastestRouteCalculator.calculateShortestRoutes(EdgeRating.TIME);
 
 		shortestRouteCalculator = new DijkstraRouteCalculator(graph);
 		shortestRouteCalculator.setRestriction(RoutingRestriction.CAR);
-		shortestRouteCalculator.setStart((Node) graph
-				.getOsmPrimitiveById(30432771));
+		shortestRouteCalculator.setStart(startNode);
 		shortestRouteCalculator.calculateShortestRoutes(EdgeRating.LENGTH);
 
 		antialiasOff = new RenderingHints(RenderingHints.KEY_ANTIALIASING,
@@ -183,10 +189,83 @@ public class MapPanel extends JPanel {
 						if (showRoute) {
 							repaint();
 						}
+						printNode("Destination", dest);
+						printRoute(fastestRoute, fastestRouteCalculator,
+								EdgeRating.TIME);
+						printRoute(shortestRoute, shortestRouteCalculator,
+								EdgeRating.LENGTH);
 					}
 				}
 			}
+
 		});
+	}
+
+	private void printNode(String label, Node n) {
+		if (n == null) {
+			return;
+		}
+		resultPanel.print(label + ":");
+		for (Way w: n.getWayList()) {
+			String name = AnnotatedOsmGraph.getTag(w, "name");
+			if (name != null && name.length()>0) {
+				resultPanel.print(" " + name);
+			}
+		}
+		resultPanel.println();
+	}
+	private void printRoute(List<Segment> route,
+			DijkstraRouteCalculator calculator, EdgeRating rating) {
+		String label = null;
+		double length = calculator.calculateCompleteWeight(route,
+				EdgeRating.LENGTH) / 1000.0;
+		double time = calculator
+				.calculateCompleteWeight(route, EdgeRating.TIME) / 3600;
+		switch (rating) {
+		case TIME:
+			label = "Fastest route";
+			break;
+		case LENGTH:
+			label = "Shortest route";
+			break;
+		}
+		resultPanel.println();
+		resultPanel.println(label);
+		if (route == null || route.size() < 1) {
+			resultPanel.println("not found :-(");
+			return;
+		}
+		resultPanel.println("  Length: " + Math.round(length * 100.0) / 100.0
+				+ "km");
+		resultPanel.println("  Time  : " + Math.round(time * 100.0) / 100.0
+				+ "h");
+		Way lastWay = null;
+		String lastName = null;
+		for (Segment s : route) {
+			Way way = getWay(s);
+			if (way != null && way != lastWay) {
+				String name = AnnotatedOsmGraph.getTag(way, "name");
+				if (name != null && !name.equals(lastName)) {
+					resultPanel.println("  " + name);
+					lastName = name;
+				}
+				lastWay = way;
+			}
+
+		}
+	}
+
+	private Way getWay(Segment s) {
+		List<? extends Way> alphaWays = ((Node) s.getAlpha()).getWayList();
+		List<? extends Way> omegaWays = ((Node) s.getOmega()).getWayList();
+		for (Way w : alphaWays) {
+			for (Way v : omegaWays) {
+				if (v == w) {
+					return w;
+				}
+			}
+		}
+		return null;
 	}
 
 	/**
