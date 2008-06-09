@@ -21,6 +21,10 @@ public class DijkstraRouteCalculator {
 		NORMAL, REVERSED;
 	}
 
+	public enum EdgeRating {
+		LENGTH, TIME;
+	}
+
 	protected class OsmDijkstraMarker extends
 			GraphMarker<OsmDijkstraMarker.Marker> {
 
@@ -104,6 +108,16 @@ public class DijkstraRouteCalculator {
 		public Direction direction;
 	}
 
+	public class Speed {
+		public double cycle = 15;
+		public double motorway = 130;
+		public double countryroad = 80;
+		public double residential = 40;
+		public double footway = 6;
+		public double unsurfaced = 20;
+		public double service = 10;
+	}
+
 	protected OsmGraph theGraph;
 	protected OsmDijkstraMarker dijkstraMarker;
 
@@ -116,6 +130,8 @@ public class DijkstraRouteCalculator {
 
 	protected boolean startChanged;
 
+	protected Speed speeds;
+
 	public DijkstraRouteCalculator(OsmGraph g) {
 		dijkstraMarker = null;
 		theGraph = g;
@@ -123,9 +139,10 @@ public class DijkstraRouteCalculator {
 		setRestriction(RoutingRestriction.CAR);
 		startChanged = false;
 		routesCalculated = false;
+		speeds = new Speed();
 	}
 
-	public void calculateShortestRoutes() {
+	public void calculateShortestRoutes(EdgeRating r) {
 		if (start == null) {
 			throw new IllegalStateException(
 					"start must be set before invoking this method!");
@@ -173,7 +190,7 @@ public class DijkstraRouteCalculator {
 
 				Node nextVertex = getNextVertex(currentEdge);
 
-				double newDistance = currentDistance + currentEdge.getLength();
+				double newDistance = currentDistance + rate(currentEdge, r);
 				// System.out.println(parameters.getWeight(currentEdge));
 				// if the new path is shorter than the distance stored
 				// at the other end, this new value is stored
@@ -199,6 +216,33 @@ public class DijkstraRouteCalculator {
 		routesCalculated = true;
 	}
 
+	private double computeFactor(Segment s) {
+		switch (s.getWayType()) {
+		case CYCLEWAY:
+			return 1.0 / speeds.cycle;
+		case MOTORWAY:
+			return 1.0 / speeds.motorway;
+		case PRIMARY:
+			return 1.0 / speeds.countryroad;
+		case SECONDARY:
+			return 1.0 / speeds.countryroad;
+		case TERTIARY:
+			return 1.0 / speeds.residential;
+		case RESIDENTIAL:
+			return 1.0 / speeds.residential;
+		case FOOTWAY:
+			return 1.0 / speeds.footway;
+		case UNSURFACED:
+			return 1.0 / speeds.unsurfaced;
+		case SERVICE:
+			return 1.0 / speeds.service;
+		case WORMHOLE:
+			return 0;
+		default:
+			return Double.MAX_VALUE;
+		}
+	}
+
 	private Node getNextVertex(Segment e) {
 		return (Node) e.getThat();
 	}
@@ -208,8 +252,8 @@ public class DijkstraRouteCalculator {
 		// all edges in normal direction
 		for (Segment currentSegment : n.getSegmentIncidences()) {
 			if (relevantTypes.contains(currentSegment.getWayType())) {
-				if(currentSegment.isNormal() || !currentSegment.isOneway())
-				out.add(currentSegment);
+				if (currentSegment.isNormal() || !currentSegment.isOneway())
+					out.add(currentSegment);
 			}
 		}
 		return out;
@@ -255,6 +299,17 @@ public class DijkstraRouteCalculator {
 
 	public Node getStart() {
 		return start;
+	}
+
+	protected double rate(Segment s, EdgeRating r) {
+		switch (r) {
+		case LENGTH:
+			return s.getLength();
+		case TIME:
+			return s.getLength() * computeFactor(s);
+		default:
+			return Double.MAX_VALUE;
+		}
 	}
 
 	public void setRestriction(RoutingRestriction rest) {
