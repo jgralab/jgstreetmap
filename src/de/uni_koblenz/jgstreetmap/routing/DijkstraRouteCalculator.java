@@ -171,7 +171,7 @@ public class DijkstraRouteCalculator {
 
 			for (Segment currentEdge : relevantSegments) {
 
-				Node nextVertex = getNextVertex(currentVertex, currentEdge);
+				Node nextVertex = getNextVertex(currentEdge);
 
 				double newDistance = currentDistance + currentEdge.getLength();
 				// System.out.println(parameters.getWeight(currentEdge));
@@ -199,29 +199,16 @@ public class DijkstraRouteCalculator {
 		routesCalculated = true;
 	}
 
-	private Node getNextVertex(Node v, Segment e) {
-		if (e.getSourceList().get(0) == v) {
-			// System.out.println("n");
-			return e.getTargetList().get(0);
-		} else if (e.getTargetList().get(0) == v) {
-			// System.out.println("r");
-			return e.getSourceList().get(0);
-		}
-		return null;
+	private Node getNextVertex(Segment e) {
+		return (Node) e.getThat();
 	}
 
 	private List<Segment> getRelevantEdges(Node n) {
 		List<Segment> out = new LinkedList<Segment>();
 		// all edges in normal direction
-		for (Segment currentSegment : n.getSegmentToTargetList()) {
+		for (Segment currentSegment : n.getSegmentIncidences()) {
 			if (relevantTypes.contains(currentSegment.getWayType())) {
-				out.add(currentSegment);
-			}
-		}
-		// all edges in reversed direction if not oneway
-		for (Segment currentSegment : n.getSegmentToSourceList()) {
-			if (!currentSegment.isOneway()
-					&& relevantTypes.contains(currentSegment.getWayType())) {
+				if(currentSegment.isNormal() || !currentSegment.isOneway())
 				out.add(currentSegment);
 			}
 		}
@@ -255,13 +242,12 @@ public class DijkstraRouteCalculator {
 		while (routesegments.size() > 0) {
 			currentTuple = new SegmentDirectionTuple();
 			currentTuple.segment = routesegments.pop();
-			if (currentTuple.segment.getSourceList().get(0) == currentNode) {
+			if (currentTuple.segment.isNormal()) {
 				currentTuple.direction = Direction.NORMAL;
-				currentNode = currentTuple.segment.getTargetList().get(0);
 			} else {
 				currentTuple.direction = Direction.REVERSED;
-				currentNode = currentTuple.segment.getSourceList().get(0);
 			}
+			currentNode = (Node) currentTuple.segment.getThat();
 			out.add(currentTuple);
 		}
 		return out;
