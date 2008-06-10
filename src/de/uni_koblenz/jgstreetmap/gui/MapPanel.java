@@ -27,6 +27,7 @@ import de.uni_koblenz.jgralab.BooleanGraphMarker;
 import de.uni_koblenz.jgstreetmap.model.AnnotatedOsmGraph;
 import de.uni_koblenz.jgstreetmap.model.LayoutInfo;
 import de.uni_koblenz.jgstreetmap.model.AnnotatedOsmGraph.Neighbour;
+import de.uni_koblenz.jgstreetmap.model.kdtree.KDTreeQueries;
 import de.uni_koblenz.jgstreetmap.osmschema.HasNode;
 import de.uni_koblenz.jgstreetmap.osmschema.Node;
 import de.uni_koblenz.jgstreetmap.osmschema.Way;
@@ -182,8 +183,8 @@ public class MapPanel extends JPanel {
 					// List<Neighbour> neighbours = KDTreeQueries.neighboursKD(
 					// MapPanel.this.graph, lat, lon, 100.0);
 					long stop = System.currentTimeMillis();
-					resultPanel.println("Neighbours: " + (stop - start) + "ms");
 					resultPanel.println();
+					resultPanel.println("Neighbours: " + (stop - start) + "ms");
 					if (neighbours != null && neighbours.size() >= 1) {
 						Node dest = neighbours.get(0).getNode();
 						if (mouseSetStartNode) {
@@ -245,12 +246,12 @@ public class MapPanel extends JPanel {
 		boolean foundName = false;
 		for (Way w : n.getWayList()) {
 			String name = AnnotatedOsmGraph.getTag(w, "name");
-			if (name !=null) {
+			if (name != null) {
 				name = name.trim();
 			}
 			if (name == null || name.length() == 0) {
 				name = AnnotatedOsmGraph.getTag(w, "ref");
-				if (name !=null) {
+				if (name != null) {
 					name = name.trim();
 				}
 			}
@@ -296,12 +297,12 @@ public class MapPanel extends JPanel {
 			Way way = getWay(s);
 			if (way != null && way != lastWay) {
 				String name = AnnotatedOsmGraph.getTag(way, "name");
-				if (name !=null) {
+				if (name != null) {
 					name = name.trim();
 				}
 				if (name == null) {
 					name = AnnotatedOsmGraph.getTag(way, "ref");
-					if (name !=null) {
+					if (name != null) {
 						name = name.trim();
 					}
 				}
@@ -932,7 +933,7 @@ public class MapPanel extends JPanel {
 	 * @return a nice string representation
 	 * @see #formatPos
 	 */
-	private String formatLongitude(double lon) {
+	public static String formatLongitude(double lon) {
 		assert lon >= -180.0 && lon <= 180.0;
 		return formatPos(lon, 'E', 'W');
 	}
@@ -945,7 +946,7 @@ public class MapPanel extends JPanel {
 	 * @return a nice string representation
 	 * @see #formatPos
 	 */
-	private String formatLatitude(double lat) {
+	public static String formatLatitude(double lat) {
 		assert lat >= -90.0 && lat <= 90.0;
 		return formatPos(lat, 'N', 'S');
 	}
@@ -966,7 +967,7 @@ public class MapPanel extends JPanel {
 	 *            hemisphere character for positive values
 	 * @return a String formatted like d&#176;mm.ff'H
 	 */
-	private String formatPos(double degrees, char p, char n) {
+	public static String formatPos(double degrees, char p, char n) {
 		if (degrees < 0) {
 			degrees = -degrees;
 			int d = (int) Math.floor(degrees);

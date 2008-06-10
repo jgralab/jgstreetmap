@@ -33,14 +33,13 @@ public class DijkstraRouteCalculator {
 		double distance;
 
 		/** stores the predecessor in the path from the start vertex */
-		Segment sourceSegment;
+		Segment parentSegment;
 
 		DijkstraMarker(double d, Segment s) {
 			distance = d;
-			sourceSegment = s;
+			parentSegment = s;
 		}
 	}
-
 
 	public enum RoutingRestriction {
 		CAR, BIKE, FOOT
@@ -56,8 +55,9 @@ public class DijkstraRouteCalculator {
 		public double service = 10;
 	}
 
-	protected OsmGraph theGraph;
+	protected OsmGraph graph;
 	protected GraphMarker<DijkstraMarker> dijkstraMarker;
+	PriorityQueue<Node> queue;
 
 	// protected RoutingRestriction rest;
 	protected Set<SegmentType> relevantTypes;
@@ -72,7 +72,7 @@ public class DijkstraRouteCalculator {
 
 	public DijkstraRouteCalculator(OsmGraph g) {
 		dijkstraMarker = null;
-		theGraph = g;
+		graph = g;
 		relevantTypes = new TreeSet<SegmentType>();
 		setRestriction(RoutingRestriction.CAR);
 		startChanged = false;
@@ -103,34 +103,27 @@ public class DijkstraRouteCalculator {
 		if (dijkstraMarker != null) {
 			dijkstraMarker.clear();
 		} else {
-			dijkstraMarker = new GraphMarker<DijkstraMarker>(theGraph);
+			dijkstraMarker = new GraphMarker<DijkstraMarker>(graph);
 		}
 
-		// for (Node currentNode : theGraph.getNodeVertices()) {
-		// dijkstraMarker.init(currentNode);
-		// }
+		if (queue == null) {
+			queue = new PriorityQueue<Node>(128, new Comparator<Node>() {
+				public int compare(Node a, Node b) {
+					return Double.compare(dijkstraMarker.getMark(a).distance,
+							dijkstraMarker.getMark(b).distance);
+				}
+			});
+		} else {
+			queue.clear();
+		}
 
-		PriorityQueue<Node> queue = new PriorityQueue<Node>(start.getGraph()
-				.getVCount(), new Comparator<Node>() {
-			public int compare(Node a, Node b) {
-				return Double.compare(dijkstraMarker.getMark(a).distance,
-						dijkstraMarker.getMark(b).distance);
-			}
-		});
-
-		// dijkstraMarker.setNewDistance(start, 0, null, null);
-		// dijkstraMarker.init(start);
 		dijkstraMarker.mark(start, new DijkstraMarker(0, null));
-		queue.add(start);
-
+		queue.offer(start);
 		// dijkstra algorithm main loop
 		while (!queue.isEmpty()) {
-			// retreive vertex with smallest distance and mark as "done"
+			// retrieve vertex with smallest distance and mark as "done"
 			Node currentVertex = queue.poll();
 
-			// System.out.println("Taken vertex " + currentVertex);
-
-			// System.out.println(dijkstraMarker.getDistance(currentVertex));
 			DijkstraMarker m = dijkstraMarker.getMark(currentVertex);
 			m.done = true;
 
@@ -142,17 +135,17 @@ public class DijkstraRouteCalculator {
 
 					Node nextVertex = (Node) currentSegment.getThat();
 
-					double newDistance = m.distance
-							+ rate(currentSegment, r);
+					double newDistance = m.distance + rate(currentSegment, r);
 					// if the new path is shorter than the distance stored
 					// at the other end, this new value is stored
 					DijkstraMarker n = dijkstraMarker.getMark(nextVertex);
 					if (n == null) {
-						dijkstraMarker.mark(nextVertex, new DijkstraMarker(newDistance, currentSegment));
+						dijkstraMarker.mark(nextVertex, new DijkstraMarker(
+								newDistance, currentSegment));
 						queue.offer(nextVertex); // position in the queue
 					} else if (n.distance > newDistance) {
 						n.distance = newDistance;
-						n.sourceSegment = currentSegment;
+						n.parentSegment = currentSegment;
 						if (!n.done) {
 							queue.remove(nextVertex);
 							queue.offer(nextVertex);
@@ -195,20 +188,20 @@ public class DijkstraRouteCalculator {
 	public List<Segment> getRoute(Node target) {
 		if (!routesCalculated) {
 			throw new IllegalStateException(
-					"Routes must be calculatet before invoking this method.");
+					"Routes must be calculated before invoking this method.");
 		}
 		if (startChanged) {
 			throw new IllegalStateException(
 					"start must not be changed after calculating the routes.");
 		}
 		DijkstraMarker m = dijkstraMarker.getMark(target);
-		if (m == null || m.sourceSegment == null) {
+		if (m == null || m.parentSegment == null) {
 			return null;
 		}
 		Stack<Segment> routesegments = new Stack<Segment>();
-		while (m != null && m.sourceSegment != null) {
-			routesegments.push(m.sourceSegment);
-			m = dijkstraMarker.getMark(m.sourceSegment.getThis());
+		while (m != null && m.parentSegment != null) {
+			routesegments.push(m.parentSegment);
+			m = dijkstraMarker.getMark(m.parentSegment.getThis());
 		}
 
 		List<Segment> out = new ArrayList<Segment>(routesegments.size());
@@ -267,7 +260,6 @@ public class DijkstraRouteCalculator {
 	public void setStart(Node start) {
 		this.start = start;
 		this.startChanged = true;
-		// calculateShortestRoute();
 	}
 
 }

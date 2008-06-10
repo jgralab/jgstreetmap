@@ -3,6 +3,7 @@ package de.uni_koblenz.jgstreetmap.model.kdtree;
 import java.util.LinkedList;
 import java.util.List;
 
+import de.uni_koblenz.jgstreetmap.gui.MapPanel;
 import de.uni_koblenz.jgstreetmap.model.AnnotatedOsmGraph;
 import de.uni_koblenz.jgstreetmap.model.AnnotatedOsmGraph.Neighbour;
 import de.uni_koblenz.jgstreetmap.osmschema.Node;
@@ -16,14 +17,12 @@ public class KDTreeQueries {
 
 	public static List<Neighbour> neighboursKD(AnnotatedOsmGraph g, double lat,
 			double lon, double maxrange) {
-		double tlon, tlat, blon, blat, height, width;
-		height = maxrange / (Segmentator.MINUTEMETER * 60);
-		double f = Math.cos(Math.toRadians(lat));
-		width = maxrange / (Segmentator.MINUTEMETER * 60 * f);
-		tlon = lon - height / 2.0;
-		tlat = lat - width / 2.0;
-		blon = lon + height / 2.0;
-		blat = lat + height / 2.0;
+		double height = maxrange / (Segmentator.MINUTEMETER * 60);
+		double width = maxrange / (Segmentator.MINUTEMETER * 60 * Math.cos(Math.toRadians(lat)));
+		double tlon = lon - width;
+		double tlat = lat - height;
+		double blon = lon + width;
+		double blat = lat + height;
 		List<Neighbour> l = new LinkedList<Neighbour>();
 		rangeQuery(g, tlon, tlat, blon, blat,
 				(Key) g.getKDTree().getFirstHasRoot().getThat());
@@ -33,6 +32,11 @@ public class KDTreeQueries {
 	public static LinkedList<Node> rangeQuery(AnnotatedOsmGraph g,
 			double topLeftLong, double topLeftLat, double bottomRightLong,
 			double bottomRightLat, Key key) {
+		System.out.println("rangeQuery");
+		System.out.println("\ttopLeftLat    = " + MapPanel.formatLatitude(topLeftLat));
+		System.out.println("\ttopLeftLon    = " + MapPanel.formatLongitude(topLeftLong));
+		System.out.println("\tbottomRightLat= " + MapPanel.formatLatitude(bottomRightLat));
+		System.out.println("\tbottomRightLon= " + MapPanel.formatLongitude(bottomRightLong));
 		if (key.getClass() == XKey.class) {
 			return rangeQuery(g, topLeftLong, topLeftLat, bottomRightLong,
 					bottomRightLat, (XKey) key);
