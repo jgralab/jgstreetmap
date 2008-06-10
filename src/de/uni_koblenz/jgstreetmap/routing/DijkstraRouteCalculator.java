@@ -1,7 +1,7 @@
 package de.uni_koblenz.jgstreetmap.routing;
 
+import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
@@ -9,7 +9,6 @@ import java.util.Stack;
 import java.util.TreeSet;
 
 import de.uni_koblenz.jgralab.GraphMarker;
-import de.uni_koblenz.jgralab.Vertex;
 import de.uni_koblenz.jgstreetmap.osmschema.Node;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmGraph;
 import de.uni_koblenz.jgstreetmap.osmschema.routing.Segment;
@@ -25,88 +24,27 @@ public class DijkstraRouteCalculator {
 		LENGTH, TIME;
 	}
 
-	protected class OsmDijkstraMarker extends
-			GraphMarker<OsmDijkstraMarker.Marker> {
+	private class DijkstraMarker {
 
-		/** Marker class for temporary attributes of Dijkstra algorithm */
-		private class Marker {
+		/** indicates that Dijkstra is done with the vertex */
+		boolean done;
 
-			/** indicates that Dijkstra is done with the vertex */
-			boolean done;
+		/** * records the distance to the start vertex */
+		double distance;
 
-			/** * records the distance to the start vertex */
-			double distance = Double.MAX_VALUE;;
+		/** stores the predecessor in the path from the start vertex */
+		Segment sourceSegment;
 
-			/** stores the predecessor in the path from the start vertex */
-			Node prev;
-			Segment sourceSegment;
-
-		}
-
-		public OsmDijkstraMarker() {
-			super(theGraph);
-		}
-
-		/** Marks the Vertex <code>v</code> as "done". */
-		public void done(Node v) {
-			getMark(v).done = true;
-		}
-
-		/**
-		 * Gets the current distance of Vertex <code>v</code> to the start
-		 * vertex.
-		 * 
-		 * @return the current distance
-		 */
-		public double getDistance(Node v) {
-			// System.out.println(v);
-			return getMark(v).distance;
-		}
-
-		public Node getPreviousNode(Node v) {
-			return getMark(v).prev;
-		}
-
-		public Segment getPreviousSegment(Node v) {
-			return getMark(v).sourceSegment;
-		}
-
-		/** Initializes a vertex with a new Marker. */
-		public void init(Vertex v) {
-			mark(v, new Marker());
-		}
-
-		/**
-		 * Checks if the Vertex <code>v</code> is already done.
-		 * 
-		 * @return true if the Vertex was already handled.
-		 */
-		public boolean isDone(Node v) {
-			return getMark(v).done;
-		}
-
-		/**
-		 * Sets the distance at Vertex <code>v</code> to
-		 * <code>newDistance</code> and stores the possibly new predecessor<code>previousVertex</code>
-		 * in the path from the start vertex.
-		 */
-		public void setNewDistance(Node v, double newDistance,
-				Node previousVertex, Segment sourceSegment) {
-			Marker m = getMark(v);
-			m.distance = newDistance;
-			m.prev = previousVertex;
-			m.sourceSegment = sourceSegment;
+		DijkstraMarker(double d, Segment s) {
+			distance = d;
+			sourceSegment = s;
 		}
 	}
+
 
 	public enum RoutingRestriction {
 		CAR, BIKE, FOOT
 	}
-
-	// public class SegmentDirectionTuple {
-	// public Segment segment;
-	// public Direction direction;
-	// }
 
 	public class Speed {
 		public double cycle = 15;
@@ -119,7 +57,7 @@ public class DijkstraRouteCalculator {
 	}
 
 	protected OsmGraph theGraph;
-	protected OsmDijkstraMarker dijkstraMarker;
+	protected GraphMarker<DijkstraMarker> dijkstraMarker;
 
 	// protected RoutingRestriction rest;
 	protected Set<SegmentType> relevantTypes;
@@ -158,31 +96,31 @@ public class DijkstraRouteCalculator {
 	}
 
 	public void calculateShortestRoutes(EdgeRating r) {
-		// long timestamp1 = System.currentTimeMillis();
 		if (start == null) {
 			throw new IllegalStateException(
-					"start must be set before invoking this method!");
+					"setStart() must be called before invoking this method!");
 		}
-		dijkstraMarker = new OsmDijkstraMarker();
-		for (Node currentNode : theGraph.getNodeVertices()) {
-			dijkstraMarker.init(currentNode);
+		if (dijkstraMarker != null) {
+			dijkstraMarker.clear();
+		} else {
+			dijkstraMarker = new GraphMarker<DijkstraMarker>(theGraph);
 		}
 
-		dijkstraMarker.setNewDistance(start, 0, null, null);
+		// for (Node currentNode : theGraph.getNodeVertices()) {
+		// dijkstraMarker.init(currentNode);
+		// }
 
 		PriorityQueue<Node> queue = new PriorityQueue<Node>(start.getGraph()
 				.getVCount(), new Comparator<Node>() {
 			public int compare(Node a, Node b) {
-				return Double.compare(dijkstraMarker.getDistance(a),
-						dijkstraMarker.getDistance(b));
+				return Double.compare(dijkstraMarker.getMark(a).distance,
+						dijkstraMarker.getMark(b).distance);
 			}
 		});
 
-		// add all vertices into priority queue
-		// for (Node currentNode : theGraph.getNodeVertices()) {
-		// queue.add(currentNode);
-		// }
-
+		// dijkstraMarker.setNewDistance(start, 0, null, null);
+		// dijkstraMarker.init(start);
+		dijkstraMarker.mark(start, new DijkstraMarker(0, null));
 		queue.add(start);
 
 		// dijkstra algorithm main loop
@@ -193,8 +131,8 @@ public class DijkstraRouteCalculator {
 			// System.out.println("Taken vertex " + currentVertex);
 
 			// System.out.println(dijkstraMarker.getDistance(currentVertex));
-			dijkstraMarker.done(currentVertex);
-			double currentDistance = dijkstraMarker.getDistance(currentVertex);
+			DijkstraMarker m = dijkstraMarker.getMark(currentVertex);
+			m.done = true;
 
 			// follow each traverseable edge
 			for (Segment currentSegment : currentVertex.getSegmentIncidences()) {
@@ -204,32 +142,25 @@ public class DijkstraRouteCalculator {
 
 					Node nextVertex = (Node) currentSegment.getThat();
 
-					double newDistance = currentDistance
+					double newDistance = m.distance
 							+ rate(currentSegment, r);
-					// System.out.println(parameters.getWeight(currentEdge));
 					// if the new path is shorter than the distance stored
 					// at the other end, this new value is stored
-					if (dijkstraMarker.getDistance(nextVertex) > newDistance) {
-						dijkstraMarker.setNewDistance(nextVertex, newDistance,
-								currentVertex, currentSegment);
-						// if the otherEnd was not handled, re-queue it to
-						// get the order of the priority queue right
-						if (!dijkstraMarker.isDone(nextVertex)) {
-							// System.out.println("reenqueued vertex " +
-							// nextVertex);
-							queue.remove(nextVertex); // put the vertex at the
-							// right
-							queue.add(nextVertex); // position in the queue
+					DijkstraMarker n = dijkstraMarker.getMark(nextVertex);
+					if (n == null) {
+						dijkstraMarker.mark(nextVertex, new DijkstraMarker(newDistance, currentSegment));
+						queue.offer(nextVertex); // position in the queue
+					} else if (n.distance > newDistance) {
+						n.distance = newDistance;
+						n.sourceSegment = currentSegment;
+						if (!n.done) {
+							queue.remove(nextVertex);
+							queue.offer(nextVertex);
 						}
 					}
 				}
 			}
 		}
-		// long timestamp2 = System.currentTimeMillis();
-		// System.out.println("Dijkstra calculation completed in "
-		// + (timestamp2 - timestamp1) / 1000.0 + " seconds.");
-		// System.out.println(dijkstraMarker.getDistance(end));
-		// return traceback(start, end);
 		startChanged = false;
 		routesCalculated = true;
 	}
@@ -260,7 +191,7 @@ public class DijkstraRouteCalculator {
 			return Double.MAX_VALUE;
 		}
 	}
-	
+
 	public List<Segment> getRoute(Node target) {
 		if (!routesCalculated) {
 			throw new IllegalStateException(
@@ -270,25 +201,19 @@ public class DijkstraRouteCalculator {
 			throw new IllegalStateException(
 					"start must not be changed after calculating the routes.");
 		}
-		Stack<Segment> routesegments = new Stack<Segment>();
-		if (dijkstraMarker.getPreviousSegment(target) == null) {
+		DijkstraMarker m = dijkstraMarker.getMark(target);
+		if (m == null || m.sourceSegment == null) {
 			return null;
 		}
-		Node currentNode = target;
-		while (dijkstraMarker.getPreviousSegment(currentNode) != null) {
-			routesegments.push(dijkstraMarker.getPreviousSegment(currentNode));
-			currentNode = dijkstraMarker.getPreviousNode(currentNode);
+		Stack<Segment> routesegments = new Stack<Segment>();
+		while (m != null && m.sourceSegment != null) {
+			routesegments.push(m.sourceSegment);
+			m = dijkstraMarker.getMark(m.sourceSegment.getThis());
 		}
 
-		List<Segment> out = new LinkedList<Segment>();
-
-		// Segment currentSegment;
-		currentNode = start;
-		Segment currentSegment;
-		while (routesegments.size() > 0) {
-			currentSegment = routesegments.pop();
-			currentNode = (Node) currentSegment.getThat();
-			out.add(currentSegment);
+		List<Segment> out = new ArrayList<Segment>(routesegments.size());
+		while (!routesegments.empty()) {
+			out.add(routesegments.pop());
 		}
 		return out;
 	}
