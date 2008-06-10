@@ -7,6 +7,7 @@ import java.awt.Dimension;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.SimpleAttributeSet;
@@ -19,11 +20,20 @@ public class ResultPanel extends JPanel {
 	private SimpleAttributeSet defaultAttributeSet;
 
 	public ResultPanel() {
-		textPane = new JTextPane();
+		textPane = new JTextPane() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public boolean getScrollableTracksViewportWidth() {
+				return false;
+			}
+		};
 		setLayout(new BorderLayout());
 		JScrollPane scp = new JScrollPane(textPane);
-		scp.setMinimumSize(new Dimension(200, 150));
-		scp.setPreferredSize(new Dimension(200, 150));
+		scp.setMinimumSize(new Dimension(300, 150));
+		scp.setPreferredSize(new Dimension(300, 150));
+		scp
+				.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
 		textPane.setEditable(false);
 		add(scp, BorderLayout.CENTER);
 

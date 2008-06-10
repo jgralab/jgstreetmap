@@ -68,8 +68,9 @@ public class MapPanel extends JPanel {
 	private double scaleLat; // pixel/minute in N-S direction
 	private double scaleLon; // pixel/minute in E-W direction
 
-	private Point mousePos; // uses to save click positions
-	private boolean mouseDragged;
+	private Point mousePos; // used to save click positions
+	private boolean mouseDragged; // true if mouse was dragged
+	private boolean mouseSetStartNode;
 
 	private RenderingHints antialiasOn; // anti-aliased painting hints
 	private RenderingHints antialiasOff; // simple painting hints
@@ -88,7 +89,7 @@ public class MapPanel extends JPanel {
 
 	private DijkstraRouteCalculator fastestRouteCalculator;
 	private DijkstraRouteCalculator shortestRouteCalculator;
-	private boolean showRoute = true;
+	private boolean showRoutes = true;
 	private List<Segment> fastestRoute = null;
 	private List<Segment> shortestRoute = null;
 	private Node startNode = null;
@@ -101,17 +102,13 @@ public class MapPanel extends JPanel {
 
 		visibleElements = new BooleanGraphMarker(graph);
 
-		startNode = (Node) graph.getOsmPrimitiveById(30432771);
-
 		fastestRouteCalculator = new DijkstraRouteCalculator(graph);
 		fastestRouteCalculator.setRestriction(RoutingRestriction.CAR);
-		fastestRouteCalculator.setStart(startNode);
-		fastestRouteCalculator.calculateShortestRoutes(EdgeRating.TIME);
-
 		shortestRouteCalculator = new DijkstraRouteCalculator(graph);
 		shortestRouteCalculator.setRestriction(RoutingRestriction.CAR);
-		shortestRouteCalculator.setStart(startNode);
-		shortestRouteCalculator.calculateShortestRoutes(EdgeRating.LENGTH);
+
+		startNode = null;
+		// (Node) graph.getOsmPrimitiveById(30432771);
 
 		antialiasOff = new RenderingHints(RenderingHints.KEY_ANTIALIASING,
 				RenderingHints.VALUE_ANTIALIAS_OFF);
@@ -171,28 +168,48 @@ public class MapPanel extends JPanel {
 			// map to the new position
 			public void mouseReleased(MouseEvent e) {
 				super.mouseReleased(e);
+				double lat = getLat(mousePos.y);
+				double lon = getLon(mousePos.x);
 				if (mouseDragged) {
-					double deltaLat = getLat(e.getY()) - getLat(mousePos.y);
-					double deltaLon = getLon(e.getX()) - getLon(mousePos.x);
+					double deltaLat = getLat(e.getY()) - lat;
+					double deltaLon = getLon(e.getX()) - lon;
 					setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 					setCenter(latC - deltaLat, lonC - deltaLon);
 				} else {
-					double lat = getLat(mousePos.y);
-					double lon = getLon(mousePos.x);
+					long start = System.currentTimeMillis();
 					List<Neighbour> neighbours = MapPanel.this.graph
-							.neighbours(lat, lon, 50.0);
+							.neighbours(lat, lon, 100.0);
+					// List<Neighbour> neighbours = KDTreeQueries.neighboursKD(
+					// MapPanel.this.graph, lat, lon, 100.0);
+					long stop = System.currentTimeMillis();
+					resultPanel.println("Neighbours: " + (stop - start) + "ms");
+					resultPanel.println();
 					if (neighbours != null && neighbours.size() >= 1) {
 						Node dest = neighbours.get(0).getNode();
-						fastestRoute = fastestRouteCalculator.getRoute(dest);
-						shortestRoute = shortestRouteCalculator.getRoute(dest);
-						if (showRoute) {
-							repaint();
+						if (mouseSetStartNode) {
+							setStartNode(dest);
+							setCursor(Cursor
+									.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+							mouseSetStartNode = false;
+						} else {
+							printNode("Destination", dest);
+							if (startNode != null) {
+								fastestRoute = fastestRouteCalculator
+										.getRoute(dest);
+								shortestRoute = shortestRouteCalculator
+										.getRoute(dest);
+								if (showRoutes) {
+									repaint();
+								}
+								printRoute(fastestRoute,
+										fastestRouteCalculator, EdgeRating.TIME);
+								printRoute(shortestRoute,
+										shortestRouteCalculator,
+										EdgeRating.LENGTH);
+							}
 						}
-						printNode("Destination", dest);
-						printRoute(fastestRoute, fastestRouteCalculator,
-								EdgeRating.TIME);
-						printRoute(shortestRoute, shortestRouteCalculator,
-								EdgeRating.LENGTH);
+					} else {
+						resultPanel.println("No node found :-(");
 					}
 				}
 			}
@@ -200,19 +217,54 @@ public class MapPanel extends JPanel {
 		});
 	}
 
+	private void setStartNode(Node n) {
+		if (n != null && n != startNode) {
+			startNode = n;
+			resultPanel.clear();
+			printNode("Start", startNode);
+			resultPanel.println("Calculating new routes...");
+			long start = System.currentTimeMillis();
+			fastestRouteCalculator.setStart(startNode);
+			fastestRouteCalculator.calculateShortestRoutes(EdgeRating.TIME);
+			long stopFastest = System.currentTimeMillis();
+			shortestRouteCalculator.setStart(startNode);
+			shortestRouteCalculator.calculateShortestRoutes(EdgeRating.LENGTH);
+			long stop = System.currentTimeMillis();
+			resultPanel.println("  fastest routes : " + (stopFastest - start)
+					+ "ms");
+			resultPanel.println("  shortest routes: " + (stop - stopFastest)
+					+ "ms");
+		}
+	}
+
 	private void printNode(String label, Node n) {
 		if (n == null) {
 			return;
 		}
 		resultPanel.print(label + ":");
-		for (Way w: n.getWayList()) {
+		boolean foundName = false;
+		for (Way w : n.getWayList()) {
 			String name = AnnotatedOsmGraph.getTag(w, "name");
-			if (name != null && name.length()>0) {
-				resultPanel.print(" " + name);
+			if (name !=null) {
+				name = name.trim();
 			}
+			if (name == null || name.length() == 0) {
+				name = AnnotatedOsmGraph.getTag(w, "ref");
+				if (name !=null) {
+					name = name.trim();
+				}
+			}
+			if (name != null && name.length() > 0) {
+				resultPanel.print(" " + name);
+				foundName = true;
+			}
+		}
+		if (!foundName) {
+			resultPanel.print("Node " + n.getOsmId());
 		}
 		resultPanel.println();
 	}
+
 	private void printRoute(List<Segment> route,
 			DijkstraRouteCalculator calculator, EdgeRating rating) {
 		String label = null;
@@ -244,6 +296,15 @@ public class MapPanel extends JPanel {
 			Way way = getWay(s);
 			if (way != null && way != lastWay) {
 				String name = AnnotatedOsmGraph.getTag(way, "name");
+				if (name !=null) {
+					name = name.trim();
+				}
+				if (name == null) {
+					name = AnnotatedOsmGraph.getTag(way, "ref");
+					if (name !=null) {
+						name = name.trim();
+					}
+				}
 				if (name != null && !name.equals(lastName)) {
 					resultPanel.println("  " + name);
 					lastName = name;
@@ -368,7 +429,7 @@ public class MapPanel extends JPanel {
 		if (showGraph) {
 			paintGraph(g2);
 		}
-		if (showRoute) {
+		if (showRoutes) {
 			paintRoute(g2, fastestRoute, LayoutInfo.FASTEST_ROUTE);
 			paintRoute(g2, shortestRoute, LayoutInfo.SHORTEST_ROUTE);
 		}
@@ -1038,4 +1099,26 @@ public class MapPanel extends JPanel {
 		return showNodeIds;
 	}
 
+	public void setShowRoutes(boolean b) {
+		if (b != showRoutes) {
+			showRoutes = b;
+			if (isVisible() && (fastestRoute != null || shortestRoute != null)) {
+				repaint();
+			}
+		}
+	}
+
+	public boolean isShowingRoutes() {
+		return showRoutes;
+	}
+
+	public void setMouseStartNode() {
+		fastestRoute = null;
+		shortestRoute = null;
+		if (showRoutes) {
+			repaint();
+		}
+		mouseSetStartNode = true;
+		setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+	}
 }

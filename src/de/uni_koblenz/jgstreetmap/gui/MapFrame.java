@@ -28,6 +28,7 @@ public class MapFrame extends JFrame {
 	private JButton zoomOutButton;
 	private JSlider zoomSlider;
 	private JButton zahnButton;
+	private JButton startButton;
 
 	private JCheckBox showMapButton;
 
@@ -42,6 +43,8 @@ public class MapFrame extends JFrame {
 	private JCheckBox showWayIdsButton;
 
 	private JCheckBox showNodeIdsButton;
+
+	private JCheckBox showRoutesButton;
 
 	// private OsmGraph graph;
 
@@ -135,6 +138,16 @@ public class MapFrame extends JFrame {
 			}
 		});
 
+		showRoutesButton = new JCheckBox("Routes", mapPanel
+				.isShowingRoutes());
+		detailPanel.add(showRoutesButton);
+		showRoutesButton.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				mapPanel.setShowRoutes(showRoutesButton.isSelected());
+			}
+		});
+
 		buttonPanel.add(new Box.Filler(new Dimension(5, 0),
 				new Dimension(5, 50), new Dimension(5, Short.MAX_VALUE)));
 
@@ -172,6 +185,17 @@ public class MapFrame extends JFrame {
 		buttonPanel.add(zoomOutButton);
 		buttonPanel.add(new Box.Filler(new Dimension(5, 0),
 				new Dimension(5, 50), new Dimension(5, Short.MAX_VALUE)));
+
+		startButton = new JButton("Set start");
+		startButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+		startButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				mapPanel.setMouseStartNode();
+			}
+		});
+		buttonPanel.add(startButton);
+		
 
 		zahnButton = new JButton("\"Zahn\"");
 		zahnButton.setAlignmentX(Component.CENTER_ALIGNMENT);

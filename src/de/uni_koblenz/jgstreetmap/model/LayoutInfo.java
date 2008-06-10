@@ -59,7 +59,7 @@ public class LayoutInfo {
 		SHORTEST_ROUTE.visible = true;
 
 		FASTEST_ROUTE.zOrder = 1000;
-		FASTEST_ROUTE.bgColor = new Color(0, 0, 255, 128);
+		FASTEST_ROUTE.bgColor = new Color(255, 0, 255, 128);
 		FASTEST_ROUTE.minWidth = 3.0;
 		FASTEST_ROUTE.maxWidth = 30.0;
 		FASTEST_ROUTE.visible = true;

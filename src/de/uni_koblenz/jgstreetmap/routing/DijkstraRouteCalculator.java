@@ -158,7 +158,7 @@ public class DijkstraRouteCalculator {
 	}
 
 	public void calculateShortestRoutes(EdgeRating r) {
-		long timestamp1 = System.currentTimeMillis();
+		// long timestamp1 = System.currentTimeMillis();
 		if (start == null) {
 			throw new IllegalStateException(
 					"start must be set before invoking this method!");
@@ -196,41 +196,38 @@ public class DijkstraRouteCalculator {
 			dijkstraMarker.done(currentVertex);
 			double currentDistance = dijkstraMarker.getDistance(currentVertex);
 
-			// System.out.println(currentDistance);
-
 			// follow each traverseable edge
-			List<Segment> relevantSegments = getRelevantEdges(currentVertex);
-			// Segment currentEdge = parameters.getFirstEdge(currentVertex);
-			// Segment currentEdge;
-			// Iterator<Segment> edgeIterator= relevantSegments.iterator();
+			for (Segment currentSegment : currentVertex.getSegmentIncidences()) {
+				if (relevantTypes.contains(currentSegment.getWayType())
+						&& (currentSegment.isNormal() || !currentSegment
+								.isOneway())) {
 
-			for (Segment currentEdge : relevantSegments) {
+					Node nextVertex = (Node) currentSegment.getThat();
 
-				Node nextVertex = getNextVertex(currentEdge);
-
-				double newDistance = currentDistance + rate(currentEdge, r);
-				// System.out.println(parameters.getWeight(currentEdge));
-				// if the new path is shorter than the distance stored
-				// at the other end, this new value is stored
-				if (dijkstraMarker.getDistance(nextVertex) > newDistance) {
-					dijkstraMarker.setNewDistance(nextVertex, newDistance,
-							currentVertex, currentEdge);
-					// if the otherEnd was not handled, re-queue it to
-					// get the order of the priority queue right
-					if (!dijkstraMarker.isDone(nextVertex)) {
-						// System.out.println("reenqueued vertex " +
-						// nextVertex);
-						queue.remove(nextVertex); // put the vertex at the
-						// right
-						queue.add(nextVertex); // position in the queue
+					double newDistance = currentDistance
+							+ rate(currentSegment, r);
+					// System.out.println(parameters.getWeight(currentEdge));
+					// if the new path is shorter than the distance stored
+					// at the other end, this new value is stored
+					if (dijkstraMarker.getDistance(nextVertex) > newDistance) {
+						dijkstraMarker.setNewDistance(nextVertex, newDistance,
+								currentVertex, currentSegment);
+						// if the otherEnd was not handled, re-queue it to
+						// get the order of the priority queue right
+						if (!dijkstraMarker.isDone(nextVertex)) {
+							// System.out.println("reenqueued vertex " +
+							// nextVertex);
+							queue.remove(nextVertex); // put the vertex at the
+							// right
+							queue.add(nextVertex); // position in the queue
+						}
 					}
 				}
-				// currentEdge = parameters.getNextEdge(currentEdge);
 			}
 		}
-		long timestamp2 = System.currentTimeMillis();
-		System.out.println("Dijkstra calculation completed in "
-				+ (timestamp2 - timestamp1) / 1000.0 + " seconds.");
+		// long timestamp2 = System.currentTimeMillis();
+		// System.out.println("Dijkstra calculation completed in "
+		// + (timestamp2 - timestamp1) / 1000.0 + " seconds.");
 		// System.out.println(dijkstraMarker.getDistance(end));
 		// return traceback(start, end);
 		startChanged = false;
@@ -263,23 +260,7 @@ public class DijkstraRouteCalculator {
 			return Double.MAX_VALUE;
 		}
 	}
-
-	private Node getNextVertex(Segment e) {
-		return (Node) e.getThat();
-	}
-
-	private List<Segment> getRelevantEdges(Node n) {
-		List<Segment> out = new LinkedList<Segment>();
-		// all edges in normal direction
-		for (Segment currentSegment : n.getSegmentIncidences()) {
-			if (relevantTypes.contains(currentSegment.getWayType())) {
-				if (currentSegment.isNormal() || !currentSegment.isOneway())
-					out.add(currentSegment);
-			}
-		}
-		return out;
-	}
-
+	
 	public List<Segment> getRoute(Node target) {
 		if (!routesCalculated) {
 			throw new IllegalStateException(
