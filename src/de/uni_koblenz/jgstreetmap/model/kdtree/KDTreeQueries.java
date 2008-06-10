@@ -116,17 +116,17 @@ public class KDTreeQueries {
 			HasYChild rightChild = leftChild.getNextHasYChild();
 			assert rightChild != null;
 			if (keyVal < topLeftLong) {
-				// examine only right subtree
+				// examine only the right subtree
 				// System.out.print("R ");
 				rangeQuery(g, l, topLeftLong, topLeftLat, bottomRightLong,
 						bottomRightLat, (YKey) rightChild.getThat());
 			} else if (keyVal >= bottomRightLong) {
-				// examine only left subtree
+				// examine only the left subtree
 				// System.out.print("L ");
 				rangeQuery(g, l, topLeftLong, topLeftLat, bottomRightLong,
 						bottomRightLat, (YKey) leftChild.getThat());
 			} else {
-				// examine oth subtrees
+				// examine both subtrees
 				// System.out.print("L ");
 				rangeQuery(g, l, topLeftLong, topLeftLat, bottomRightLong,
 						bottomRightLat, (YKey) leftChild.getThat());
@@ -178,5 +178,55 @@ public class KDTreeQueries {
 			}
 		}
 		// System.out.println(c + " Nodes");
+	}
+	
+	public static Node nearestNodeStart(AnnotatedOsmGraph g, double lat, double lon){
+		Key key=(Key)g.getKDTree().getFirstHasRoot().getThat();
+		if((key instanceof XKey)||(key instanceof YKey))
+			return nearestNode(g,key,lat,lon);
+		else{
+			throw new RuntimeException("Unexpected KD root type "+ key.getM1Class());
+		}
+	}
+	
+	public static Node nearestNode(AnnotatedOsmGraph g, Key key, double lat, double lon){
+		double keyVal=key.getKeyValue();
+		if(key instanceof XKey){
+			HasXChild leftChild=((XKey)key).getFirstHasXChild();
+			if(lon<=keyVal)
+				return nearestNode(g,(XKey)leftChild.getThat(),lat,lon);
+			else
+				return nearestNode(g,(XKey)leftChild.getNextHasXChild().getThat(),lat,lon);
+		}
+		else{
+			HasYChild leftChild=((YKey)key).getFirstHasYChild();
+			if(lat<=keyVal)
+				return nearestNode(g,(YKey)leftChild.getThat(),lat,lon);
+			else
+				return nearestNode(g,(YKey)leftChild.getNextHasYChild().getThat(),lat,lon);
+		}
+	}
+	
+	public static double getDistance(Node n,double lat, double lon){
+		double helpX=(n.getLongitude()-lon)*(n.getLongitude()-lon);
+		double helpY=(n.getLatitude()-lat)*(n.getLatitude()-lat);
+		return Math.sqrt(helpX+helpY);
+	}
+	
+	public static Node nearestNode(AnnotatedOsmGraph g, NodeSet set, double lat, double lon){
+		double dist;
+		Node n;
+		List<? extends Node> nodes=set.getElementList();
+		dist=getDistance(nodes.get(0),lat,lon);
+		n=nodes.get(0);
+		double curdist;
+		for(int i=1; i<nodes.size();i++){
+			curdist=getDistance(nodes.get(i),lat,lon);
+			if(curdist<dist){
+				dist=curdist;
+				n=nodes.get(i);
+			}
+		}
+		return n;
 	}
 }
