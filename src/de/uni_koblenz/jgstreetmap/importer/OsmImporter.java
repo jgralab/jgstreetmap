@@ -150,7 +150,13 @@ public class OsmImporter extends DefaultHandler {
 			if (currentTagList == null) {
 				currentTagList = new ArrayList<Tag>();
 			}
-			currentTagList.add(new Tag(atts.getValue("k"), atts.getValue("v")));
+			String v = atts.getValue("v");
+			v = v.replaceAll("&apos;", "'");
+			v = v.replaceAll("&gt;", ">");
+			v = v.replaceAll("&lt;", "<");
+			v = v.replaceAll("&quot;", "\"");
+			v = v.replaceAll("&amp;", "&");
+			currentTagList.add(new Tag(atts.getValue("k"), v));
 
 		} else if (state == State.RELATION && name.equals("member")) {
 			String type = atts.getValue("type");

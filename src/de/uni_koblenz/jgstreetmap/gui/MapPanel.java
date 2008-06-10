@@ -27,7 +27,6 @@ import de.uni_koblenz.jgralab.BooleanGraphMarker;
 import de.uni_koblenz.jgstreetmap.model.AnnotatedOsmGraph;
 import de.uni_koblenz.jgstreetmap.model.LayoutInfo;
 import de.uni_koblenz.jgstreetmap.model.AnnotatedOsmGraph.Neighbour;
-import de.uni_koblenz.jgstreetmap.model.kdtree.KDTreeQueries;
 import de.uni_koblenz.jgstreetmap.osmschema.HasNode;
 import de.uni_koblenz.jgstreetmap.osmschema.Node;
 import de.uni_koblenz.jgstreetmap.osmschema.Way;
@@ -289,8 +288,10 @@ public class MapPanel extends JPanel {
 		}
 		resultPanel.println("  Length: " + Math.round(length * 100.0) / 100.0
 				+ "km");
-		resultPanel.println("  Time  : " + Math.round(time * 100.0) / 100.0
-				+ "h");
+		
+		long hrs = (long)Math.floor(time);
+		long min = Math.round((time - hrs) * 60.0);
+		resultPanel.println("  Time  : " + hrs + " h " + min + " min");
 		Way lastWay = null;
 		String lastName = null;
 		for (Segment s : route) {

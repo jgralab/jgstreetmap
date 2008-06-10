@@ -47,9 +47,9 @@ public class DijkstraRouteCalculator {
 
 	public class Speed {
 		public double cycle = 15;
-		public double motorway = 110;
+		public double motorway = 100;
 		public double countryroad = 60;
-		public double residential = 40;
+		public double residential = 35;
 		public double footway = 5;
 		public double unsurfaced = 20;
 		public double service = 10;
