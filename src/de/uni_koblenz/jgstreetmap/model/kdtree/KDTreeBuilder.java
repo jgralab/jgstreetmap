@@ -24,7 +24,7 @@ public class KDTreeBuilder {
 		}
 		KDTree kdTree = g.getKDTree();
 		kdTree.setLevels(maxLevels);
-		kdTree.addRoot(constructkdTreeY(g, nodeList, 1));
+		kdTree.addRoot(constructkdTreeY(g, nodeList, 0));
 	}
 
 	public static YKey constructkdTreeY(AnnotatedOsmGraph g,
@@ -44,17 +44,21 @@ public class KDTreeBuilder {
 				set.addElement(n);
 			}
 		} else {
-			yk.setKeyValue(nodeList.get(nodeList.size() / 2 - 1).getLatitude());
+			double keyValue = nodeList.get(nodeList.size() / 2 - 1)
+					.getLatitude();
+			yk.setKeyValue(keyValue);
 			// List of nodes is split into two lists, the nodes contained in
 			// leftList
 			// will be part of the left subtree, the nodes left in nodeList will
 			// be
 			// part of the right subtree
-			LinkedList<Node> leftList = new LinkedList<Node>();
-			for (int i = 0; i < nodeList.size() / 2; i++) {
-				leftList.add(nodeList.poll());
-			}
 
+			LinkedList<Node> leftList = new LinkedList<Node>();
+			Node n = nodeList.peek();
+			while (n.getLatitude() <= keyValue) {
+				leftList.add(nodeList.poll());
+				n = nodeList.peek();
+			}
 			// construct next level, which consists of XKeys
 			yk.addChild(constructkdTreeX(g, leftList, depth + 1));
 			yk.addChild(constructkdTreeX(g, nodeList, depth + 1));
@@ -74,14 +78,16 @@ public class KDTreeBuilder {
 				set.addElement(n);
 			}
 		} else {
-			xk
-					.setKeyValue(nodeList.get(nodeList.size() / 2 - 1)
-							.getLongitude());
-			LinkedList<Node> leftList = new LinkedList<Node>();
-			for (int i = 0; i < nodeList.size() / 2; i++) {
-				leftList.add(nodeList.poll());
-			}
+			double keyValue = nodeList.get(nodeList.size() / 2 - 1)
+					.getLongitude();
 
+			xk.setKeyValue(keyValue);
+			LinkedList<Node> leftList = new LinkedList<Node>();
+			Node n = nodeList.peek();
+			while (n.getLongitude() <= keyValue) {
+				leftList.add(nodeList.poll());
+				n = nodeList.peek();
+			}
 			xk.addChild(constructkdTreeY(g, leftList, depth + 1));
 			xk.addChild(constructkdTreeY(g, nodeList, depth + 1));
 		}

@@ -39,6 +39,8 @@ public class OsmImporter extends DefaultHandler {
 	private SimpleDateFormat dateFormat;
 	private OsmPrimitive currentPrimitive;
 	private List<Tag> currentTagList;
+	private int nodeCount;
+	private static final int MAX_SET_MEMBERS = 512;
 
 	public OsmImporter() {
 		dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
@@ -71,14 +73,23 @@ public class OsmImporter extends DefaultHandler {
 	public void startDocument() throws SAXException {
 		System.out.println("Converting...");
 		startTime = System.currentTimeMillis();
-		graph = (AnnotatedOsmGraph) OsmSchema.instance().createOsmGraph(16000, 16000);
+		graph = (AnnotatedOsmGraph) OsmSchema.instance().createOsmGraph(16000,
+				16000);
 		osmIdMap = new HashMap<Long, OsmPrimitive>();
+		nodeCount = 0;
 	}
 
 	@Override
 	public void endDocument() throws SAXException {
 		Segmentator.segmentateGraph(graph);
-		KDTreeBuilder.buildTree(graph, 8);
+		int n = nodeCount;
+		int levels = 1;
+		while (n > MAX_SET_MEMBERS) {
+			n /= 2;
+			++levels;
+		}
+		System.out.println("Building KDTree with " + levels + " levels...");
+		KDTreeBuilder.buildTree(graph, levels);
 		try {
 			GraphIO.saveGraphToFile("OsmGraph.tg", graph,
 					new ProgressFunctionImpl());
@@ -102,6 +113,7 @@ public class OsmImporter extends DefaultHandler {
 		// }
 		if (state == State.OSM && name.equals("node")) {
 			state = State.NODE;
+			++nodeCount;
 			Node n = graph.createNode();
 			long id = Long.parseLong(atts.getValue("id"));
 			n.setOsmId(id);

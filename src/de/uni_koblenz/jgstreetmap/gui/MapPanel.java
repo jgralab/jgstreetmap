@@ -27,6 +27,7 @@ import de.uni_koblenz.jgralab.BooleanGraphMarker;
 import de.uni_koblenz.jgstreetmap.model.AnnotatedOsmGraph;
 import de.uni_koblenz.jgstreetmap.model.LayoutInfo;
 import de.uni_koblenz.jgstreetmap.model.AnnotatedOsmGraph.Neighbour;
+import de.uni_koblenz.jgstreetmap.model.kdtree.KDTreeQueries;
 import de.uni_koblenz.jgstreetmap.osmschema.HasNode;
 import de.uni_koblenz.jgstreetmap.osmschema.Node;
 import de.uni_koblenz.jgstreetmap.osmschema.Way;
@@ -177,10 +178,10 @@ public class MapPanel extends JPanel {
 					setCenter(latC - deltaLat, lonC - deltaLon);
 				} else {
 					long start = System.currentTimeMillis();
-					List<Neighbour> neighbours = MapPanel.this.graph
-							.neighbours(lat, lon, 100.0);
-					// List<Neighbour> neighbours = KDTreeQueries.neighboursKD(
-					// MapPanel.this.graph, lat, lon, 100.0);
+					// List<Neighbour> neighbours = MapPanel.this.graph
+					// .neighbours(lat, lon, 100.0);
+					List<Neighbour> neighbours = KDTreeQueries.neighboursKD(
+							MapPanel.this.graph, lat, lon, 100.0);
 					long stop = System.currentTimeMillis();
 					resultPanel.println();
 					resultPanel.println("Neighbours: " + (stop - start) + "ms");
@@ -267,6 +268,9 @@ public class MapPanel extends JPanel {
 
 	private void printRoute(List<Segment> route,
 			DijkstraRouteCalculator calculator, EdgeRating rating) {
+		if (route == null) {
+			return;
+		}
 		String label = null;
 		double length = calculator.calculateCompleteWeight(route,
 				EdgeRating.LENGTH) / 1000.0;
@@ -288,8 +292,8 @@ public class MapPanel extends JPanel {
 		}
 		resultPanel.println("  Length: " + Math.round(length * 100.0) / 100.0
 				+ "km");
-		
-		long hrs = (long)Math.floor(time);
+
+		long hrs = (long) Math.floor(time);
 		long min = Math.round((time - hrs) * 60.0);
 		resultPanel.println("  Time  : " + hrs + " h " + min + " min");
 		Way lastWay = null;

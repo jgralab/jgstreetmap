@@ -1,5 +1,6 @@
 package de.uni_koblenz.jgstreetmap.model;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -22,6 +23,7 @@ import de.uni_koblenz.jgstreetmap.osmschema.kdtree.Key;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.NodeSet;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.XKey;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.YKey;
+import de.uni_koblenz.jgstreetmap.routing.Segmentator;
 
 public class AnnotatedOsmGraph extends OsmGraphImpl {
 	private Map<Long, OsmPrimitive> osmIdMap;
@@ -141,7 +143,7 @@ public class AnnotatedOsmGraph extends OsmGraphImpl {
 		return tree;
 	}
 
-	public class Neighbour implements Comparable<Neighbour> {
+	public static class Neighbour implements Comparable<Neighbour> {
 		private Node node;
 		private double distance;
 
@@ -165,12 +167,9 @@ public class AnnotatedOsmGraph extends OsmGraphImpl {
 	}
 
 	public List<Neighbour> neighbours(double lat, double lon, double maxDistance) {
-		List<Neighbour> l = new LinkedList<Neighbour>();
+		List<Neighbour> l = new ArrayList<Neighbour>();
 		for (Node n : getNodeVertices()) {
-			double dy = 1852.0 * (n.getLatitude() - lat) * 60.0;
-			double dx = Math.cos(Math.toRadians((n.getLatitude() + lat) / 2))
-					* 1852.0 * (n.getLongitude() - lon) * 60.0;
-			double dist = Math.sqrt(dx * dx + dy * dy);
+			double dist = Segmentator.distance(lat, lon, n);
 			if (dist < maxDistance && n.getFirstSegment() != null) {
 				l.add(new Neighbour(n, dist));
 			}

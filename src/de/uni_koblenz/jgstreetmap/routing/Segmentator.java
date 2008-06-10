@@ -1,6 +1,5 @@
 package de.uni_koblenz.jgstreetmap.routing;
 
-import static java.lang.Math.abs;
 import static java.lang.Math.cos;
 import static java.lang.Math.sqrt;
 import static java.lang.Math.toRadians;
@@ -39,7 +38,7 @@ import de.uni_koblenz.jgstreetmap.osmschema.routing.SegmentType;
 public class Segmentator {
 
 	private static OsmGraph theGraph;
-	public static final int MINUTEMETER = 1852;
+	public static final double MINUTEMETER = 1852.0;
 
 	private static List<Way> computeRelevantWays(Iterable<Vertex> vertices) {
 		List<Way> output = new LinkedList<Way>();
@@ -122,23 +121,20 @@ public class Segmentator {
 	}
 
 	public static double distance(Node n1, Node n2) {
-		return distance(n1.getLatitude(), n2.getLatitude(), n1.getLongitude(),
+		return distance(n1.getLatitude(), n1.getLongitude(), n2.getLatitude(),
 				n2.getLongitude());
-		// double deltaLat = abs(n1.getLatitude() - n2.getLatitude());
-		// double deltaLon = abs(n1.getLongitude() - n2.getLongitude());
-		// double latMiddle = (n1.getLatitude() + n2.getLatitude()) / 2.0;
-		// double k1 = deltaLat * 60 * MINUTEMETER;
-		// double k2 = deltaLon * 60 * MINUTEMETER * cos(toRadians(latMiddle));
-		// return sqrt(k1 * k1 + k2 * k2);
 	}
 
-	public static double distance(double lat1, double lat2, double lon1,
+	public static double distance(double lat, double lon, Node n) {
+		return distance(lat, lon, n.getLatitude(), n.getLongitude());
+	}
+
+	public static double distance(double lat1, double lon1, double lat2,
 			double lon2) {
-		double deltaLat = abs(lat1 - lat2);
-		double deltaLon = abs(lon1 - lon2);
-		double latMiddle = (lat1 + lat2) / 2.0;
+		double deltaLat = lat1 - lat2;
+		double deltaLon = lon1 - lon2;
 		double k1 = deltaLat * 60 * MINUTEMETER;
-		double k2 = deltaLon * 60 * MINUTEMETER * cos(toRadians(latMiddle));
+		double k2 = deltaLon * 60 * MINUTEMETER * cos(toRadians((lat1 + lat2) / 2.0));
 		return sqrt(k1 * k1 + k2 * k2);
 	}
 

@@ -1,12 +1,15 @@
 package de.uni_koblenz.jgstreetmap.model.kdtree;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import de.uni_koblenz.jgstreetmap.gui.MapPanel;
 import de.uni_koblenz.jgstreetmap.model.AnnotatedOsmGraph;
 import de.uni_koblenz.jgstreetmap.model.AnnotatedOsmGraph.Neighbour;
+import de.uni_koblenz.jgstreetmap.osmschema.HasElement;
 import de.uni_koblenz.jgstreetmap.osmschema.Node;
+import de.uni_koblenz.jgstreetmap.osmschema.kdtree.HasXChild;
+import de.uni_koblenz.jgstreetmap.osmschema.kdtree.HasYChild;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.Key;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.NodeSet;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.XKey;
@@ -18,107 +21,120 @@ public class KDTreeQueries {
 	public static List<Neighbour> neighboursKD(AnnotatedOsmGraph g, double lat,
 			double lon, double maxrange) {
 		double height = maxrange / (Segmentator.MINUTEMETER * 60);
-		double width = maxrange / (Segmentator.MINUTEMETER * 60 * Math.cos(Math.toRadians(lat)));
+		double width = maxrange
+				/ (Segmentator.MINUTEMETER * 60 * Math.cos(Math.toRadians(lat)));
 		double tlon = lon - width;
 		double tlat = lat - height;
 		double blon = lon + width;
 		double blat = lat + height;
-		List<Neighbour> l = new LinkedList<Neighbour>();
-		rangeQuery(g, tlon, tlat, blon, blat,
-				(Key) g.getKDTree().getFirstHasRoot().getThat());
-		return l;
+		List<Node> l = new ArrayList<Node>();
+		rangeQuery(g, l, tlon, tlat, blon, blat, (Key) g.getKDTree()
+				.getFirstHasRoot().getThat());
+		List<Neighbour> result = new ArrayList<Neighbour>(l.size());
+		for (Node n : l) {
+			result.add(new Neighbour(n, Segmentator.distance(lat, lon, n)));
+		}
+		Collections.sort(result);
+		return result;
 	}
 
-	public static LinkedList<Node> rangeQuery(AnnotatedOsmGraph g,
+	public static void rangeQuery(AnnotatedOsmGraph g, List<Node> l,
 			double topLeftLong, double topLeftLat, double bottomRightLong,
 			double bottomRightLat, Key key) {
-		System.out.println("rangeQuery");
-		System.out.println("\ttopLeftLat    = " + MapPanel.formatLatitude(topLeftLat));
-		System.out.println("\ttopLeftLon    = " + MapPanel.formatLongitude(topLeftLong));
-		System.out.println("\tbottomRightLat= " + MapPanel.formatLatitude(bottomRightLat));
-		System.out.println("\tbottomRightLon= " + MapPanel.formatLongitude(bottomRightLong));
-		if (key.getClass() == XKey.class) {
-			return rangeQuery(g, topLeftLong, topLeftLat, bottomRightLong,
+		// System.out.println("rangeQuery");
+		// System.out.println("\ttopLeftLat = "
+		// + MapPanel.formatLatitude(topLeftLat) + " " + topLeftLat);
+		// System.out.println("\ttopLeftLon = "
+		// + MapPanel.formatLongitude(topLeftLong) + " " + topLeftLong);
+		// System.out.println("\tbottomRightLat= "
+		// + MapPanel.formatLatitude(bottomRightLat) + " "
+		// + bottomRightLat);
+		// System.out.println("\tbottomRightLon= "
+		// + MapPanel.formatLongitude(bottomRightLong) + " "
+		// + bottomRightLong);
+		if (key instanceof XKey) {
+			rangeQuery(g, l, topLeftLong, topLeftLat, bottomRightLong,
 					bottomRightLat, (XKey) key);
-		} else if (key.getClass() == YKey.class) {
-			return rangeQuery(g, topLeftLong, topLeftLat, bottomRightLong,
+		} else if (key instanceof YKey) {
+			rangeQuery(g, l, topLeftLong, topLeftLat, bottomRightLong,
 					bottomRightLat, (YKey) key);
+		} else {
+			throw new RuntimeException("Unexpected KD root type "
+					+ key.getM1Class());
 		}
-		return null;
 	}
 
-	public static LinkedList<Node> rangeQuery(AnnotatedOsmGraph g,
+	public static void rangeQuery(AnnotatedOsmGraph g, List<Node> l,
 			double topLeftLong, double topLeftLat, double bottomRightLong,
 			double bottomRightLat, YKey key) {
-		LinkedList<Node> includedNodes = new LinkedList<Node>();
 		double keyVal = key.getKeyValue();
-		if (key.getChildList().size() == 0) { // is true whenever key has no
-			// XKey children,
-			// therefore the only child of key is a NodeSet
-			KDTreeQueries.rangeQuery(g, topLeftLong, topLeftLat,
-					bottomRightLong, bottomRightLat, key.getSetList().get(0));
+
+		// System.out.println("Query Y " + keyVal);
+
+		HasXChild leftChild = key.getFirstHasXChild();
+		if (leftChild == null) {
+			// the only child of key is a NodeSet
+			rangeQuery(g, l, topLeftLong, topLeftLat, bottomRightLong,
+					bottomRightLat, (NodeSet) key.getFirstHasSet().getThat());
 		} else {
-			if (keyVal < bottomRightLat) {
+			HasXChild rightChild = leftChild.getNextHasXChild();
+			assert rightChild != null;
+			if (keyVal < topLeftLat) {
 				// only the right subtree has to be examined further
-				includedNodes.addAll(KDTreeQueries.rangeQuery(g, topLeftLong,
-						topLeftLat, bottomRightLong, bottomRightLat, key
-								.getChildList().get(1)));
-			}
-			if (keyVal >= topLeftLat) {
+				// System.out.print("R ");
+				rangeQuery(g, l, topLeftLong, topLeftLat, bottomRightLong,
+						bottomRightLat, (XKey) rightChild.getThat());
+			} else if (keyVal >= bottomRightLat) {
+				// System.out.print("L ");
 				// only the left subtree has to be examined further
-				includedNodes.addAll(KDTreeQueries.rangeQuery(g, topLeftLong,
-						topLeftLat, bottomRightLong, bottomRightLat, key
-								.getChildList().get(0)));
-			}
-			if ((bottomRightLat < keyVal) && (keyVal < topLeftLat)) {
+				rangeQuery(g, l, topLeftLong, topLeftLat, bottomRightLong,
+						bottomRightLat, (XKey) leftChild.getThat());
+			} else {
 				// the right and the left subtree have to be examined
-				includedNodes.addAll(KDTreeQueries.rangeQuery(g, topLeftLong,
-						topLeftLat, bottomRightLong, bottomRightLat, key
-								.getChildList().get(0)));
-				includedNodes.addAll(KDTreeQueries.rangeQuery(g, topLeftLong,
-						topLeftLat, bottomRightLong, bottomRightLat, key
-								.getChildList().get(1)));
+				// System.out.print("L ");
+				rangeQuery(g, l, topLeftLong, topLeftLat, bottomRightLong,
+						bottomRightLat, (XKey) leftChild.getThat());
+				// System.out.print("R ");
+				rangeQuery(g, l, topLeftLong, topLeftLat, bottomRightLong,
+						bottomRightLat, (XKey) rightChild.getThat());
 			}
 		}
-
-		return includedNodes;
 	}
 
-	public static LinkedList<Node> rangeQuery(AnnotatedOsmGraph g,
+	public static void rangeQuery(AnnotatedOsmGraph g, List<Node> l,
 			double topLeftLong, double topLeftLat, double bottomRightLong,
 			double bottomRightLat, XKey key) {
-		LinkedList<Node> includedNodes = new LinkedList<Node>();
 		double keyVal = key.getKeyValue();
 
-		if (key.getChildList().size() == 0) { // is true, when key has a
-			// NodeSet as a child
-			KDTreeQueries.rangeQuery(g, topLeftLong, topLeftLat,
-					bottomRightLong, bottomRightLat, key.getSetList().get(0));
+		// System.out.println("Query X " + keyVal);
+
+		HasYChild leftChild = key.getFirstHasYChild();
+		if (leftChild == null) {
+			rangeQuery(g, l, topLeftLong, topLeftLat, bottomRightLong,
+					bottomRightLat, (NodeSet) key.getFirstHasSet().getThat());
 		} else {
+			HasYChild rightChild = leftChild.getNextHasYChild();
+			assert rightChild != null;
 			if (keyVal < topLeftLong) {
 				// examine only right subtree
-				includedNodes.addAll(rangeQuery(g, topLeftLong, topLeftLat,
-						bottomRightLong, bottomRightLat, key.getChildList()
-								.get(1)));
-			}
-			if (keyVal >= bottomRightLong) {
+				// System.out.print("R ");
+				rangeQuery(g, l, topLeftLong, topLeftLat, bottomRightLong,
+						bottomRightLat, (YKey) rightChild.getThat());
+			} else if (keyVal >= bottomRightLong) {
 				// examine only left subtree
-				includedNodes.addAll(rangeQuery(g, topLeftLong, topLeftLat,
-						bottomRightLong, bottomRightLat, key.getChildList()
-								.get(0)));
-			}
-			if ((topLeftLong < keyVal) && (keyVal < bottomRightLong)) {
+				// System.out.print("L ");
+				rangeQuery(g, l, topLeftLong, topLeftLat, bottomRightLong,
+						bottomRightLat, (YKey) leftChild.getThat());
+			} else {
 				// examine oth subtrees
-				includedNodes.addAll(rangeQuery(g, topLeftLong, topLeftLat,
-						bottomRightLong, bottomRightLat, key.getChildList()
-								.get(0)));
-				includedNodes.addAll(rangeQuery(g, topLeftLong, topLeftLat,
-						bottomRightLong, bottomRightLat, key.getChildList()
-								.get(1)));
+				// System.out.print("L ");
+				rangeQuery(g, l, topLeftLong, topLeftLat, bottomRightLong,
+						bottomRightLat, (YKey) leftChild.getThat());
+				// System.out.print("R ");
+				rangeQuery(g, l, topLeftLong, topLeftLat, bottomRightLong,
+						bottomRightLat, (YKey) rightChild.getThat());
 			}
 		}
-
-		return includedNodes;
 	}
 
 	/**
@@ -142,22 +158,25 @@ public class KDTreeQueries {
 	 * @param set
 	 * @return a List of all Nodes which are included in the rectangle
 	 */
-	public static LinkedList<Node> rangeQuery(AnnotatedOsmGraph g,
+	public static void rangeQuery(AnnotatedOsmGraph g, List<Node> l,
 			double topLeftLong, double topLeftLat, double bottomRightLong,
 			double bottomRightLat, NodeSet set) {
-		LinkedList<Node> nodes = new LinkedList<Node>();
-		nodes.addAll(set.getElementList());
-		LinkedList<Node> includedNodes = new LinkedList<Node>();
 
-		for (int i = 0; i < nodes.size(); i++) {
-			if ((nodes.get(i).getLatitude() <= topLeftLat)
-					&& (nodes.get(i).getLatitude() >= bottomRightLat))
-				if ((nodes.get(i).getLongitude() <= bottomRightLong)
-						&& (nodes.get(i).getLongitude() >= topLeftLong))
-					includedNodes.add(nodes.get(i));
+		// System.out.println(set);
+		int c = 0;
+		for (HasElement e : set.getHasElementIncidences()) {
+			Node n = (Node) e.getThat();
+			++c;
+			// System.out.println(" (" + n.getLatitude() + ", "
+			// + n.getLongitude() + ")");
+			if (n.getLatitude() >= topLeftLat
+					&& n.getLatitude() <= bottomRightLat
+					&& n.getLongitude() <= bottomRightLong
+					&& n.getLongitude() >= topLeftLong
+					&& n.getFirstSegment() != null) {
+				l.add(n);
+			}
 		}
-
-		return includedNodes;
+		// System.out.println(c + " Nodes");
 	}
-
 }
