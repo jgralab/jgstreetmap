@@ -229,9 +229,11 @@ public class DijkstraRouteCalculator {
 		case TIME:
 			return s.getLength() * computeFactor(s);
 		case CONVENIENCE:
-			return (previous.getWayId() == s.getWayId()) ? s.getLength() : s
-					.getLength()
-					* INCONVENIENCEFACTOR;
+			if (previous != null)
+				return (previous.getWayId() == s.getWayId()) ? s.getLength()
+						: s.getLength() * INCONVENIENCEFACTOR;
+			else
+				return s.getLength();
 		default:
 			return Double.MAX_VALUE;
 		}
