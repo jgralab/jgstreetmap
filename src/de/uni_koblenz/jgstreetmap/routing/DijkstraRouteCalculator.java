@@ -55,7 +55,7 @@ public class DijkstraRouteCalculator {
 		public double service = 10;
 	}
 
-	private static final double INCONVENIENCEFACTOR = 2.0;
+	private static final double INCONVENIENCEVALUE = 50;
 
 	protected OsmGraph graph;
 	protected GraphMarker<DijkstraMarker> dijkstraMarker;
@@ -231,7 +231,7 @@ public class DijkstraRouteCalculator {
 		case CONVENIENCE:
 			if (previous != null)
 				return (previous.getWayId() == s.getWayId()) ? s.getLength()
-						: s.getLength() * INCONVENIENCEFACTOR;
+						: s.getLength() + INCONVENIENCEVALUE;
 			else
 				return s.getLength();
 		default:

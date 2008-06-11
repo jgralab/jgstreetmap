@@ -12,12 +12,15 @@
 
 	<property name="comlib.dir" value="../common/lib" />
 	
-	<property name="classes.dir" value="./build/classes"/>
+	<property name="classes.dir" value="${project.dir}/build/classes"/>
+	
 	<!-- classpath -->
 	<path id="classpath">
 		<pathelement location="${classes.dir}" />
 		<fileset dir="${project.dir}/lib" includes="**/*.jar" />
 		<fileset dir="${comlib.dir}" includes="**/*.jar" />
+		<fileset dir="${project.dir}/build/jar" includes="**/*.jar" />
+		<pathelement location="../jgralab/build/jar/jgralab.jar" />
 	</path>
 
 	<!-- main class name -->
@@ -93,6 +96,18 @@
 		<!-- <ant dir="${common.dir}" antfile="build.xml" target="generateparser">
 			<property name="grammarfile" value = ""/>			
 		</ant> -->
+	</target>
+	
+	<property name="run.args" value=""/>
+	
+	<target name="generategraph">
+		<java classname="de.uni_koblenz.jgstreetmap.importer.OsmImporter" 
+		      classpathref="classpath"
+		      fork="true"
+		      maxmemory="768m"
+		      dir="./">
+			<arg line="${run.args}"/>
+		</java>
 	</target>
 
 	<!-- compile -->

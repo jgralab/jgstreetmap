@@ -249,7 +249,7 @@ public class MapPanel extends JPanel {
 			resultPanel.println("  shortest routes: "
 					+ (stopShortest - stopFastest) + "ms");
 			resultPanel.println("  most convenient routes: "
-					+ (stopFastest - stop) + "ms");
+					+ (stop - stopFastest) + "ms");
 		}
 	}
 
