@@ -90,9 +90,11 @@ public class MapPanel extends JPanel {
 
 	private DijkstraRouteCalculator fastestRouteCalculator;
 	private DijkstraRouteCalculator shortestRouteCalculator;
+	private DijkstraRouteCalculator mostConvenientRouteCalculator;
 	private boolean showRoutes = true;
 	private List<Segment> fastestRoute = null;
 	private List<Segment> shortestRoute = null;
+	private List<Segment> mostConvenientRoute = null;
 	private Node startNode = null;
 
 	private ResultPanel resultPanel;
@@ -107,6 +109,8 @@ public class MapPanel extends JPanel {
 		fastestRouteCalculator.setRestriction(RoutingRestriction.CAR);
 		shortestRouteCalculator = new DijkstraRouteCalculator(graph);
 		shortestRouteCalculator.setRestriction(RoutingRestriction.CAR);
+		mostConvenientRouteCalculator = new DijkstraRouteCalculator(graph);
+		mostConvenientRouteCalculator.setRestriction(RoutingRestriction.CAR);
 
 		startNode = null;
 		// (Node) graph.getOsmPrimitiveById(30432771);
@@ -199,6 +203,8 @@ public class MapPanel extends JPanel {
 										.getRoute(dest);
 								shortestRoute = shortestRouteCalculator
 										.getRoute(dest);
+								mostConvenientRoute = mostConvenientRouteCalculator
+										.getRoute(dest);
 								if (showRoutes) {
 									repaint();
 								}
@@ -207,6 +213,9 @@ public class MapPanel extends JPanel {
 								printRoute(shortestRoute,
 										shortestRouteCalculator,
 										EdgeRating.LENGTH);
+								printRoute(mostConvenientRoute,
+										mostConvenientRouteCalculator,
+										EdgeRating.CONVENIENCE);
 							}
 						}
 					} else {
@@ -230,11 +239,17 @@ public class MapPanel extends JPanel {
 			long stopFastest = System.currentTimeMillis();
 			shortestRouteCalculator.setStart(startNode);
 			shortestRouteCalculator.calculateShortestRoutes(EdgeRating.LENGTH);
+			long stopShortest = System.currentTimeMillis();
+			mostConvenientRouteCalculator.setStart(startNode);
+			mostConvenientRouteCalculator
+					.calculateShortestRoutes(EdgeRating.CONVENIENCE);
 			long stop = System.currentTimeMillis();
 			resultPanel.println("  fastest routes : " + (stopFastest - start)
 					+ "ms");
-			resultPanel.println("  shortest routes: " + (stop - stopFastest)
-					+ "ms");
+			resultPanel.println("  shortest routes: "
+					+ (stopShortest - stopFastest) + "ms");
+			resultPanel.println("  most convenient routes: "
+					+ (stopFastest - stop) + "ms");
 		}
 	}
 
@@ -282,6 +297,9 @@ public class MapPanel extends JPanel {
 			break;
 		case LENGTH:
 			label = "Shortest route";
+			break;
+		case CONVENIENCE:
+			label = "Most convenient route";
 			break;
 		}
 		resultPanel.println();
@@ -438,6 +456,7 @@ public class MapPanel extends JPanel {
 		if (showRoutes) {
 			paintRoute(g2, fastestRoute, LayoutInfo.FASTEST_ROUTE);
 			paintRoute(g2, shortestRoute, LayoutInfo.SHORTEST_ROUTE);
+			paintRoute(g2, mostConvenientRoute, LayoutInfo.MOSTCONVENIENT_ROUTE);
 		}
 
 		// draw center cross

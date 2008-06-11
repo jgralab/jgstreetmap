@@ -16,14 +16,6 @@ import de.uni_koblenz.jgstreetmap.osmschema.routing.SegmentType;
 
 public class DijkstraRouteCalculator {
 
-	public enum Direction {
-		NORMAL, REVERSED;
-	}
-
-	public enum EdgeRating {
-		LENGTH, TIME;
-	}
-
 	private class DijkstraMarker {
 
 		/** indicates that Dijkstra is done with the vertex */
@@ -41,6 +33,14 @@ public class DijkstraRouteCalculator {
 		}
 	}
 
+	public enum Direction {
+		NORMAL, REVERSED;
+	}
+
+	public enum EdgeRating {
+		LENGTH, TIME, CONVENIENCE;
+	}
+
 	public enum RoutingRestriction {
 		CAR, BIKE, FOOT
 	}
@@ -54,6 +54,8 @@ public class DijkstraRouteCalculator {
 		public double unsurfaced = 20;
 		public double service = 10;
 	}
+
+	private static final double INCONVENIENCEFACTOR = 2.0;
 
 	protected OsmGraph graph;
 	protected GraphMarker<DijkstraMarker> dijkstraMarker;
@@ -90,7 +92,11 @@ public class DijkstraRouteCalculator {
 			case TIME:
 				out += currentSegment.getLength()
 						* computeFactor(currentSegment);
+				break;
+			case CONVENIENCE:
+				out += currentSegment.getLength();
 			}
+
 		}
 		return out;
 	}
@@ -135,7 +141,8 @@ public class DijkstraRouteCalculator {
 
 					Node nextVertex = (Node) currentSegment.getThat();
 
-					double newDistance = m.distance + rate(currentSegment, r);
+					double newDistance = m.distance
+							+ rate(currentSegment, r, m.parentSegment);
 					// if the new path is shorter than the distance stored
 					// at the other end, this new value is stored
 					DijkstraMarker n = dijkstraMarker.getMark(nextVertex);
@@ -215,12 +222,16 @@ public class DijkstraRouteCalculator {
 		return start;
 	}
 
-	protected double rate(Segment s, EdgeRating r) {
+	protected double rate(Segment s, EdgeRating r, Segment previous) {
 		switch (r) {
 		case LENGTH:
 			return s.getLength();
 		case TIME:
 			return s.getLength() * computeFactor(s);
+		case CONVENIENCE:
+			return (previous.getWayId() == s.getWayId()) ? s.getLength() : s
+					.getLength()
+					* INCONVENIENCEFACTOR;
 		default:
 			return Double.MAX_VALUE;
 		}

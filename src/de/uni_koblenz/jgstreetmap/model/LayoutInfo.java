@@ -50,6 +50,7 @@ public class LayoutInfo {
 
 	public static final LayoutInfo SHORTEST_ROUTE = new LayoutInfo();
 	public static final LayoutInfo FASTEST_ROUTE = new LayoutInfo();
+	public static final LayoutInfo MOSTCONVENIENT_ROUTE = new LayoutInfo();	
 
 	static {
 		SHORTEST_ROUTE.zOrder = 1000;
@@ -63,6 +64,12 @@ public class LayoutInfo {
 		FASTEST_ROUTE.minWidth = 3.0;
 		FASTEST_ROUTE.maxWidth = 30.0;
 		FASTEST_ROUTE.visible = true;
+		
+		MOSTCONVENIENT_ROUTE.zOrder = 1000;
+		MOSTCONVENIENT_ROUTE.bgColor = new Color(255, 255, 0, 128);
+		MOSTCONVENIENT_ROUTE.minWidth = 3.0;
+		MOSTCONVENIENT_ROUTE.maxWidth = 30.0;
+		MOSTCONVENIENT_ROUTE.visible = true;
 
 		DEFAULT.zOrder = 50;
 		DEFAULT.fgColor = Color.MAGENTA;
