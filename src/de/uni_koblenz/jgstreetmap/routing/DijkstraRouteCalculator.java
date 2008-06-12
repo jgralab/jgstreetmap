@@ -84,6 +84,7 @@ public class DijkstraRouteCalculator {
 
 	public double calculateCompleteWeight(List<Segment> list, EdgeRating r) {
 		double out = 0;
+		Segment last = null;
 		for (Segment currentSegment : list) {
 			switch (r) {
 			case LENGTH:
@@ -94,9 +95,12 @@ public class DijkstraRouteCalculator {
 						* computeFactor(currentSegment);
 				break;
 			case CONVENIENCE:
-				out += currentSegment.getLength();
+				if (last != null)
+					out += Math.toDegrees(GpsTools.getAngleBetweenSegments(
+							last, currentSegment));
 			}
-
+			// out += rate(currentSegment, r, last);
+			last = currentSegment;
 		}
 		return out;
 	}
@@ -229,11 +233,17 @@ public class DijkstraRouteCalculator {
 		case TIME:
 			return s.getLength() * computeFactor(s);
 		case CONVENIENCE:
-			if (previous != null)
-				return (previous.getWayId() == s.getWayId()) ? s.getLength()
-						: s.getLength() + INCONVENIENCEVALUE;
-			else
-				return s.getLength();
+			if (previous != null) {
+				return Math.toDegrees(GpsTools.getAngleBetweenSegments(
+						previous, s))
+						* 0.5 + s.getLength() * computeFactor(s);
+			}
+			// return (previous.getWayId() == s.getWayId()) ? s.getLength()
+			// : s.getLength() + INCONVENIENCEVALUE;
+			else {
+				return 0;
+			}
+			// return s.getLength();
 		default:
 			return Double.MAX_VALUE;
 		}

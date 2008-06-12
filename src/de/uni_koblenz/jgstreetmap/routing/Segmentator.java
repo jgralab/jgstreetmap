@@ -38,7 +38,6 @@ import de.uni_koblenz.jgstreetmap.osmschema.routing.SegmentType;
 public class Segmentator {
 
 	private static OsmGraph theGraph;
-	public static final double MINUTEMETER = 1852.0;
 
 	private static List<Way> computeRelevantWays(Iterable<Vertex> vertices) {
 		List<Way> output = new LinkedList<Way>();
@@ -133,8 +132,9 @@ public class Segmentator {
 			double lon2) {
 		double deltaLat = lat1 - lat2;
 		double deltaLon = lon1 - lon2;
-		double k1 = deltaLat * 60 * MINUTEMETER;
-		double k2 = deltaLon * 60 * MINUTEMETER * cos(toRadians((lat1 + lat2) / 2.0));
+		double k1 = deltaLat * 60 * GpsTools.MINUTEMETER;
+		double k2 = deltaLon * 60 * GpsTools.MINUTEMETER
+				* cos(toRadians((lat1 + lat2) / 2.0));
 		return sqrt(k1 * k1 + k2 * k2);
 	}
 

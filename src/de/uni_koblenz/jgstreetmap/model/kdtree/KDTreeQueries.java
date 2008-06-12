@@ -14,15 +14,16 @@ import de.uni_koblenz.jgstreetmap.osmschema.kdtree.Key;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.NodeSet;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.XKey;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.YKey;
+import de.uni_koblenz.jgstreetmap.routing.GpsTools;
 import de.uni_koblenz.jgstreetmap.routing.Segmentator;
 
 public class KDTreeQueries {
 
 	public static List<Neighbour> neighboursKD(AnnotatedOsmGraph g, double lat,
 			double lon, double maxrange) {
-		double height = maxrange / (Segmentator.MINUTEMETER * 60);
+		double height = maxrange / (GpsTools.MINUTEMETER * 60);
 		double width = maxrange
-				/ (Segmentator.MINUTEMETER * 60 * Math.cos(Math.toRadians(lat)));
+				/ (GpsTools.MINUTEMETER * 60 * Math.cos(Math.toRadians(lat)));
 		double tlon = lon - width;
 		double tlat = lat - height;
 		double blon = lon + width;

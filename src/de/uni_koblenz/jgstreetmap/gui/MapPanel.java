@@ -291,6 +291,8 @@ public class MapPanel extends JPanel {
 				EdgeRating.LENGTH) / 1000.0;
 		double time = calculator
 				.calculateCompleteWeight(route, EdgeRating.TIME) / 3600;
+		double degree = calculator.calculateCompleteWeight(route,
+				EdgeRating.CONVENIENCE);
 		switch (rating) {
 		case TIME:
 			label = "Fastest route";
@@ -314,6 +316,7 @@ public class MapPanel extends JPanel {
 		long hrs = (long) Math.floor(time);
 		long min = Math.round((time - hrs) * 60.0);
 		resultPanel.println("  Time  : " + hrs + " h " + min + " min");
+		resultPanel.println("  Degree : " + degree);
 		Way lastWay = null;
 		String lastName = null;
 		for (Segment s : route) {
