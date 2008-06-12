@@ -15,6 +15,9 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
+import java.awt.print.PageFormat;
+import java.awt.print.Printable;
+import java.awt.print.PrinterException;
 import java.util.List;
 
 import javax.swing.BoundedRangeModel;
@@ -37,7 +40,7 @@ import de.uni_koblenz.jgstreetmap.routing.DijkstraRouteCalculator;
 import de.uni_koblenz.jgstreetmap.routing.DijkstraRouteCalculator.EdgeRating;
 import de.uni_koblenz.jgstreetmap.routing.DijkstraRouteCalculator.RoutingRestriction;
 
-public class MapPanel extends JPanel {
+public class MapPanel extends JPanel implements Printable {
 	private static final long serialVersionUID = 1L;
 
 	public static final int ZOOM_MAX = 40;
@@ -1148,5 +1151,19 @@ public class MapPanel extends JPanel {
 		}
 		mouseSetStartNode = true;
 		setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+	}
+
+	@Override
+	public int print(Graphics graphics, PageFormat pf, int page)
+			throws PrinterException {
+		if (page > 0) { /* We have only one page, and 'page' is zero-based */
+	         return NO_SUCH_PAGE;
+	    }
+		Graphics2D g2 = (Graphics2D)graphics;
+	    g2.translate(pf.getImageableX(), pf.getImageableY());
+	    double scale = Math.min(pf.getImageableWidth() / getWidth(), pf.getImageableHeight() / getHeight());
+	    g2.scale(scale, scale);
+		paint(g2);
+		return PAGE_EXISTS;
 	}
 }

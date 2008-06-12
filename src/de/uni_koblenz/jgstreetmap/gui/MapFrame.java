@@ -3,8 +3,11 @@ package de.uni_koblenz.jgstreetmap.gui;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.PrintJob;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.print.PrinterException;
+import java.awt.print.PrinterJob;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -29,6 +32,7 @@ public class MapFrame extends JFrame {
 	private JSlider zoomSlider;
 	private JButton zahnButton;
 	private JButton startButton;
+	private JButton printButton;
 
 	private JCheckBox showMapButton;
 
@@ -197,6 +201,23 @@ public class MapFrame extends JFrame {
 		buttonPanel.add(startButton);
 		
 
+		printButton = new JButton("Print");
+		printButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+		printButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				PrinterJob pj = PrinterJob.getPrinterJob();
+				pj.setPrintable(mapPanel);
+				if (pj.printDialog()) {
+			         try {pj.print();}
+			         catch (PrinterException exc) {
+			           exc.printStackTrace();
+			          }
+			      }   
+			}
+		});
+		buttonPanel.add(printButton);
+		
 		zahnButton = new JButton("\"Zahn\"");
 		zahnButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 		zahnButton.addActionListener(new ActionListener() {
