@@ -55,7 +55,7 @@ public class DijkstraRouteCalculator {
 		public double service = 10;
 	}
 
-	private static final double INCONVENIENCEVALUE = 50;
+	private static final double INCONVENIENCEVALUE = 100;
 
 	protected OsmGraph graph;
 	protected GraphMarker<DijkstraMarker> dijkstraMarker;
@@ -86,20 +86,20 @@ public class DijkstraRouteCalculator {
 		double out = 0;
 		Segment last = null;
 		for (Segment currentSegment : list) {
-			switch (r) {
-			case LENGTH:
-				out += currentSegment.getLength();
-				break;
-			case TIME:
-				out += currentSegment.getLength()
-						* computeFactor(currentSegment);
-				break;
-			case CONVENIENCE:
-				if (last != null)
-					out += Math.toDegrees(GpsTools.getAngleBetweenSegments(
-							last, currentSegment));
-			}
-			// out += rate(currentSegment, r, last);
+			// switch (r) {
+			// case LENGTH:
+			// out += currentSegment.getLength();
+			// break;
+			// case TIME:
+			// out += currentSegment.getLength()
+			// * computeFactor(currentSegment);
+			// break;
+			// case CONVENIENCE:
+			// if (last != null)
+			// out += Math.toDegrees(GpsTools.getAngleBetweenSegments(
+			// last, currentSegment));
+			// }
+			out += rate(currentSegment, r, last);
 			last = currentSegment;
 		}
 		return out;
@@ -233,17 +233,18 @@ public class DijkstraRouteCalculator {
 		case TIME:
 			return s.getLength() * computeFactor(s);
 		case CONVENIENCE:
-			if (previous != null) {
-				return Math.toDegrees(GpsTools.getAngleBetweenSegments(
-						previous, s))
-						* 0.5 + s.getLength() * computeFactor(s);
-			}
-			// return (previous.getWayId() == s.getWayId()) ? s.getLength()
-			// : s.getLength() + INCONVENIENCEVALUE;
-			else {
-				return 0;
-			}
-			// return s.getLength();
+			// if (previous != null) {
+			// double angle = Math.toDegrees(GpsTools.getAngleBetweenSegments(
+			// previous, s));
+			// return Math.abs(angle);
+			// }
+			// else {
+			// return 0;
+			// }
+			if (previous != null)
+				return (previous.getWayId() == s.getWayId()) ? s.getLength()
+						: s.getLength() + INCONVENIENCEVALUE;
+			return s.getLength();
 		default:
 			return Double.MAX_VALUE;
 		}

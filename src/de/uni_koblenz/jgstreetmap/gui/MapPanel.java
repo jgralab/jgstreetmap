@@ -294,8 +294,8 @@ public class MapPanel extends JPanel implements Printable {
 				EdgeRating.LENGTH) / 1000.0;
 		double time = calculator
 				.calculateCompleteWeight(route, EdgeRating.TIME) / 3600;
-		double degree = calculator.calculateCompleteWeight(route,
-				EdgeRating.CONVENIENCE);
+		// double degree = calculator.calculateCompleteWeight(route,
+		// EdgeRating.CONVENIENCE);
 		switch (rating) {
 		case TIME:
 			label = "Fastest route";
@@ -319,7 +319,7 @@ public class MapPanel extends JPanel implements Printable {
 		long hrs = (long) Math.floor(time);
 		long min = Math.round((time - hrs) * 60.0);
 		resultPanel.println("  Time  : " + hrs + " h " + min + " min");
-		resultPanel.println("  Degree : " + degree);
+		// resultPanel.println(" Degree : " + degree);
 		Way lastWay = null;
 		String lastName = null;
 		for (Segment s : route) {
@@ -1133,7 +1133,8 @@ public class MapPanel extends JPanel implements Printable {
 	public void setShowRoutes(boolean b) {
 		if (b != showRoutes) {
 			showRoutes = b;
-			if (isVisible() && (fastestRoute != null || shortestRoute != null)) {
+			if (isVisible()
+					&& (fastestRoute != null || shortestRoute != null || mostConvenientRoute != null)) {
 				repaint();
 			}
 		}
@@ -1146,6 +1147,8 @@ public class MapPanel extends JPanel implements Printable {
 	public void setMouseStartNode() {
 		fastestRoute = null;
 		shortestRoute = null;
+		mostConvenientRoute = null;
+
 		if (showRoutes) {
 			repaint();
 		}

@@ -11,11 +11,18 @@ public class GpsTools {
 		public static final D2Vector XAXIS = new D2Vector(1, 0);
 
 		public static final D2Vector YAXIS = new D2Vector(0, 1);
+
 		public static double getAngle(D2Vector v1, D2Vector v2) {
 			double argument = scalarProduct(v1, v2)
 					/ (v1.length() * v2.length());
 			// System.out.println(argument);
 			return Math.acos(argument);
+		}
+
+		public static double getPolarAngleDifference(D2Vector v1, D2Vector v2) {
+			double angle1 = Math.atan2(v1.y, v1.x);
+			double angle2 = Math.atan2(v2.y, v2.x);
+			return angle1 - angle2;
 		}
 
 		public static double scalarProduct(D2Vector v1, D2Vector v2) {
@@ -71,20 +78,20 @@ public class GpsTools {
 		// double angle1 = D2Vector.getAngle(v1, D2Vector.XAXIS);
 		D2Vector v2 = createVectorFromSegment(s2);
 		// double angle2 = D2Vector.getAngle(v2, D2Vector.XAXIS);
-		out = D2Vector.getAngle(v1, v2);
+		// out = D2Vector.getAngle(v1, v2);
+		out = D2Vector.getPolarAngleDifference(v1, v2);
 		// out = Math.toDegrees(out);
 		// out = angle1 - angle2;
 		return out;
 	}
 
-	// public static void main(String[] args) {
-	// D2Vector v1 = new D2Vector();
-	// v1.x = 0;
-	// v1.y = 1;
-	// D2Vector v2 = new D2Vector();
-	// v2.x = 1;
-	// v2.y = -1;
-	// System.out.println(Math.toDegrees(D2Vector.getAngle(v1, v2)));
-	//
-	//	}
+	 public static void main(String[] args) {
+		D2Vector v1 = new D2Vector();
+		v1.x = 0;
+		v1.y = 1;
+		D2Vector v2 = new D2Vector();
+		v2.x = 1;
+		v2.y = -1;
+		System.out.println(Math.toDegrees(D2Vector.getPolarAngleDifference(v1, v2)));
+	}
 }
