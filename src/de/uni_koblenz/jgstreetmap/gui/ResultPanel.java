@@ -30,11 +30,12 @@ public class ResultPanel extends JPanel {
 		};
 		setLayout(new BorderLayout());
 		JScrollPane scp = new JScrollPane(textPane);
-		scp.setMinimumSize(new Dimension(300, 150));
-		scp.setPreferredSize(new Dimension(300, 150));
+		scp.setMinimumSize(new Dimension(200, 150));
+		scp.setPreferredSize(new Dimension(200, 150));
 		scp
 				.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
-		textPane.setEditable(false);
+		// textPane.setEditable(false);
+		scp.setBackground(textPane.getBackground());
 		add(scp, BorderLayout.CENTER);
 
 		defaultAttributeSet = new SimpleAttributeSet();
@@ -59,7 +60,7 @@ public class ResultPanel extends JPanel {
 	public void print(String str) {
 		try {
 			getTextDocument().insertString(getTextDocument().getLength(), str,
-					defaultAttributeSet);
+					null);
 			textPane.setCaretPosition(getTextDocument().getLength());
 		} catch (BadLocationException e) {
 			// TODO Auto-generated catch block

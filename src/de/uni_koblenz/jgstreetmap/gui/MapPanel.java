@@ -184,14 +184,11 @@ public class MapPanel extends JPanel implements Printable {
 					setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 					setCenter(latC - deltaLat, lonC - deltaLon);
 				} else {
-					long start = System.currentTimeMillis();
-					// List<Neighbour> neighbours = MapPanel.this.graph
-					// .neighbours(lat, lon, 100.0);
+					// long start = System.currentTimeMillis();
 					List<Neighbour> neighbours = KDTreeQueries.neighboursKD(
 							MapPanel.this.graph, lat, lon, 100.0);
-					long stop = System.currentTimeMillis();
-					resultPanel.println();
-					resultPanel.println("Neighbours: " + (stop - start) + "ms");
+					// long stop = System.currentTimeMillis();
+					resultPanel.clear();
 					if (neighbours != null && neighbours.size() >= 1) {
 						Node dest = neighbours.get(0).getNode();
 						if (mouseSetStartNode) {
@@ -569,7 +566,7 @@ public class MapPanel extends JPanel implements Printable {
 		}
 
 		long stop = System.currentTimeMillis();
-		System.out.println("time to paint map: " + (stop - start) + "ms");
+//		System.out.println("time to paint map: " + (stop - start) + "ms");
 	}
 
 	private boolean intersects(Node a, Node b) {
@@ -629,8 +626,8 @@ public class MapPanel extends JPanel implements Printable {
 		}
 
 		long stop = System.currentTimeMillis();
-		System.out.println("time to compute visible elements: "
-				+ (stop - start) + "ms");
+//		System.out.println("time to compute visible elements: "
+//				+ (stop - start) + "ms");
 	}
 
 	private void paintGraph(Graphics2D g) {
@@ -853,7 +850,7 @@ public class MapPanel extends JPanel implements Printable {
 	 */
 	private void paintFrame(Graphics2D g) {
 		g.setRenderingHints(antialiasOn);
-
+		g.setClip(0, 0, getWidth(), getHeight());
 		// draw background of frame
 		g.setColor(FRAME_BG_COLOR);
 		g.fillRect(0, 0, FRAMEWIDTH, getHeight());
@@ -1160,12 +1157,14 @@ public class MapPanel extends JPanel implements Printable {
 	public int print(Graphics graphics, PageFormat pf, int page)
 			throws PrinterException {
 		if (page > 0) { /* We have only one page, and 'page' is zero-based */
-	         return NO_SUCH_PAGE;
-	    }
-		Graphics2D g2 = (Graphics2D)graphics;
-	    g2.translate(pf.getImageableX(), pf.getImageableY());
-	    double scale = Math.min(pf.getImageableWidth() / getWidth(), pf.getImageableHeight() / getHeight());
-	    g2.scale(scale, scale);
+			return NO_SUCH_PAGE;
+		}
+		Graphics2D g2 = (Graphics2D) graphics;
+		g2.translate(pf.getImageableX(), pf.getImageableY());
+		double scale = Math.min(pf.getImageableWidth() / getWidth(), pf
+				.getImageableHeight()
+				/ getHeight());
+		g2.scale(scale, scale);
 		paint(g2);
 		return PAGE_EXISTS;
 	}

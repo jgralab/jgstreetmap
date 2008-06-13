@@ -18,6 +18,7 @@ import de.uni_koblenz.jgstreetmap.osmschema.OsmPrimitive;
 import de.uni_koblenz.jgstreetmap.osmschema.Tag;
 import de.uni_koblenz.jgstreetmap.osmschema.Way;
 import de.uni_koblenz.jgstreetmap.osmschema.impl.OsmGraphImpl;
+import de.uni_koblenz.jgstreetmap.osmschema.kdtree.HasRoot;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.KDTree;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.Key;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.NodeSet;
@@ -29,7 +30,8 @@ public class AnnotatedOsmGraph extends OsmGraphImpl {
 	private Map<Long, OsmPrimitive> osmIdMap;
 	private GraphMarker<LayoutInfo> layoutInfo;
 	private SortedMap<Integer, List<Way>> orderedWays;
-
+	private KDTree kdTree;
+	
 	public AnnotatedOsmGraph(String id, int vmax, int emax) {
 		super(id, vmax, emax);
 		osmIdMap = new HashMap<Long, OsmPrimitive>();
@@ -77,6 +79,8 @@ public class AnnotatedOsmGraph extends OsmGraphImpl {
 		for (String n : new TreeSet<String>(m.keySet())) {
 			System.err.println(m.get(n) + "\t" + n);
 		}
+		
+		kdTree = getFirstKDTree();
 	}
 
 	public SortedMap<Integer, List<Way>> getOrderedWayVertices() {
@@ -105,16 +109,17 @@ public class AnnotatedOsmGraph extends OsmGraphImpl {
 	}
 
 	public boolean hasKDTree() {
-		return getFirstKDTree() != null;
+		return kdTree != null;
 	}
 
 	public void deleteKDTree() {
-		if (!hasKDTree()) {
+		if (kdTree == null) {
 			return;
 		}
-		KDTree tree = getKDTree();
 		Stack<Key> s = new Stack<Key>();
-		s.push((Key) tree.getFirstHasRoot().getThat());
+		HasRoot e = kdTree.getFirstHasRoot();
+		if (e != null) {
+		s.push((Key) e.getThat());
 		while (!s.empty()) {
 			Key current = s.pop();
 			NodeSet ns = (NodeSet) current.getFirstHasSet().getThat();
@@ -133,16 +138,23 @@ public class AnnotatedOsmGraph extends OsmGraphImpl {
 				current.delete();
 			}
 		}
+		}
+		kdTree.delete();
+		kdTree = null;
 	}
 
 	public KDTree getKDTree() {
-		KDTree tree = getFirstKDTree();
-		if (tree == null) {
-			tree = createKDTree();
-		}
-		return tree;
+		return kdTree;
 	}
 
+	@Override
+	public KDTree createKDTree() {
+		if (kdTree == null) {
+			kdTree = super.createKDTree();
+		}
+		return kdTree;
+	}
+	
 	public static class Neighbour implements Comparable<Neighbour> {
 		private Node node;
 		private double distance;

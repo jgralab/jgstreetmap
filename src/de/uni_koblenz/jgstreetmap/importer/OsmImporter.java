@@ -76,6 +76,7 @@ public class OsmImporter extends DefaultHandler {
 		graph = (AnnotatedOsmGraph) OsmSchema.instance().createOsmGraph(16000,
 				16000);
 		osmIdMap = new HashMap<Long, OsmPrimitive>();
+		graph.createKDTree();
 		nodeCount = 0;
 	}
 

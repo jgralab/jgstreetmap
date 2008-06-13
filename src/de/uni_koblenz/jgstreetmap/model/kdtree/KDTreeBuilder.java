@@ -22,7 +22,7 @@ public class KDTreeBuilder {
 		if (g.hasKDTree()) {
 			g.deleteKDTree();
 		}
-		KDTree kdTree = g.getKDTree();
+		KDTree kdTree = g.createKDTree();
 		kdTree.setLevels(maxLevels);
 		kdTree.addRoot(constructkdTreeY(g, nodeList, 0));
 	}
