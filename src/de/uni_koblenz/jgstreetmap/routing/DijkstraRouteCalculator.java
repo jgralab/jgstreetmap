@@ -86,6 +86,7 @@ public class DijkstraRouteCalculator {
 		double out = 0;
 		Segment last = null;
 		for (Segment currentSegment : list) {
+			// TODO uncomment here
 			// switch (r) {
 			// case LENGTH:
 			// out += currentSegment.getLength();
@@ -233,12 +234,16 @@ public class DijkstraRouteCalculator {
 		case TIME:
 			return s.getLength() * computeFactor(s);
 		case CONVENIENCE:
+			// TODO comment here
 			// if (previous != null) {
-			// double angle = Math.toDegrees(GpsTools.getAngleBetweenSegments(
-			// previous, s));
-			// return Math.abs(angle);
+			// int angle = GpsTools.getAngleBetweenSegments(
+			// previous, s);
+			// if(GpsTools.isNearer(previous, s)){
+			// angle = 180 - angle;
 			// }
-			// else {
+			// System.out.println(angle);
+			// return Math.abs(angle);
+			// } else {
 			// return 0;
 			// }
 			if (previous != null)
