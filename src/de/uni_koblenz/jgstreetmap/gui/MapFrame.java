@@ -3,7 +3,6 @@ package de.uni_koblenz.jgstreetmap.gui;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.PrintJob;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.print.PrinterException;
@@ -88,8 +87,7 @@ public class MapFrame extends JFrame {
 		showNatureButton.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				mapPanel
-						.setShowStreetsOnly(showNatureButton.isSelected());
+				mapPanel.setShowStreetsOnly(showNatureButton.isSelected());
 			}
 		});
 
@@ -132,8 +130,7 @@ public class MapFrame extends JFrame {
 			}
 		});
 
-		showLengthButton = new JCheckBox("Length", mapPanel
-				.isShowingLength());
+		showLengthButton = new JCheckBox("Length", mapPanel.isShowingLength());
 		detailPanel.add(showLengthButton);
 		showLengthButton.addChangeListener(new ChangeListener() {
 			@Override
@@ -142,8 +139,7 @@ public class MapFrame extends JFrame {
 			}
 		});
 
-		showRoutesButton = new JCheckBox("Routes", mapPanel
-				.isShowingRoutes());
+		showRoutesButton = new JCheckBox("Routes", mapPanel.isShowingRoutes());
 		detailPanel.add(showRoutesButton);
 		showRoutesButton.addChangeListener(new ChangeListener() {
 			@Override
@@ -199,7 +195,6 @@ public class MapFrame extends JFrame {
 			}
 		});
 		buttonPanel.add(startButton);
-		
 
 		printButton = new JButton("Print");
 		printButton.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -209,15 +204,16 @@ public class MapFrame extends JFrame {
 				PrinterJob pj = PrinterJob.getPrinterJob();
 				pj.setPrintable(mapPanel);
 				if (pj.printDialog()) {
-			         try {pj.print();}
-			         catch (PrinterException exc) {
-			           exc.printStackTrace();
-			          }
-			      }   
+					try {
+						pj.print();
+					} catch (PrinterException exc) {
+						exc.printStackTrace();
+					}
+				}
 			}
 		});
 		buttonPanel.add(printButton);
-		
+
 		zahnButton = new JButton("\"Zahn\"");
 		zahnButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 		zahnButton.addActionListener(new ActionListener() {

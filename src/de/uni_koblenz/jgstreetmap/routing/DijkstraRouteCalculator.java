@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
-import java.util.Set;
 import java.util.Stack;
 import java.util.TreeSet;
 
@@ -14,7 +13,7 @@ import de.uni_koblenz.jgstreetmap.osmschema.OsmGraph;
 import de.uni_koblenz.jgstreetmap.osmschema.routing.Segment;
 import de.uni_koblenz.jgstreetmap.osmschema.routing.SegmentType;
 
-public class DijkstraRouteCalculator {
+public class DijkstraRouteCalculator extends RouteCalculator {
 
 	private class DijkstraMarker {
 
@@ -33,44 +32,14 @@ public class DijkstraRouteCalculator {
 		}
 	}
 
-	public enum Direction {
-		NORMAL, REVERSED;
-	}
-
-	public enum EdgeRating {
-		LENGTH, TIME, CONVENIENCE;
-	}
-
-	public enum RoutingRestriction {
-		CAR, BIKE, FOOT
-	}
-
-	public class Speed {
-		public double cycle = 15;
-		public double motorway = 100;
-		public double countryroad = 60;
-		public double residential = 35;
-		public double footway = 5;
-		public double unsurfaced = 20;
-		public double service = 10;
-	}
-
-	private static final double INCONVENIENCEVALUE = 100;
-
-	protected OsmGraph graph;
 	protected GraphMarker<DijkstraMarker> dijkstraMarker;
 	PriorityQueue<Node> queue;
 
 	// protected RoutingRestriction rest;
-	protected Set<SegmentType> relevantTypes;
-
-	protected Node start;
 
 	protected boolean routesCalculated;
 
 	protected boolean startChanged;
-
-	protected Speed speeds;
 
 	public DijkstraRouteCalculator(OsmGraph g) {
 		dijkstraMarker = null;
@@ -80,30 +49,6 @@ public class DijkstraRouteCalculator {
 		startChanged = false;
 		routesCalculated = false;
 		speeds = new Speed();
-	}
-
-	public double calculateCompleteWeight(List<Segment> list, EdgeRating r) {
-		double out = 0;
-		Segment last = null;
-		for (Segment currentSegment : list) {
-			// TODO uncomment here
-			// switch (r) {
-			// case LENGTH:
-			// out += currentSegment.getLength();
-			// break;
-			// case TIME:
-			// out += currentSegment.getLength()
-			// * computeFactor(currentSegment);
-			// break;
-			// case CONVENIENCE:
-			// if (last != null)
-			// out += Math.toDegrees(GpsTools.getAngleBetweenSegments(
-			// last, currentSegment));
-			// }
-			out += rate(currentSegment, r, last);
-			last = currentSegment;
-		}
-		return out;
 	}
 
 	public void calculateShortestRoutes(EdgeRating r) {
@@ -170,45 +115,18 @@ public class DijkstraRouteCalculator {
 		routesCalculated = true;
 	}
 
-	private double computeFactor(Segment s) {
-		switch (s.getWayType()) {
-		case CYCLEWAY:
-			return 3.6 / speeds.cycle;
-		case MOTORWAY:
-			return 3.6 / speeds.motorway;
-		case PRIMARY:
-			return 3.6 / speeds.countryroad;
-		case SECONDARY:
-			return 3.6 / speeds.countryroad;
-		case TERTIARY:
-			return 3.6 / speeds.residential;
-		case RESIDENTIAL:
-			return 3.6 / speeds.residential;
-		case FOOTWAY:
-			return 3.6 / speeds.footway;
-		case UNSURFACED:
-			return 3.6 / speeds.unsurfaced;
-		case SERVICE:
-			return 3.6 / speeds.service;
-		case WORMHOLE:
-			return 0;
-		default:
-			return Double.MAX_VALUE;
-		}
-	}
+	@Override
+	public RoutingResult getRoute(Node target, EdgeRating r) {
+		long startTime = System.currentTimeMillis();
 
-	public List<Segment> getRoute(Node target) {
-		if (!routesCalculated) {
-			throw new IllegalStateException(
-					"Routes must be calculated before invoking this method.");
+		if (!routesCalculated || startChanged) {
+			calculateShortestRoutes(r);
 		}
-		if (startChanged) {
-			throw new IllegalStateException(
-					"start must not be changed after calculating the routes.");
-		}
+
 		DijkstraMarker m = dijkstraMarker.getMark(target);
 		if (m == null || m.parentSegment == null) {
-			return null;
+			return new RoutingResult(null, System.currentTimeMillis()
+					- startTime);
 		}
 		Stack<Segment> routesegments = new Stack<Segment>();
 		while (m != null && m.parentSegment != null) {
@@ -220,75 +138,12 @@ public class DijkstraRouteCalculator {
 		while (!routesegments.empty()) {
 			out.add(routesegments.pop());
 		}
-		return out;
+		return new RoutingResult(out, System.currentTimeMillis() - startTime);
 	}
 
-	public Node getStart() {
-		return start;
-	}
-
-	protected double rate(Segment s, EdgeRating r, Segment previous) {
-		switch (r) {
-		case LENGTH:
-			return s.getLength();
-		case TIME:
-			return s.getLength() * computeFactor(s);
-		case CONVENIENCE:
-			// TODO comment here
-			// if (previous != null) {
-			// int angle = GpsTools.getAngleBetweenSegments(
-			// previous, s);
-			// if(GpsTools.isNearer(previous, s)){
-			// angle = 180 - angle;
-			// }
-			// System.out.println(angle);
-			// return Math.abs(angle);
-			// } else {
-			// return 0;
-			// }
-			if (previous != null)
-				return (previous.getWayId() == s.getWayId()) ? s.getLength()
-						: s.getLength() + INCONVENIENCEVALUE;
-			return s.getLength();
-		default:
-			return Double.MAX_VALUE;
-		}
-	}
-
-	public void setRestriction(RoutingRestriction rest) {
-
-		if (rest == RoutingRestriction.CAR) {
-			relevantTypes.add(SegmentType.MOTORWAY);
-			relevantTypes.add(SegmentType.PRIMARY);
-			relevantTypes.add(SegmentType.SECONDARY);
-			relevantTypes.add(SegmentType.TERTIARY);
-			relevantTypes.add(SegmentType.RESIDENTIAL);
-			relevantTypes.add(SegmentType.WORMHOLE);
-			relevantTypes.add(SegmentType.SERVICE);
-			relevantTypes.add(SegmentType.UNSURFACED);
-		} else if (rest == RoutingRestriction.BIKE) {
-			relevantTypes.add(SegmentType.CYCLEWAY);
-			relevantTypes.add(SegmentType.UNSURFACED);
-			relevantTypes.add(SegmentType.RESIDENTIAL);
-			relevantTypes.add(SegmentType.TERTIARY);
-			relevantTypes.add(SegmentType.SECONDARY);
-			relevantTypes.add(SegmentType.WORMHOLE);
-			relevantTypes.add(SegmentType.SERVICE);
-		} else if (rest == RoutingRestriction.FOOT) {
-			relevantTypes.add(SegmentType.CYCLEWAY);
-			relevantTypes.add(SegmentType.UNSURFACED);
-			relevantTypes.add(SegmentType.RESIDENTIAL);
-			relevantTypes.add(SegmentType.TERTIARY);
-			relevantTypes.add(SegmentType.SERVICE);
-			relevantTypes.add(SegmentType.WORMHOLE);
-			relevantTypes.add(SegmentType.FOOTWAY);
-		}
-
-	}
-
+	@Override
 	public void setStart(Node start) {
 		this.start = start;
-		this.startChanged = true;
+		startChanged = true;
 	}
-
 }

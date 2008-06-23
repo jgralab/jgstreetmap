@@ -37,8 +37,10 @@ import de.uni_koblenz.jgstreetmap.osmschema.Way;
 import de.uni_koblenz.jgstreetmap.osmschema.routing.Segment;
 import de.uni_koblenz.jgstreetmap.osmschema.routing.SegmentType;
 import de.uni_koblenz.jgstreetmap.routing.DijkstraRouteCalculator;
-import de.uni_koblenz.jgstreetmap.routing.DijkstraRouteCalculator.EdgeRating;
-import de.uni_koblenz.jgstreetmap.routing.DijkstraRouteCalculator.RoutingRestriction;
+import de.uni_koblenz.jgstreetmap.routing.RouteCalculator;
+import de.uni_koblenz.jgstreetmap.routing.RoutingResult;
+import de.uni_koblenz.jgstreetmap.routing.RouteCalculator.EdgeRating;
+import de.uni_koblenz.jgstreetmap.routing.RouteCalculator.RoutingRestriction;
 
 public class MapPanel extends JPanel implements Printable {
 	private static final long serialVersionUID = 1L;
@@ -91,13 +93,13 @@ public class MapPanel extends JPanel implements Printable {
 	private boolean showWayIds = true;
 	private boolean showNodeIds = false;
 
-	private DijkstraRouteCalculator fastestRouteCalculator;
-	private DijkstraRouteCalculator shortestRouteCalculator;
-	private DijkstraRouteCalculator mostConvenientRouteCalculator;
+	private RouteCalculator fastestRouteCalculator;
+	private RouteCalculator shortestRouteCalculator;
+	private RouteCalculator mostConvenientRouteCalculator;
 	private boolean showRoutes = true;
-	private List<Segment> fastestRoute = null;
-	private List<Segment> shortestRoute = null;
-	private List<Segment> mostConvenientRoute = null;
+	private RoutingResult fastestRoute = null;
+	private RoutingResult shortestRoute = null;
+	private RoutingResult mostConvenientRoute = null;
 	private Node startNode = null;
 
 	private ResultPanel resultPanel;
@@ -199,12 +201,12 @@ public class MapPanel extends JPanel implements Printable {
 						} else {
 							printNode("Destination", dest);
 							if (startNode != null) {
-								fastestRoute = fastestRouteCalculator
-										.getRoute(dest);
+								fastestRoute = fastestRouteCalculator.getRoute(
+										dest, EdgeRating.TIME);
 								shortestRoute = shortestRouteCalculator
-										.getRoute(dest);
+										.getRoute(dest, EdgeRating.LENGTH);
 								mostConvenientRoute = mostConvenientRouteCalculator
-										.getRoute(dest);
+										.getRoute(dest, EdgeRating.CONVENIENCE);
 								if (showRoutes) {
 									repaint();
 								}
@@ -232,24 +234,9 @@ public class MapPanel extends JPanel implements Printable {
 			startNode = n;
 			resultPanel.clear();
 			printNode("Start", startNode);
-			resultPanel.println("Calculating new routes...");
-			long start = System.currentTimeMillis();
 			fastestRouteCalculator.setStart(startNode);
-			fastestRouteCalculator.calculateShortestRoutes(EdgeRating.TIME);
-			long stopFastest = System.currentTimeMillis();
 			shortestRouteCalculator.setStart(startNode);
-			shortestRouteCalculator.calculateShortestRoutes(EdgeRating.LENGTH);
-			long stopShortest = System.currentTimeMillis();
 			mostConvenientRouteCalculator.setStart(startNode);
-			mostConvenientRouteCalculator
-					.calculateShortestRoutes(EdgeRating.CONVENIENCE);
-			long stop = System.currentTimeMillis();
-			resultPanel.println("  fastest routes : " + (stopFastest - start)
-					+ "ms");
-			resultPanel.println("  shortest routes: "
-					+ (stopShortest - stopFastest) + "ms");
-			resultPanel.println("  most convenient routes: "
-					+ (stop - stopFastest) + "ms");
 		}
 	}
 
@@ -281,8 +268,9 @@ public class MapPanel extends JPanel implements Printable {
 		resultPanel.println();
 	}
 
-	private void printRoute(List<Segment> route,
-			DijkstraRouteCalculator calculator, EdgeRating rating) {
+	private void printRoute(RoutingResult result, RouteCalculator calculator,
+			EdgeRating rating) {
+		List<Segment> route = result.getRoute();
 		if (route == null) {
 			return;
 		}
@@ -306,6 +294,8 @@ public class MapPanel extends JPanel implements Printable {
 		}
 		resultPanel.println();
 		resultPanel.println(label);
+		resultPanel.println("Time needed for calculation: "
+				+ result.getRouteCalculationTime() / 1000d + " seconds");
 		if (route == null || route.size() < 1) {
 			resultPanel.println("not found :-(");
 			return;
@@ -474,13 +464,14 @@ public class MapPanel extends JPanel implements Printable {
 
 	}
 
-	private void paintRoute(Graphics2D g, List<Segment> route, LayoutInfo l) {
-		if (route == null || route.size() < 1) {
+	private void paintRoute(Graphics2D g, RoutingResult result, LayoutInfo l) {
+		if (result == null || result.getRoute() == null
+				|| result.getRoute().size() < 1) {
 			return;
 		}
 		Polygon poly = new Polygon();
 		Segment lastSeg = null;
-		for (Segment s : route) {
+		for (Segment s : result.getRoute()) {
 			Node n = (Node) s.getThis();
 			poly.addPoint(getPx(n.getLongitude()), getPy(n.getLatitude()));
 			lastSeg = s;
@@ -566,7 +557,7 @@ public class MapPanel extends JPanel implements Printable {
 		}
 
 		long stop = System.currentTimeMillis();
-//		System.out.println("time to paint map: " + (stop - start) + "ms");
+		// System.out.println("time to paint map: " + (stop - start) + "ms");
 	}
 
 	private boolean intersects(Node a, Node b) {
@@ -626,8 +617,8 @@ public class MapPanel extends JPanel implements Printable {
 		}
 
 		long stop = System.currentTimeMillis();
-//		System.out.println("time to compute visible elements: "
-//				+ (stop - start) + "ms");
+		// System.out.println("time to compute visible elements: "
+		// + (stop - start) + "ms");
 	}
 
 	private void paintGraph(Graphics2D g) {
