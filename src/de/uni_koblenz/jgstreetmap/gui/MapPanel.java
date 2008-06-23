@@ -294,7 +294,7 @@ public class MapPanel extends JPanel implements Printable {
 		}
 		resultPanel.println();
 		resultPanel.println(label);
-		resultPanel.println("Time needed for calculation: "
+		resultPanel.println("  Calculation time: "
 				+ result.getRouteCalculationTime() / 1000d + " seconds");
 		if (route == null || route.size() < 1) {
 			resultPanel.println("not found :-(");

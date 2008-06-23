@@ -211,15 +211,18 @@ public class AStarRouteCalculator extends RouteCalculator {
 		if (start == target)
 			return 0;
 
-		double sLat = start.getLatitude();
-		double sLong = start.getLongitude();
-		double tLat = target.getLatitude();
-		double tLong = target.getLongitude();
+		double sLat = start.getLatitude() * Math.PI / 180;
+		double sLong = start.getLongitude() * Math.PI / 180;
+		double tLat = target.getLatitude() * Math.PI / 180;
+		double tLong = target.getLongitude() * Math.PI / 180;
+		double earthRadius = 6378.3 * 1000;
 
 		double dist = Math.acos(Math.sin(sLat) * Math.sin(tLat)
-				+ Math.cos(sLat) * Math.cos(tLat) * Math.cos(sLong - tLong)) * 6378.3;
+				+ Math.cos(sLat) * Math.cos(tLat) * Math.cos(sLong - tLong))
+				* earthRadius;
 
-		// System.out.println("dist = " + dist);
+		// System.out.println("dist between " + start + " and target " + target
+		// + " = " + dist + " meters.");
 
 		switch (r) {
 		case LENGTH:
