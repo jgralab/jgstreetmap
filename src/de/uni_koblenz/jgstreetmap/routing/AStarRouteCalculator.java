@@ -117,7 +117,6 @@ public class AStarRouteCalculator extends RouteCalculator {
 					if (n == null) {
 						marker.mark(nextVertex, new AStarMark(newFValue,
 								newDist, currentSegment));
-						System.out.println("Adding " + nextVertex);
 						queue.offer(nextVertex);
 					} else if (n.distance > newDist) {
 						n.fvalue = newFValue;
@@ -219,6 +218,8 @@ public class AStarRouteCalculator extends RouteCalculator {
 
 		double dist = Math.acos(Math.sin(sLat) * Math.sin(tLat)
 				+ Math.cos(sLat) * Math.cos(tLat) * Math.cos(sLong - tLong)) * 6378.3;
+
+		// System.out.println("dist = " + dist);
 
 		switch (r) {
 		case LENGTH:

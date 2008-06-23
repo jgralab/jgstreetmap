@@ -12,6 +12,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -19,6 +20,7 @@ import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import de.uni_koblenz.jgstreetmap.gui.MapPanel.RoutingAlgorithms;
 import de.uni_koblenz.jgstreetmap.model.AnnotatedOsmGraph;
 
 public class MapFrame extends JFrame {
@@ -48,6 +50,11 @@ public class MapFrame extends JFrame {
 	private JCheckBox showNodeIdsButton;
 
 	private JCheckBox showRoutesButton;
+
+	private JComboBox algorithmComboBox;
+
+	private RoutingAlgorithms[] routingAlgorithms = {
+			RoutingAlgorithms.Dijkstra, RoutingAlgorithms.AStar };
 
 	// private OsmGraph graph;
 
@@ -145,6 +152,17 @@ public class MapFrame extends JFrame {
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				mapPanel.setShowRoutes(showRoutesButton.isSelected());
+			}
+		});
+
+		algorithmComboBox = new JComboBox(routingAlgorithms);
+		detailPanel.add(algorithmComboBox);
+		algorithmComboBox.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				mapPanel
+						.setRoutingAlgorithm((RoutingAlgorithms) algorithmComboBox
+								.getSelectedItem());
 			}
 		});
 

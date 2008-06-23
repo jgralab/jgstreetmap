@@ -36,6 +36,7 @@ import de.uni_koblenz.jgstreetmap.osmschema.Node;
 import de.uni_koblenz.jgstreetmap.osmschema.Way;
 import de.uni_koblenz.jgstreetmap.osmschema.routing.Segment;
 import de.uni_koblenz.jgstreetmap.osmschema.routing.SegmentType;
+import de.uni_koblenz.jgstreetmap.routing.AStarRouteCalculator;
 import de.uni_koblenz.jgstreetmap.routing.DijkstraRouteCalculator;
 import de.uni_koblenz.jgstreetmap.routing.RouteCalculator;
 import de.uni_koblenz.jgstreetmap.routing.RoutingResult;
@@ -104,18 +105,17 @@ public class MapPanel extends JPanel implements Printable {
 
 	private ResultPanel resultPanel;
 
+	public enum RoutingAlgorithms {
+		Dijkstra, AStar;
+	}
+
 	public MapPanel(AnnotatedOsmGraph graph, ResultPanel respnl) {
 		this.graph = graph;
 		this.resultPanel = respnl;
 
-		visibleElements = new BooleanGraphMarker(graph);
+		setRoutingAlgorithm(RoutingAlgorithms.Dijkstra);
 
-		fastestRouteCalculator = new DijkstraRouteCalculator(graph);
-		fastestRouteCalculator.setRestriction(RoutingRestriction.CAR);
-		shortestRouteCalculator = new DijkstraRouteCalculator(graph);
-		shortestRouteCalculator.setRestriction(RoutingRestriction.CAR);
-		mostConvenientRouteCalculator = new DijkstraRouteCalculator(graph);
-		mostConvenientRouteCalculator.setRestriction(RoutingRestriction.CAR);
+		visibleElements = new BooleanGraphMarker(graph);
 
 		startNode = null;
 		// (Node) graph.getOsmPrimitiveById(30432771);
@@ -230,7 +230,7 @@ public class MapPanel extends JPanel implements Printable {
 	}
 
 	private void setStartNode(Node n) {
-		if (n != null && n != startNode) {
+		if (n != null) {
 			startNode = n;
 			resultPanel.clear();
 			printNode("Start", startNode);
@@ -580,6 +580,31 @@ public class MapPanel extends JPanel implements Printable {
 			return false;
 		}
 		return true;
+	}
+
+	public void setRoutingAlgorithm(RoutingAlgorithms alg) {
+		switch (alg) {
+		case Dijkstra:
+			fastestRouteCalculator = new DijkstraRouteCalculator(graph);
+			shortestRouteCalculator = new DijkstraRouteCalculator(graph);
+			mostConvenientRouteCalculator = new DijkstraRouteCalculator(graph);
+			System.out.println("Choosen Dijkstra routing algorithm.");
+			break;
+		case AStar:
+			fastestRouteCalculator = new AStarRouteCalculator(graph);
+			shortestRouteCalculator = new AStarRouteCalculator(graph);
+			mostConvenientRouteCalculator = new AStarRouteCalculator(graph);
+			System.out.println("Choosen A* routing algorithm.");
+			break;
+		default:
+			System.err.println("Unknown RoutingAlgorithm selected! " + alg);
+		}
+		fastestRouteCalculator.setRestriction(RoutingRestriction.CAR);
+		shortestRouteCalculator.setRestriction(RoutingRestriction.CAR);
+		mostConvenientRouteCalculator.setRestriction(RoutingRestriction.CAR);
+
+		System.out.println("Setting start node to " + startNode);
+		setStartNode(startNode);
 	}
 
 	private void computeVisibleElements() {
