@@ -187,9 +187,13 @@ public class MapPanel extends JPanel implements Printable {
 					setCenter(latC - deltaLat, lonC - deltaLon);
 				} else {
 					// long start = System.currentTimeMillis();
-					List<Neighbour> neighbours = KDTreeQueries.neighboursKD(
+					List<Neighbour> neighbours = null;
+					// for (int n = 0; n < 1000; ++n) {
+					neighbours = KDTreeQueries.neighboursKD(
 							MapPanel.this.graph, lat, lon, 100.0);
+					// }
 					// long stop = System.currentTimeMillis();
+					// System.out.println("Time:" + (stop - start));
 					resultPanel.clear();
 					if (neighbours != null && neighbours.size() >= 1) {
 						Node dest = neighbours.get(0).getNode();
@@ -492,7 +496,7 @@ public class MapPanel extends JPanel implements Printable {
 	 *            graphics context for paint operations
 	 */
 	private void paintMap(Graphics2D g) {
-		long start = System.currentTimeMillis();
+		// long start = System.currentTimeMillis();
 
 		g.setRenderingHints(antialiasOn);
 
@@ -556,7 +560,7 @@ public class MapPanel extends JPanel implements Printable {
 			}
 		}
 
-		long stop = System.currentTimeMillis();
+		// long stop = System.currentTimeMillis();
 		// System.out.println("time to paint map: " + (stop - start) + "ms");
 	}
 
@@ -608,7 +612,7 @@ public class MapPanel extends JPanel implements Printable {
 	}
 
 	private void computeVisibleElements() {
-		long start = System.currentTimeMillis();
+		// long start = System.currentTimeMillis();
 		visibleElements.clear();
 		if (showWaysInGraph || showMap) {
 			WAY: for (Way w : graph.getWayVertices()) {
@@ -641,7 +645,7 @@ public class MapPanel extends JPanel implements Printable {
 			}
 		}
 
-		long stop = System.currentTimeMillis();
+		// long stop = System.currentTimeMillis();
 		// System.out.println("time to compute visible elements: "
 		// + (stop - start) + "ms");
 	}
