@@ -146,5 +146,13 @@
 		<!-- calls target document in general ant file ../common/build.xml -->
 		<ant dir="${common.dir}" antfile="build.xml" target="document" />
 	</target>
+	
+		<!-- convertschema -->
+	<!-- convert xmi schema into tg schema -->
+	<target name="convertschema">
+		<java jar="${common.dir}/lib/saxon/saxon9.jar" fork="true">
+			<arg line="-s:OsmSchema.xmi -xsl:../jgralab/src/de/uni_koblenz/jgralab/utilities/xmi2tgschema/XMI2TGSchema.xsl -o:src/de/uni_koblenz/jgstreetmap/OsmSchema.tg tool=ea schemaName=de.uni_koblenz.jgstreetmap.osmschema.OsmSchema"/>
+		</java>
+	</target>
 
 </project>
