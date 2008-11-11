@@ -4,11 +4,11 @@ import java.util.Collections;
 import java.util.LinkedList;
 
 import de.uni_koblenz.jgstreetmap.model.AnnotatedOsmGraph;
-import de.uni_koblenz.jgstreetmap.osmschema.Node;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.KDTree;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.NodeSet;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.XKey;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.YKey;
+import de.uni_koblenz.jgstreetmap.osmschema.map.Node;
 
 public class KDTreeBuilder {
 	public static void buildTree(AnnotatedOsmGraph g, int maxLevels) {

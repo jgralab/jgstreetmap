@@ -13,10 +13,6 @@ import java.util.TreeSet;
 
 import de.uni_koblenz.jgralab.GraphMarker;
 import de.uni_koblenz.jgralab.Vertex;
-import de.uni_koblenz.jgstreetmap.osmschema.Node;
-import de.uni_koblenz.jgstreetmap.osmschema.OsmPrimitive;
-import de.uni_koblenz.jgstreetmap.osmschema.Tag;
-import de.uni_koblenz.jgstreetmap.osmschema.Way;
 import de.uni_koblenz.jgstreetmap.osmschema.impl.OsmGraphImpl;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.HasRoot;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.KDTree;
@@ -24,6 +20,10 @@ import de.uni_koblenz.jgstreetmap.osmschema.kdtree.Key;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.NodeSet;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.XKey;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.YKey;
+import de.uni_koblenz.jgstreetmap.osmschema.map.Node;
+import de.uni_koblenz.jgstreetmap.osmschema.map.OsmPrimitive;
+import de.uni_koblenz.jgstreetmap.osmschema.map.Tag;
+import de.uni_koblenz.jgstreetmap.osmschema.map.Way;
 import de.uni_koblenz.jgstreetmap.routing.Segmentator;
 
 public class AnnotatedOsmGraph extends OsmGraphImpl {
@@ -31,7 +31,7 @@ public class AnnotatedOsmGraph extends OsmGraphImpl {
 	private GraphMarker<LayoutInfo> layoutInfo;
 	private SortedMap<Integer, List<Way>> orderedWays;
 	private KDTree kdTree;
-	
+
 	public AnnotatedOsmGraph(String id, int vmax, int emax) {
 		super(id, vmax, emax);
 		osmIdMap = new HashMap<Long, OsmPrimitive>();
@@ -79,7 +79,7 @@ public class AnnotatedOsmGraph extends OsmGraphImpl {
 		for (String n : new TreeSet<String>(m.keySet())) {
 			System.err.println(m.get(n) + "\t" + n);
 		}
-		
+
 		kdTree = getFirstKDTree();
 	}
 
@@ -154,7 +154,7 @@ public class AnnotatedOsmGraph extends OsmGraphImpl {
 		}
 		return kdTree;
 	}
-	
+
 	public static class Neighbour implements Comparable<Neighbour> {
 		private Node node;
 		private double distance;

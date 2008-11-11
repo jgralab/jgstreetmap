@@ -1,6 +1,6 @@
 package de.uni_koblenz.jgstreetmap.routing;
 
-import de.uni_koblenz.jgstreetmap.osmschema.Node;
+import de.uni_koblenz.jgstreetmap.osmschema.map.Node;
 import de.uni_koblenz.jgstreetmap.osmschema.routing.Segment;
 
 public class GpsTools {

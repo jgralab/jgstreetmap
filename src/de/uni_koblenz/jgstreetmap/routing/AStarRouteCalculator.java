@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package de.uni_koblenz.jgstreetmap.routing;
 
@@ -11,14 +11,14 @@ import java.util.Stack;
 import java.util.TreeSet;
 
 import de.uni_koblenz.jgralab.GraphMarker;
-import de.uni_koblenz.jgstreetmap.osmschema.Node;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmGraph;
+import de.uni_koblenz.jgstreetmap.osmschema.map.Node;
 import de.uni_koblenz.jgstreetmap.osmschema.routing.Segment;
 import de.uni_koblenz.jgstreetmap.osmschema.routing.SegmentType;
 
 /**
- * @author tassilo
- * 
+ * @author Tassilo Horn
+ *
  */
 public class AStarRouteCalculator extends RouteCalculator {
 	GraphMarker<AStarMark> marker;
@@ -139,8 +139,9 @@ public class AStarRouteCalculator extends RouteCalculator {
 	}
 
 	private double calculateHeuristic(Node start, Node target, EdgeRating r) {
-		if (start == target)
+		if (start == target) {
 			return 0;
+		}
 
 		double sLat = start.getLatitude() * Math.PI / 180;
 		double sLong = start.getLongitude() * Math.PI / 180;

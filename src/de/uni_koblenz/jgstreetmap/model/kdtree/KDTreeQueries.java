@@ -6,14 +6,14 @@ import java.util.List;
 
 import de.uni_koblenz.jgstreetmap.model.AnnotatedOsmGraph;
 import de.uni_koblenz.jgstreetmap.model.AnnotatedOsmGraph.Neighbour;
-import de.uni_koblenz.jgstreetmap.osmschema.HasElement;
-import de.uni_koblenz.jgstreetmap.osmschema.Node;
+import de.uni_koblenz.jgstreetmap.osmschema.kdtree.HasElement;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.HasXChild;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.HasYChild;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.Key;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.NodeSet;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.XKey;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.YKey;
+import de.uni_koblenz.jgstreetmap.osmschema.map.Node;
 import de.uni_koblenz.jgstreetmap.routing.GpsTools;
 import de.uni_koblenz.jgstreetmap.routing.Segmentator;
 
@@ -142,7 +142,7 @@ public class KDTreeQueries {
 	 * examines for every Node of the given NodeSet set if the Node is contained
 	 * by the rectangle defined by its vertex at the upper left corner and its
 	 * vertex at the lower right corner
-	 * 
+	 *
 	 * @param g
 	 * @param topLeftLong
 	 *            longitude of the vertex at the upper left corner of the
@@ -180,40 +180,42 @@ public class KDTreeQueries {
 		}
 		// System.out.println(c + " Nodes");
 	}
-	
+
 	public static Node nearestNodeStart(AnnotatedOsmGraph g, double lat, double lon){
 		Key key=(Key)g.getKDTree().getFirstHasRoot().getThat();
-		if((key instanceof XKey)||(key instanceof YKey))
+		if((key instanceof XKey)||(key instanceof YKey)) {
 			return nearestNode(g,key,lat,lon);
-		else{
+		} else{
 			throw new RuntimeException("Unexpected KD root type "+ key.getM1Class());
 		}
 	}
-	
+
 	public static Node nearestNode(AnnotatedOsmGraph g, Key key, double lat, double lon){
 		double keyVal=key.getKeyValue();
 		if(key instanceof XKey){
 			HasXChild leftChild=((XKey)key).getFirstHasXChild();
-			if(lon<=keyVal)
+			if(lon<=keyVal) {
 				return nearestNode(g,(XKey)leftChild.getThat(),lat,lon);
-			else
+			} else {
 				return nearestNode(g,(XKey)leftChild.getNextHasXChild().getThat(),lat,lon);
+			}
 		}
 		else{
 			HasYChild leftChild=((YKey)key).getFirstHasYChild();
-			if(lat<=keyVal)
+			if(lat<=keyVal) {
 				return nearestNode(g,(YKey)leftChild.getThat(),lat,lon);
-			else
+			} else {
 				return nearestNode(g,(YKey)leftChild.getNextHasYChild().getThat(),lat,lon);
+			}
 		}
 	}
-	
+
 	public static double getDistance(Node n,double lat, double lon){
 		double helpX=(n.getLongitude()-lon)*(n.getLongitude()-lon);
 		double helpY=(n.getLatitude()-lat)*(n.getLatitude()-lat);
 		return Math.sqrt(helpX+helpY);
 	}
-	
+
 	public static Node nearestNode(AnnotatedOsmGraph g, NodeSet set, double lat, double lon){
 		double dist;
 		Node n;

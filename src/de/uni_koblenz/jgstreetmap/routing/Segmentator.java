@@ -13,10 +13,10 @@ import de.uni_koblenz.jgralab.GraphIOException;
 import de.uni_koblenz.jgralab.Vertex;
 import de.uni_koblenz.jgralab.impl.ProgressFunctionImpl;
 import de.uni_koblenz.jgstreetmap.model.AnnotatedOsmGraph;
-import de.uni_koblenz.jgstreetmap.osmschema.Node;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmGraph;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmSchema;
-import de.uni_koblenz.jgstreetmap.osmschema.Way;
+import de.uni_koblenz.jgstreetmap.osmschema.map.Node;
+import de.uni_koblenz.jgstreetmap.osmschema.map.Way;
 import de.uni_koblenz.jgstreetmap.osmschema.routing.Segment;
 import de.uni_koblenz.jgstreetmap.osmschema.routing.SegmentType;
 

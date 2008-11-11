@@ -31,9 +31,9 @@ import de.uni_koblenz.jgstreetmap.model.AnnotatedOsmGraph;
 import de.uni_koblenz.jgstreetmap.model.LayoutInfo;
 import de.uni_koblenz.jgstreetmap.model.AnnotatedOsmGraph.Neighbour;
 import de.uni_koblenz.jgstreetmap.model.kdtree.KDTreeQueries;
-import de.uni_koblenz.jgstreetmap.osmschema.HasNode;
-import de.uni_koblenz.jgstreetmap.osmschema.Node;
-import de.uni_koblenz.jgstreetmap.osmschema.Way;
+import de.uni_koblenz.jgstreetmap.osmschema.map.HasNode;
+import de.uni_koblenz.jgstreetmap.osmschema.map.Node;
+import de.uni_koblenz.jgstreetmap.osmschema.map.Way;
 import de.uni_koblenz.jgstreetmap.osmschema.routing.Segment;
 import de.uni_koblenz.jgstreetmap.osmschema.routing.SegmentType;
 import de.uni_koblenz.jgstreetmap.routing.AStarRouteCalculator;
@@ -176,6 +176,7 @@ public class MapPanel extends JPanel implements Printable {
 
 			// Computes translation of the mouse coordinates and recenters the
 			// map to the new position
+			@Override
 			public void mouseReleased(MouseEvent e) {
 				super.mouseReleased(e);
 				double lat = getLat(mousePos.y);
@@ -360,7 +361,7 @@ public class MapPanel extends JPanel implements Printable {
 	/**
 	 * Computes the x position on this MapPanel for a given longitude
 	 * <code>lon</code>.
-	 * 
+	 *
 	 * @param lon
 	 *            a longitude value
 	 * @return the x position
@@ -374,7 +375,7 @@ public class MapPanel extends JPanel implements Printable {
 	/**
 	 * Computes the y position on this MapPanel for a given latitude
 	 * <code>lat</code>.
-	 * 
+	 *
 	 * @param lat
 	 *            a latitude value
 	 * @return the y position
@@ -389,7 +390,7 @@ public class MapPanel extends JPanel implements Printable {
 	/**
 	 * Computes the latitude value for a given <code>y</code> position on this
 	 * MapPanel.
-	 * 
+	 *
 	 * @param y
 	 *            an y position
 	 * @return the latitude value
@@ -402,7 +403,7 @@ public class MapPanel extends JPanel implements Printable {
 	/**
 	 * Computes the longitude value for a given <code>x</code> position on
 	 * this MapPanel.
-	 * 
+	 *
 	 * @param x
 	 *            an x position
 	 * @return the longitude value
@@ -491,7 +492,7 @@ public class MapPanel extends JPanel implements Printable {
 
 	/**
 	 * Paints the map in the coordinate range latS..latN/lonW..lonE.
-	 * 
+	 *
 	 * @param g
 	 *            graphics context for paint operations
 	 */
@@ -864,7 +865,7 @@ public class MapPanel extends JPanel implements Printable {
 
 	/**
 	 * Paints a frame of width FRAMEWIDTH around the border of this MapPanel.
-	 * 
+	 *
 	 * @param g
 	 *            graphics context for paint operations
 	 */
@@ -949,7 +950,7 @@ public class MapPanel extends JPanel implements Printable {
 		g.drawString(s, getWidth() - FRAMEWIDTH
 				- g.getFontMetrics().stringWidth(s), g.getFont().getSize());
 
-		Graphics2D g2 = (Graphics2D) g;
+		Graphics2D g2 = g;
 		s = formatLatitude(latN);
 		AffineTransform t = g2.getTransform();
 		g2.rotate(-Math.PI / 2, g.getFont().getSize(), FRAMEWIDTH
@@ -974,7 +975,7 @@ public class MapPanel extends JPanel implements Printable {
 
 	/**
 	 * Formats a longitude value <code>lon</code>.
-	 * 
+	 *
 	 * @param lon
 	 *            a longitude value, -180.0 &lt;= lon &lt;= 180.0
 	 * @return a nice string representation
@@ -987,7 +988,7 @@ public class MapPanel extends JPanel implements Printable {
 
 	/**
 	 * Formats a latitude value <code>lan</code>.
-	 * 
+	 *
 	 * @param lat
 	 *            a latitude value, -90.0 &lt;= lon &lt;= 90.0
 	 * @return a nice string representation
@@ -1001,11 +1002,11 @@ public class MapPanel extends JPanel implements Printable {
 	/**
 	 * Formats a degrees value into a String d&#176;mm.ff'H, where H is p for
 	 * positive values, and H is n for negative values. Example:
-	 * 
+	 *
 	 * formatPos(54.5, 'N', 'S') --> 54&#176;30.00'N
-	 * 
+	 *
 	 * formatPos(-10.5, 'E', 'W') --> 10&#176;30.00'W
-	 * 
+	 *
 	 * @param degrees
 	 *            value in degrees and decimal fractions
 	 * @param p
@@ -1038,7 +1039,7 @@ public class MapPanel extends JPanel implements Printable {
 	/**
 	 * Sets the center of the map display to the specified position
 	 * <code>lat</code>, <code>lon</code>.
-	 * 
+	 *
 	 * @param lat
 	 *            latitude of the new center
 	 * @param lon

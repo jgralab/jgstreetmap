@@ -3,8 +3,8 @@ package de.uni_koblenz.jgstreetmap.routing;
 import java.util.List;
 import java.util.Set;
 
-import de.uni_koblenz.jgstreetmap.osmschema.Node;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmGraph;
+import de.uni_koblenz.jgstreetmap.osmschema.map.Node;
 import de.uni_koblenz.jgstreetmap.osmschema.routing.Segment;
 import de.uni_koblenz.jgstreetmap.osmschema.routing.SegmentType;
 
@@ -146,9 +146,10 @@ public abstract class RouteCalculator {
 			// } else {
 			// return 0;
 			// }
-			if (previous != null)
+			if (previous != null) {
 				return (previous.getWayId() == s.getWayId()) ? s.getLength()
 						: s.getLength() + INCONVENIENCEVALUE;
+			}
 			return s.getLength();
 		default:
 			return Double.MAX_VALUE;
