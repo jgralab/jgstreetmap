@@ -50,7 +50,6 @@ public class OsmImporter extends DefaultHandler {
 		String filename = (args.length > 0) ? args[0] : "map.osm.xml";
 		System.out.println("OSM to TGraph");
 		System.out.println("=============");
-		// new OsmImporter().importOsm("rheinland-pfalz.osm.xml");
 		OsmSchema.instance().getGraphFactory().setGraphImplementationClass(
 				OsmGraph.class, AnnotatedOsmGraph.class);
 		new OsmImporter().importOsm(filename);
