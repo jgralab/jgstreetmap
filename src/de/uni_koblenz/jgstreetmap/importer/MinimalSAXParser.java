@@ -20,8 +20,13 @@ public class MinimalSAXParser {
 
 	private int la, in;
 
+	private int line;
+
 	void getNext() throws SAXException {
 		in = la;
+		if (in == '\n') {
+			++line;
+		}
 		try {
 			la = rdr.read();
 		} catch (IOException e) {
@@ -35,7 +40,6 @@ public class MinimalSAXParser {
 		StringBuffer attrValue = new StringBuffer();
 		StringBuffer chars = new StringBuffer();
 		AttributesImpl attrs = null;
-
 		try {
 			rdr = new BufferedReader(new InputStreamReader(new FileInputStream(
 					uri), "UTF-8"));
@@ -44,6 +48,7 @@ public class MinimalSAXParser {
 		} catch (UnsupportedEncodingException e) {
 			throw new SAXException("Can't parse document", e);
 		}
+		line = 0;
 		getNext();
 		if (la < 0) {
 			return;
@@ -164,5 +169,9 @@ public class MinimalSAXParser {
 			}
 		}
 		handler.endDocument();
+	}
+
+	public int getLine() {
+		return line;
 	}
 }

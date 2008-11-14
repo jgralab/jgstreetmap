@@ -41,6 +41,7 @@ public class OsmImporter extends DefaultHandler {
 	private List<Tag> currentTagList;
 	private int nodeCount;
 	private static final int MAX_SET_MEMBERS = 512;
+	private MinimalSAXParser parser;
 
 	public OsmImporter() {
 		dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
@@ -56,7 +57,7 @@ public class OsmImporter extends DefaultHandler {
 	}
 
 	public void importOsm(String fileName) {
-		MinimalSAXParser parser = new MinimalSAXParser();
+		parser = new MinimalSAXParser();
 		try {
 			state = State.INIT;
 			currentPrimitive = null;
@@ -154,6 +155,7 @@ public class OsmImporter extends DefaultHandler {
 					graph.createHasNode((Way) currentPrimitive, n);
 				}
 			} catch (ClassCastException e) {
+				System.err.println("Line number: " + parser.getLine());
 				e.printStackTrace();
 			}
 

@@ -15,22 +15,43 @@ import javax.swing.Timer;
 
 import de.uni_koblenz.jgralab.ProgressFunction;
 
+/**
+ * A ProgressFunction to display a graphical progress bar in a Swing GUI. A
+ * JFrame is automatically created on initialisation, and also automatically
+ * disposed after finishing.
+ * 
+ * @author riediger
+ * 
+ */
 public class SwingProgressFunction implements ProgressFunction, ActionListener {
 	private JFrame wnd;
 	private JProgressBar pb;
 	private String title;
 	private String label;
-	private long steps;
+	private long totalElements;
 	private BoundedRangeModel brm;
 	private JLabel lbl;
 	private long startTime;
 	private Timer timer;
 
+	/**
+	 * Creates a ProgressFunction to display progress in a Swing GUI.
+	 * 
+	 * @param title
+	 *            title for the JFrame of the progress display
+	 * @param label
+	 *            text to be displayed above the progress bar
+	 */
 	public SwingProgressFunction(String title, String label) {
 		this.title = title;
 		this.label = label;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see de.uni_koblenz.jgralab.ProgressFunction#finished()
+	 */
 	@Override
 	public void finished() {
 		brm.setValue(brm.getMaximum());
@@ -39,14 +60,25 @@ public class SwingProgressFunction implements ProgressFunction, ActionListener {
 		timer.start();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see de.uni_koblenz.jgralab.ProgressFunction#getUpdateInterval()
+	 */
 	@Override
-	public long getInterval() {
-		return brm.getMaximum() > steps ? 1 : steps / brm.getMaximum();
+	public long getUpdateInterval() {
+		return brm.getMaximum() > totalElements ? 1 : totalElements
+				/ brm.getMaximum();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see de.uni_koblenz.jgralab.ProgressFunction#init(long)
+	 */
 	@Override
-	public void init(long steps) {
-		this.steps = steps;
+	public void init(long totalElements) {
+		this.totalElements = totalElements;
 		wnd = new JFrame(title);
 		wnd.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		wnd.setResizable(false);
@@ -56,7 +88,7 @@ public class SwingProgressFunction implements ProgressFunction, ActionListener {
 		pb = new JProgressBar();
 		brm = new DefaultBoundedRangeModel();
 		pb.setModel(brm);
-		lbl = new JLabel("", JLabel.CENTER);
+		lbl = new JLabel("####### elements, ##.###s", JLabel.CENTER);
 
 		wnd.getContentPane().add(new JLabel(label, JLabel.CENTER),
 				BorderLayout.NORTH);
@@ -65,26 +97,36 @@ public class SwingProgressFunction implements ProgressFunction, ActionListener {
 		wnd.getContentPane().add(new JPanel(), BorderLayout.WEST);
 		wnd.getContentPane().add(new JPanel(), BorderLayout.EAST);
 		startTime = System.currentTimeMillis();
-		setTimeText();
 		wnd.pack();
+		setTimeText();
 		wnd.setVisible(true);
 	}
 
 	private void setTimeText() {
 		lbl
-				.setText(steps + " elements, elapsed time: "
+				.setText(totalElements + " elements, "
 						+ ((System.currentTimeMillis() - startTime) / 100)
 						/ 10.0 + "s");
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see de.uni_koblenz.jgralab.ProgressFunction#progress(long)
+	 */
 	@Override
-	public void progress(long progress) {
+	public void progress(long processedElements) {
 		if (brm.getValue() < brm.getMaximum()) {
 			brm.setValue(brm.getValue() + 1);
 			setTimeText();
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		timer.stop();
