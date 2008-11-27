@@ -1,7 +1,6 @@
 Schema de.uni_koblenz.jgstreetmap.osmschema.OsmSchema;
 GraphClass OsmGraph;
 EnumDomain routing.SegmentType (NOWAY, CYCLEWAY, MOTORWAY, PRIMARY, SECONDARY, TERTIARY, RESIDENTIAL, FOOTWAY, UNSURFACED, SERVICE, WORMHOLE);
-RecordDomain map.Tag (key: String, value: String);
 Package kdtree;
 Package map;
 Package routing;
@@ -13,7 +12,7 @@ VertexClass kdtree.XKey: kdtree.Key;
 VertexClass kdtree.YKey: kdtree.Key;
 VertexClass map.Area: map.Way;
 VertexClass map.Node: map.OsmPrimitive {latitude: Double, longitude: Double};
-abstract VertexClass map.OsmPrimitive {osmId: Long, tags: List<map.Tag>, timestamp: Long, user: String};
+abstract VertexClass map.OsmPrimitive {osmId: Long, tags: Map<String, String>, timestamp: Long, user: String};
 VertexClass map.Relation: map.OsmPrimitive;
 VertexClass map.Way: map.OsmPrimitive {closed: Boolean, wayType: routing.SegmentType};
 AggregationClass kdtree.HasRoot from kdtree.KDTree (0,1) role tree to kdtree.Key (1,1) role root aggregate from;
