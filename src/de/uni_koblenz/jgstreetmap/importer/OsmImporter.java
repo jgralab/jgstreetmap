@@ -2,7 +2,6 @@ package de.uni_koblenz.jgstreetmap.importer;
 
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +22,6 @@ import de.uni_koblenz.jgstreetmap.osmschema.map.HasMember;
 import de.uni_koblenz.jgstreetmap.osmschema.map.Node;
 import de.uni_koblenz.jgstreetmap.osmschema.map.OsmPrimitive;
 import de.uni_koblenz.jgstreetmap.osmschema.map.Relation;
-import de.uni_koblenz.jgstreetmap.osmschema.map.Tag;
 import de.uni_koblenz.jgstreetmap.osmschema.map.Way;
 import de.uni_koblenz.jgstreetmap.routing.Segmentator;
 
@@ -38,7 +36,7 @@ public class OsmImporter extends DefaultHandler {
 	private AnnotatedOsmGraph graph;
 	private SimpleDateFormat dateFormat;
 	private OsmPrimitive currentPrimitive;
-	private List<Tag> currentTagList;
+	private Map<String, String> currentTagMap;
 	private int nodeCount;
 	private static final int MAX_SET_MEMBERS = 512;
 	private MinimalSAXParser parser;
@@ -61,7 +59,7 @@ public class OsmImporter extends DefaultHandler {
 		try {
 			state = State.INIT;
 			currentPrimitive = null;
-			currentTagList = null;
+			currentTagMap = null;
 			parser.parse(fileName, this);
 		} catch (SAXException e) {
 			// TODO Auto-generated catch block
@@ -161,8 +159,8 @@ public class OsmImporter extends DefaultHandler {
 
 		} else if (state != State.INIT && state != State.OSM
 				&& name.equals("tag")) {
-			if (currentTagList == null) {
-				currentTagList = new ArrayList<Tag>();
+			if (currentTagMap == null) {
+				currentTagMap = new HashMap<String, String>();
 			}
 			String v = atts.getValue("v");
 			v = v.replaceAll("&apos;", "'");
@@ -170,7 +168,7 @@ public class OsmImporter extends DefaultHandler {
 			v = v.replaceAll("&lt;", "<");
 			v = v.replaceAll("&quot;", "\"");
 			v = v.replaceAll("&amp;", "&");
-			currentTagList.add(new Tag(atts.getValue("k"), v));
+			currentTagMap.put(atts.getValue("k"), v);
 
 		} else if (state == State.RELATION && name.equals("member")) {
 			String type = atts.getValue("type");
@@ -189,7 +187,7 @@ public class OsmImporter extends DefaultHandler {
 		} else if (state == State.INIT && name.equals("osm")) {
 			state = State.OSM;
 			currentPrimitive = null;
-			currentTagList = null;
+			currentTagMap = null;
 
 		} else {
 			throw new RuntimeException("Yee! Found element '" + name
@@ -218,7 +216,7 @@ public class OsmImporter extends DefaultHandler {
 			throws SAXException {
 		if (name.equals("node") || name.equals("way")
 				|| name.equals("relation")) {
-			currentPrimitive.setTags(currentTagList);
+			currentPrimitive.setTags(currentTagMap);
 			if (state == State.WAY) {
 				Way w = (Way) currentPrimitive;
 				List<? extends Node> nl = w.getNodeList();
@@ -226,7 +224,7 @@ public class OsmImporter extends DefaultHandler {
 						&& nl.get(0) == nl.get(nl.size() - 1));
 			}
 			currentPrimitive = null;
-			currentTagList = null;
+			currentTagMap = null;
 			state = State.OSM;
 		}
 	}

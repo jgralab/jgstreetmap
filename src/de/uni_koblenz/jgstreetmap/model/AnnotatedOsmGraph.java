@@ -22,7 +22,6 @@ import de.uni_koblenz.jgstreetmap.osmschema.kdtree.XKey;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.YKey;
 import de.uni_koblenz.jgstreetmap.osmschema.map.Node;
 import de.uni_koblenz.jgstreetmap.osmschema.map.OsmPrimitive;
-import de.uni_koblenz.jgstreetmap.osmschema.map.Tag;
 import de.uni_koblenz.jgstreetmap.osmschema.map.Way;
 import de.uni_koblenz.jgstreetmap.routing.Segmentator;
 
@@ -96,14 +95,9 @@ public class AnnotatedOsmGraph extends OsmGraphImpl {
 	}
 
 	public static String getTag(OsmPrimitive o, String key) {
-		List<Tag> tagList = o.getTags();
-		if (tagList == null) {
-			return null;
-		}
-		for (Tag t : tagList) {
-			if (t.key.equals(key)) {
-				return t.value;
-			}
+		Map<String, String> tags = o.getTags();
+		if (tags != null) {
+			return tags.get(key);
 		}
 		return null;
 	}
@@ -119,25 +113,25 @@ public class AnnotatedOsmGraph extends OsmGraphImpl {
 		Stack<Key> s = new Stack<Key>();
 		HasRoot e = kdTree.getFirstHasRoot();
 		if (e != null) {
-		s.push((Key) e.getThat());
-		while (!s.empty()) {
-			Key current = s.pop();
-			NodeSet ns = (NodeSet) current.getFirstHasSet().getThat();
-			if (ns != null) {
-				ns.delete();
-			} else {
-				if (current instanceof XKey) {
-					for (Key k : ((XKey) current).getChildList()) {
-						s.push(k);
-					}
+			s.push((Key) e.getThat());
+			while (!s.empty()) {
+				Key current = s.pop();
+				NodeSet ns = (NodeSet) current.getFirstHasSet().getThat();
+				if (ns != null) {
+					ns.delete();
 				} else {
-					for (Key k : ((YKey) current).getChildList()) {
-						s.push(k);
+					if (current instanceof XKey) {
+						for (Key k : ((XKey) current).getChildList()) {
+							s.push(k);
+						}
+					} else {
+						for (Key k : ((YKey) current).getChildList()) {
+							s.push(k);
+						}
 					}
+					current.delete();
 				}
-				current.delete();
 			}
-		}
 		}
 		kdTree.delete();
 		kdTree = null;
@@ -166,7 +160,8 @@ public class AnnotatedOsmGraph extends OsmGraphImpl {
 
 		@Override
 		public int compareTo(Neighbour o) {
-			return (distance < o.distance) ? -1 : (distance > o.distance) ? 1 : 0;
+			return (distance < o.distance) ? -1 : (distance > o.distance) ? 1
+					: 0;
 		}
 
 		public Node getNode() {
