@@ -4,6 +4,7 @@ import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -40,9 +41,23 @@ public class OsmImporter extends DefaultHandler {
 	private int nodeCount;
 	private static final int MAX_SET_MEMBERS = 512;
 	private MinimalSAXParser parser;
+	private HashSet<String> usedTags;
 
 	public OsmImporter() {
 		dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+		usedTags = new HashSet<String>(10);
+		// Only these tags which are needed for visualizing the map and routing
+		// are saved in the graph.
+		usedTags.add("highway");
+		usedTags.add("waterway");
+		usedTags.add("cycleway");
+		usedTags.add("railway");
+		usedTags.add("landuse");
+		usedTags.add("amenity");
+		usedTags.add("place");
+		usedTags.add("natural");
+		usedTags.add("oneway");
+		usedTags.add("name");
 	}
 
 	public static void main(String[] args) {
@@ -162,13 +177,17 @@ public class OsmImporter extends DefaultHandler {
 			if (currentTagMap == null) {
 				currentTagMap = new HashMap<String, String>();
 			}
+			String key = atts.getValue("k");
+			if (!usedTags.contains(key)) {
+				return;
+			}
 			String v = atts.getValue("v");
 			v = v.replaceAll("&apos;", "'");
 			v = v.replaceAll("&gt;", ">");
 			v = v.replaceAll("&lt;", "<");
 			v = v.replaceAll("&quot;", "\"");
 			v = v.replaceAll("&amp;", "&");
-			currentTagMap.put(atts.getValue("k"), v);
+			currentTagMap.put(key, v);
 
 		} else if (state == State.RELATION && name.equals("member")) {
 			String type = atts.getValue("type");
