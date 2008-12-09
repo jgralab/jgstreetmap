@@ -200,10 +200,12 @@ public class MapPanel extends JPanel implements Printable {
 						Node dest = neighbours.get(0).getNode();
 						if (mouseSetStartNode) {
 							setStartNode(dest);
+							printNode("Start", startNode);
 							setCursor(Cursor
 									.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 							mouseSetStartNode = false;
 						} else {
+							printNode("Start", startNode);
 							printNode("Destination", dest);
 							if (startNode != null) {
 								fastestRoute = fastestRouteCalculator.getRoute(
@@ -238,7 +240,6 @@ public class MapPanel extends JPanel implements Printable {
 		if (n != null) {
 			startNode = n;
 			resultPanel.clear();
-			printNode("Start", startNode);
 			fastestRouteCalculator.setStart(startNode);
 			shortestRouteCalculator.setStart(startNode);
 			mostConvenientRouteCalculator.setStart(startNode);
@@ -249,7 +250,7 @@ public class MapPanel extends JPanel implements Printable {
 		if (n == null) {
 			return;
 		}
-		resultPanel.print(label + ":");
+		resultPanel.printLabel(label + ":", Color.black);
 		boolean foundName = false;
 		for (Way w : n.getWayList()) {
 			String name = AnnotatedOsmGraph.getTag(w, "name");
@@ -263,12 +264,12 @@ public class MapPanel extends JPanel implements Printable {
 				}
 			}
 			if (name != null && name.length() > 0) {
-				resultPanel.print(" " + name);
+				resultPanel.print("  " + name);
 				foundName = true;
 			}
 		}
 		if (!foundName) {
-			resultPanel.print("Node " + n.getOsmId());
+			resultPanel.print("  Node " + n.getOsmId());
 		}
 		resultPanel.println();
 	}
@@ -279,26 +280,28 @@ public class MapPanel extends JPanel implements Printable {
 		if (route == null) {
 			return;
 		}
-		String label = null;
 		double length = calculator.calculateCompleteWeight(route,
 				EdgeRating.LENGTH) / 1000.0;
 		double time = calculator
 				.calculateCompleteWeight(route, EdgeRating.TIME) / 3600;
 		// double degree = calculator.calculateCompleteWeight(route,
 		// EdgeRating.CONVENIENCE);
+		resultPanel.println();
 		switch (rating) {
 		case TIME:
-			label = "Fastest route";
+			resultPanel.printLabel("Fastest Route:",
+					LayoutInfo.FASTEST_ROUTE.bgColor);
 			break;
 		case LENGTH:
-			label = "Shortest route";
+			resultPanel.printLabel("Shortest Route:",
+					LayoutInfo.SHORTEST_ROUTE.bgColor);
 			break;
 		case CONVENIENCE:
-			label = "Most convenient route";
+			resultPanel.printLabel("Most convenient Route:",
+					LayoutInfo.MOSTCONVENIENT_ROUTE.bgColor);
 			break;
 		}
-		resultPanel.println();
-		resultPanel.println(label);
+
 		resultPanel.println("  Calculation time: "
 				+ result.getRouteCalculationTime() / 1000d + " seconds");
 		if (route == null || route.size() < 1) {
@@ -309,8 +312,10 @@ public class MapPanel extends JPanel implements Printable {
 				+ "km");
 
 		long hrs = (long) Math.floor(time);
-		long min = Math.round((time - hrs) * 60.0);
-		resultPanel.println("  Time  : " + hrs + " h " + min + " min");
+		long min = (long) Math.floor((time - hrs) * 60.0);
+		long sec = Math.round((time - (hrs + min / 60d)) * 60 * 60);
+		resultPanel.println("  Time  : " + hrs + " h " + min + " min " + sec
+				+ " sec");
 		// resultPanel.println(" Degree : " + degree);
 		Way lastWay = null;
 		String lastName = null;
@@ -401,8 +406,8 @@ public class MapPanel extends JPanel implements Printable {
 	}
 
 	/**
-	 * Computes the longitude value for a given <code>x</code> position on
-	 * this MapPanel.
+	 * Computes the longitude value for a given <code>x</code> position on this
+	 * MapPanel.
 	 *
 	 * @param x
 	 *            an x position

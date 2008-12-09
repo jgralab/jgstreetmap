@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
@@ -66,6 +67,15 @@ public class ResultPanel extends JPanel {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	public void printLabel(String str, Color c) {
+		JLabel l = new JLabel(str);
+		l.setForeground(c);
+		l.setOpaque(true);
+		l.setBackground(Color.lightGray);
+		textPane.insertComponent(l);
+		println();
 	}
 
 	public void clear() {
