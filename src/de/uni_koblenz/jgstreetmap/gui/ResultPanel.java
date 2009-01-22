@@ -71,7 +71,7 @@ public class ResultPanel extends JPanel {
 
 	public void printLabel(String str, Color c) {
 		JLabel l = new JLabel(str);
-		l.setForeground(c);
+		l.setForeground(Color.BLACK);
 		l.setOpaque(true);
 		l.setBackground(Color.lightGray);
 		textPane.insertComponent(l);

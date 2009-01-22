@@ -212,8 +212,11 @@ public class MapPanel extends JPanel implements Printable {
 										dest, EdgeRating.TIME);
 								shortestRoute = shortestRouteCalculator
 										.getRoute(dest, EdgeRating.LENGTH);
-								mostConvenientRoute = mostConvenientRouteCalculator
-										.getRoute(dest, EdgeRating.CONVENIENCE);
+								if (mostConvenientRouteCalculator != null) {
+									mostConvenientRoute = mostConvenientRouteCalculator
+											.getRoute(dest,
+													EdgeRating.CONVENIENCE);
+								}
 								if (showRoutes) {
 									repaint();
 								}
@@ -222,9 +225,11 @@ public class MapPanel extends JPanel implements Printable {
 								printRoute(shortestRoute,
 										shortestRouteCalculator,
 										EdgeRating.LENGTH);
-								printRoute(mostConvenientRoute,
-										mostConvenientRouteCalculator,
-										EdgeRating.CONVENIENCE);
+								if (mostConvenientRoute != null) {
+									printRoute(mostConvenientRoute,
+											mostConvenientRouteCalculator,
+											EdgeRating.CONVENIENCE);
+								}
 							}
 						}
 					} else {
@@ -242,7 +247,7 @@ public class MapPanel extends JPanel implements Printable {
 			resultPanel.clear();
 			fastestRouteCalculator.setStart(startNode);
 			shortestRouteCalculator.setStart(startNode);
-			mostConvenientRouteCalculator.setStart(startNode);
+			// mostConvenientRouteCalculator.setStart(startNode);
 		}
 	}
 
@@ -366,7 +371,7 @@ public class MapPanel extends JPanel implements Printable {
 	/**
 	 * Computes the x position on this MapPanel for a given longitude
 	 * <code>lon</code>.
-	 *
+	 * 
 	 * @param lon
 	 *            a longitude value
 	 * @return the x position
@@ -380,7 +385,7 @@ public class MapPanel extends JPanel implements Printable {
 	/**
 	 * Computes the y position on this MapPanel for a given latitude
 	 * <code>lat</code>.
-	 *
+	 * 
 	 * @param lat
 	 *            a latitude value
 	 * @return the y position
@@ -395,7 +400,7 @@ public class MapPanel extends JPanel implements Printable {
 	/**
 	 * Computes the latitude value for a given <code>y</code> position on this
 	 * MapPanel.
-	 *
+	 * 
 	 * @param y
 	 *            an y position
 	 * @return the latitude value
@@ -408,7 +413,7 @@ public class MapPanel extends JPanel implements Printable {
 	/**
 	 * Computes the longitude value for a given <code>x</code> position on this
 	 * MapPanel.
-	 *
+	 * 
 	 * @param x
 	 *            an x position
 	 * @return the longitude value
@@ -497,7 +502,7 @@ public class MapPanel extends JPanel implements Printable {
 
 	/**
 	 * Paints the map in the coordinate range latS..latN/lonW..lonE.
-	 *
+	 * 
 	 * @param g
 	 *            graphics context for paint operations
 	 */
@@ -597,13 +602,15 @@ public class MapPanel extends JPanel implements Printable {
 		case Dijkstra:
 			fastestRouteCalculator = new DijkstraRouteCalculator(graph);
 			shortestRouteCalculator = new DijkstraRouteCalculator(graph);
-			mostConvenientRouteCalculator = new DijkstraRouteCalculator(graph);
+			mostConvenientRouteCalculator = null; // new
+			// DijkstraRouteCalculator(graph);
 			System.out.println("Choosen Dijkstra routing algorithm.");
 			break;
 		case AStar:
 			fastestRouteCalculator = new AStarRouteCalculator(graph);
 			shortestRouteCalculator = new AStarRouteCalculator(graph);
-			mostConvenientRouteCalculator = new AStarRouteCalculator(graph);
+			mostConvenientRouteCalculator = null; // new
+			// AStarRouteCalculator(graph);
 			System.out.println("Choosen A* routing algorithm.");
 			break;
 		default:
@@ -611,7 +618,10 @@ public class MapPanel extends JPanel implements Printable {
 		}
 		fastestRouteCalculator.setRestriction(RoutingRestriction.CAR);
 		shortestRouteCalculator.setRestriction(RoutingRestriction.CAR);
-		mostConvenientRouteCalculator.setRestriction(RoutingRestriction.CAR);
+		if (mostConvenientRouteCalculator != null) {
+			mostConvenientRouteCalculator
+					.setRestriction(RoutingRestriction.CAR);
+		}
 
 		System.out.println("Setting start node to " + startNode);
 		setStartNode(startNode);
@@ -870,7 +880,7 @@ public class MapPanel extends JPanel implements Printable {
 
 	/**
 	 * Paints a frame of width FRAMEWIDTH around the border of this MapPanel.
-	 *
+	 * 
 	 * @param g
 	 *            graphics context for paint operations
 	 */
@@ -980,7 +990,7 @@ public class MapPanel extends JPanel implements Printable {
 
 	/**
 	 * Formats a longitude value <code>lon</code>.
-	 *
+	 * 
 	 * @param lon
 	 *            a longitude value, -180.0 &lt;= lon &lt;= 180.0
 	 * @return a nice string representation
@@ -993,7 +1003,7 @@ public class MapPanel extends JPanel implements Printable {
 
 	/**
 	 * Formats a latitude value <code>lan</code>.
-	 *
+	 * 
 	 * @param lat
 	 *            a latitude value, -90.0 &lt;= lon &lt;= 90.0
 	 * @return a nice string representation
@@ -1007,11 +1017,11 @@ public class MapPanel extends JPanel implements Printable {
 	/**
 	 * Formats a degrees value into a String d&#176;mm.ff'H, where H is p for
 	 * positive values, and H is n for negative values. Example:
-	 *
+	 * 
 	 * formatPos(54.5, 'N', 'S') --> 54&#176;30.00'N
-	 *
+	 * 
 	 * formatPos(-10.5, 'E', 'W') --> 10&#176;30.00'W
-	 *
+	 * 
 	 * @param degrees
 	 *            value in degrees and decimal fractions
 	 * @param p
@@ -1044,7 +1054,7 @@ public class MapPanel extends JPanel implements Printable {
 	/**
 	 * Sets the center of the map display to the specified position
 	 * <code>lat</code>, <code>lon</code>.
-	 *
+	 * 
 	 * @param lat
 	 *            latitude of the new center
 	 * @param lon

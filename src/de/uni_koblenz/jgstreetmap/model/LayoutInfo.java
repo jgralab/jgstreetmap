@@ -212,7 +212,7 @@ public class LayoutInfo {
 			} else if (t.startsWith("foot") || t.equals("pedestrian")
 					|| t.equals("steps") || t.equals("track")
 					|| t.equals("bridleway") || t.equals("trak")
-					|| t.equals("tr")) {
+					|| t.equals("tr") || t.equals("path")) {
 				return FOOTWAY;
 			} else if (t.startsWith("cycleway")) {
 				return CYCLEWAY;

@@ -104,6 +104,7 @@ public class OsmImporter extends DefaultHandler {
 		}
 		System.out.println("Building KDTree with " + levels + " levels...");
 		KDTreeBuilder.buildTree(graph, levels);
+		graph.defragment();
 		try {
 			GraphIO.saveGraphToFile("OsmGraph.tg", graph,
 					new ProgressFunctionImpl());

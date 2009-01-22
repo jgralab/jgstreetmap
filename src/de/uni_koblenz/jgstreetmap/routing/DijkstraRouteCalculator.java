@@ -120,7 +120,10 @@ public class DijkstraRouteCalculator extends RouteCalculator {
 		long startTime = System.currentTimeMillis();
 
 		if (!routesCalculated || startChanged) {
+			long t = System.currentTimeMillis();
 			calculateShortestRoutes(r);
+			t = System.currentTimeMillis() - t;
+			System.out.println("calculateShortestRoutes() took " + t + " ms");
 		}
 
 		DijkstraMarker m = dijkstraMarker.getMark(target);
