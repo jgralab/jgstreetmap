@@ -18,7 +18,10 @@ import java.awt.geom.Point2D;
 import java.awt.print.PageFormat;
 import java.awt.print.Printable;
 import java.awt.print.PrinterException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.swing.BoundedRangeModel;
 import javax.swing.DefaultBoundedRangeModel;
@@ -105,6 +108,8 @@ public class MapPanel extends JPanel implements Printable {
 
 	private ResultPanel resultPanel;
 
+	private Map<String, Node> townMap = new HashMap<String, Node>(10000);
+
 	public enum RoutingAlgorithms {
 		Dijkstra, AStar;
 	}
@@ -112,6 +117,8 @@ public class MapPanel extends JPanel implements Printable {
 	public MapPanel(AnnotatedOsmGraph graph, ResultPanel respnl) {
 		this.graph = graph;
 		this.resultPanel = respnl;
+
+		initializeTownMap();
 
 		setRoutingAlgorithm(RoutingAlgorithms.Dijkstra);
 
@@ -239,6 +246,19 @@ public class MapPanel extends JPanel implements Printable {
 			}
 
 		});
+	}
+
+	private void initializeTownMap() {
+		for (Node n : graph.getNodeVertices()) {
+			Map<String, String> tags = n.getTags();
+			if ((tags == null) || !tags.containsKey("place")
+					|| !tags.containsKey("name")) {
+				continue;
+			}
+			townMap.put(tags.get("name"), n);
+		}
+		System.out.println("Initialized town map with " + townMap.size()
+				+ " towns.");
 	}
 
 	private void setStartNode(Node n) {
@@ -572,14 +592,10 @@ public class MapPanel extends JPanel implements Printable {
 		}
 
 		// draw town/village names
-		for (Node n : graph.getNodeVertices()) {
-			if ((n.getTags() == null) || !n.getTags().containsKey("place")
-					|| !n.getTags().containsKey("name")) {
-				continue;
-			}
+		for (Entry<String, Node> e : townMap.entrySet()) {
 			g.setColor(Color.black);
-			g.drawString(n.getTags().get("name"), getPx(n.getLongitude()),
-					getPy(n.getLatitude()));
+			g.drawString(e.getKey(), getPx(e.getValue().getLongitude()),
+					getPy(e.getValue().getLatitude()));
 		}
 
 		// long stop = System.currentTimeMillis();
@@ -1212,5 +1228,13 @@ public class MapPanel extends JPanel implements Printable {
 		g2.scale(scale, scale);
 		paint(g2);
 		return PAGE_EXISTS;
+	}
+
+	public void centerTown(String town) {
+		Node n = townMap.get(town);
+		if (n == null) {
+			return;
+		}
+		setCenter(n.getLatitude(), n.getLongitude());
 	}
 }

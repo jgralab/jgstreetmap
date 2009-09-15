@@ -17,6 +17,8 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -52,6 +54,8 @@ public class MapFrame extends JFrame {
 	private JCheckBox showRoutesButton;
 
 	private JComboBox algorithmComboBox;
+
+	private JTextField searchTextField;
 
 	private RoutingAlgorithms[] routingAlgorithms = {
 			RoutingAlgorithms.Dijkstra, RoutingAlgorithms.AStar };
@@ -166,6 +170,18 @@ public class MapFrame extends JFrame {
 			}
 		});
 
+		searchTextField = new JTextField(20);
+		searchTextField
+				.setToolTipText("Enter a name of a town and hit return.");
+		detailPanel.add(searchTextField);
+		searchTextField.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				mapPanel.centerTown(searchTextField.getText());
+			}
+		});
+
 		buttonPanel.add(new Box.Filler(new Dimension(5, 0),
 				new Dimension(5, 50), new Dimension(5, Short.MAX_VALUE)));
 
@@ -185,7 +201,7 @@ public class MapFrame extends JFrame {
 		});
 		buttonPanel.add(zoomInButton);
 
-		zoomSlider = new JSlider(JSlider.VERTICAL);
+		zoomSlider = new JSlider(SwingConstants.VERTICAL);
 		zoomSlider.setModel(mapPanel.getZoomLevelModel());
 		zoomSlider.setAlignmentX(Component.CENTER_ALIGNMENT);
 		buttonPanel.add(zoomSlider);
