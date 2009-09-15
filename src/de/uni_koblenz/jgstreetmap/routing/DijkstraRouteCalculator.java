@@ -51,7 +51,7 @@ public class DijkstraRouteCalculator extends RouteCalculator {
 		speeds = new Speed();
 	}
 
-	public void calculateShortestRoutes(EdgeRating r) {
+	public void calculateShortestRoutes(EdgeRating rating) {
 		if (start == null) {
 			throw new IllegalStateException(
 					"setStart() must be called before invoking this method!");
@@ -92,7 +92,7 @@ public class DijkstraRouteCalculator extends RouteCalculator {
 					Node nextVertex = (Node) currentSegment.getThat();
 
 					double newDistance = m.distance
-							+ rate(currentSegment, r, m.parentSegment);
+							+ rate(currentSegment, rating, m.parentSegment);
 					// if the new path is shorter than the distance stored
 					// at the other end, this new value is stored
 					DijkstraMarker n = dijkstraMarker.getMark(nextVertex);
@@ -116,23 +116,20 @@ public class DijkstraRouteCalculator extends RouteCalculator {
 	}
 
 	@Override
-	public RoutingResult getRoute(Node target, EdgeRating r) {
+	public RoutingResult getRoute(Node target, EdgeRating rating) {
 		long startTime = System.currentTimeMillis();
 
 		if (!routesCalculated || startChanged) {
-			long t = System.currentTimeMillis();
-			calculateShortestRoutes(r);
-			t = System.currentTimeMillis() - t;
-			System.out.println("calculateShortestRoutes() took " + t + " ms");
+			calculateShortestRoutes(rating);
 		}
 
 		DijkstraMarker m = dijkstraMarker.getMark(target);
-		if (m == null || m.parentSegment == null) {
+		if ((m == null) || (m.parentSegment == null)) {
 			return new RoutingResult(null, System.currentTimeMillis()
 					- startTime);
 		}
 		Stack<Segment> routesegments = new Stack<Segment>();
-		while (m != null && m.parentSegment != null) {
+		while ((m != null) && (m.parentSegment != null)) {
 			routesegments.push(m.parentSegment);
 			m = dijkstraMarker.getMark(m.parentSegment.getThis());
 		}

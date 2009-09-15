@@ -53,6 +53,8 @@ public class MapFrame extends JFrame {
 
 	private JCheckBox showRoutesButton;
 
+	private JCheckBox showTownsButton;
+
 	private JComboBox algorithmComboBox;
 
 	private JTextField searchTextField;
@@ -156,6 +158,15 @@ public class MapFrame extends JFrame {
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				mapPanel.setShowRoutes(showRoutesButton.isSelected());
+			}
+		});
+
+		showTownsButton = new JCheckBox("Towns", mapPanel.isShowingTowns());
+		detailPanel.add(showTownsButton);
+		showTownsButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				mapPanel.setShowTowns(showTownsButton.isSelected());
 			}
 		});
 

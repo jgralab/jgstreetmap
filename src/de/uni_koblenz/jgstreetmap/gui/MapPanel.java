@@ -96,6 +96,7 @@ public class MapPanel extends JPanel implements Printable {
 	private boolean showLength = false;
 	private boolean showWayIds = true;
 	private boolean showNodeIds = false;
+	private boolean showTowns = true;
 
 	private RouteCalculator fastestRouteCalculator;
 	private RouteCalculator shortestRouteCalculator;
@@ -267,7 +268,9 @@ public class MapPanel extends JPanel implements Printable {
 			resultPanel.clear();
 			fastestRouteCalculator.setStart(startNode);
 			shortestRouteCalculator.setStart(startNode);
-			// mostConvenientRouteCalculator.setStart(startNode);
+			if (mostConvenientRouteCalculator != null) {
+				mostConvenientRouteCalculator.setStart(startNode);
+			}
 		}
 	}
 
@@ -1162,6 +1165,15 @@ public class MapPanel extends JPanel implements Printable {
 		}
 	}
 
+	public void setShowTowns(boolean b) {
+		if (b != showTowns) {
+			showTowns = b;
+			if (isVisible()) {
+				repaint();
+			}
+		}
+	}
+
 	public boolean isShowingWayIds() {
 		return showWayIds;
 	}
@@ -1236,5 +1248,9 @@ public class MapPanel extends JPanel implements Printable {
 			return;
 		}
 		setCenter(n.getLatitude(), n.getLongitude());
+	}
+
+	public boolean isShowingTowns() {
+		return showTowns;
 	}
 }
