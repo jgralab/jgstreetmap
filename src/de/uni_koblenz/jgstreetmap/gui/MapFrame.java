@@ -17,6 +17,7 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
@@ -81,7 +82,7 @@ public class MapFrame extends JFrame {
 		getContentPane().add(buttonPanel, BorderLayout.WEST);
 
 		JPanel detailPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-		getContentPane().add(detailPanel, BorderLayout.SOUTH);
+		getContentPane().add(new JScrollPane(detailPanel), BorderLayout.SOUTH);
 
 		detailPanel.add(new JLabel("Visible details:"));
 
