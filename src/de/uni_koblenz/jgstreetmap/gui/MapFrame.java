@@ -3,6 +3,7 @@ package de.uni_koblenz.jgstreetmap.gui;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.print.PrinterException;
@@ -68,7 +69,7 @@ public class MapFrame extends JFrame {
 		super("jgStreetMap");
 		// this.graph = graph;
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setLayout(new BorderLayout());
+		getContentPane().setLayout(new BorderLayout());
 		resultPanel = new ResultPanel();
 		mapPanel = new MapPanel(graph, resultPanel);
 
@@ -79,7 +80,7 @@ public class MapFrame extends JFrame {
 		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
 		getContentPane().add(buttonPanel, BorderLayout.WEST);
 
-		JPanel detailPanel = new JPanel();
+		JPanel detailPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		getContentPane().add(detailPanel, BorderLayout.SOUTH);
 
 		detailPanel.add(new JLabel("Visible details:"));
@@ -163,9 +164,9 @@ public class MapFrame extends JFrame {
 
 		showTownsButton = new JCheckBox("Towns", mapPanel.isShowingTowns());
 		detailPanel.add(showTownsButton);
-		showTownsButton.addActionListener(new ActionListener() {
+		showTownsButton.addChangeListener(new ChangeListener() {
 			@Override
-			public void actionPerformed(ActionEvent e) {
+			public void stateChanged(ChangeEvent e) {
 				mapPanel.setShowTowns(showTownsButton.isSelected());
 			}
 		});
@@ -192,6 +193,7 @@ public class MapFrame extends JFrame {
 				mapPanel.centerTown(searchTextField.getText());
 			}
 		});
+		detailPanel.validate();
 
 		buttonPanel.add(new Box.Filler(new Dimension(5, 0),
 				new Dimension(5, 50), new Dimension(5, Short.MAX_VALUE)));
@@ -267,9 +269,10 @@ public class MapFrame extends JFrame {
 				mapPanel.setDefaultPosition();
 			}
 		});
-
 		buttonPanel.add(zahnButton);
+
 		pack();
 		setVisible(true);
+		validate();
 	}
 }

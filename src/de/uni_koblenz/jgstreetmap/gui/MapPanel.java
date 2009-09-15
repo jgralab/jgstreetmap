@@ -595,10 +595,12 @@ public class MapPanel extends JPanel implements Printable {
 		}
 
 		// draw town/village names
-		for (Entry<String, Node> e : townMap.entrySet()) {
-			g.setColor(Color.black);
-			g.drawString(e.getKey(), getPx(e.getValue().getLongitude()),
-					getPy(e.getValue().getLatitude()));
+		if (showTowns) {
+			for (Entry<String, Node> e : townMap.entrySet()) {
+				g.setColor(Color.black);
+				g.drawString(e.getKey(), getPx(e.getValue().getLongitude()),
+						getPy(e.getValue().getLatitude()));
+			}
 		}
 
 		// long stop = System.currentTimeMillis();
