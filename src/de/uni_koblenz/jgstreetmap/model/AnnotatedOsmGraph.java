@@ -13,7 +13,7 @@ import java.util.TreeSet;
 
 import de.uni_koblenz.jgralab.GraphMarker;
 import de.uni_koblenz.jgralab.Vertex;
-import de.uni_koblenz.jgstreetmap.osmschema.impl.OsmGraphImpl;
+import de.uni_koblenz.jgstreetmap.osmschema.impl.std.OsmGraphImpl;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.HasRoot;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.KDTree;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.Key;
@@ -177,7 +177,7 @@ public class AnnotatedOsmGraph extends OsmGraphImpl {
 		List<Neighbour> l = new ArrayList<Neighbour>();
 		for (Node n : getNodeVertices()) {
 			double dist = Segmentator.distance(lat, lon, n);
-			if (dist < maxDistance && n.getFirstSegment() != null) {
+			if ((dist < maxDistance) && (n.getFirstSegment() != null)) {
 				l.add(new Neighbour(n, dist));
 			}
 		}
