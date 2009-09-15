@@ -196,7 +196,7 @@ public class MapPanel extends JPanel implements Printable {
 					// long stop = System.currentTimeMillis();
 					// System.out.println("Time:" + (stop - start));
 					resultPanel.clear();
-					if (neighbours != null && neighbours.size() >= 1) {
+					if ((neighbours != null) && (neighbours.size() >= 1)) {
 						Node dest = neighbours.get(0).getNode();
 						if (mouseSetStartNode) {
 							setStartNode(dest);
@@ -255,20 +255,20 @@ public class MapPanel extends JPanel implements Printable {
 		if (n == null) {
 			return;
 		}
-		resultPanel.printLabel(label + ":", Color.black);
+		resultPanel.printLabel(label + ":", Color.white);
 		boolean foundName = false;
 		for (Way w : n.getWayList()) {
 			String name = AnnotatedOsmGraph.getTag(w, "name");
 			if (name != null) {
 				name = name.trim();
 			}
-			if (name == null || name.length() == 0) {
+			if ((name == null) || (name.length() == 0)) {
 				name = AnnotatedOsmGraph.getTag(w, "ref");
 				if (name != null) {
 					name = name.trim();
 				}
 			}
-			if (name != null && name.length() > 0) {
+			if ((name != null) && (name.length() > 0)) {
 				resultPanel.print("  " + name);
 				foundName = true;
 			}
@@ -309,7 +309,7 @@ public class MapPanel extends JPanel implements Printable {
 
 		resultPanel.println("  Calculation time: "
 				+ result.getRouteCalculationTime() / 1000d + " seconds");
-		if (route == null || route.size() < 1) {
+		if ((route == null) || (route.size() < 1)) {
 			resultPanel.println("not found :-(");
 			return;
 		}
@@ -326,7 +326,7 @@ public class MapPanel extends JPanel implements Printable {
 		String lastName = null;
 		for (Segment s : route) {
 			Way way = getWay(s);
-			if (way != null && way != lastWay) {
+			if ((way != null) && (way != lastWay)) {
 				String name = AnnotatedOsmGraph.getTag(way, "name");
 				if (name != null) {
 					name = name.trim();
@@ -337,7 +337,7 @@ public class MapPanel extends JPanel implements Printable {
 						name = name.trim();
 					}
 				}
-				if (name != null && !name.equals(lastName)) {
+				if ((name != null) && !name.equals(lastName)) {
 					resultPanel.println("  " + name);
 					lastName = name;
 				}
@@ -480,8 +480,8 @@ public class MapPanel extends JPanel implements Printable {
 	}
 
 	private void paintRoute(Graphics2D g, RoutingResult result, LayoutInfo l) {
-		if (result == null || result.getRoute() == null
-				|| result.getRoute().size() < 1) {
+		if ((result == null) || (result.getRoute() == null)
+				|| (result.getRoute().size() < 1)) {
 			return;
 		}
 		Polygon poly = new Polygon();
@@ -534,11 +534,11 @@ public class MapPanel extends JPanel implements Printable {
 				LayoutInfo l = graph.getLayoutInfo(way);
 				if (l.enabled
 						&& l.visible
-						&& l.bgColor != null
+						&& (l.bgColor != null)
 						&& !l.area
-						&& l.bgColor != null
+						&& (l.bgColor != null)
 						&& visibleElements.isMarked(way)
-						&& (!showStreetsOnly || way.getWayType() != SegmentType.NOWAY)) {
+						&& (!showStreetsOnly || (way.getWayType() != SegmentType.NOWAY))) {
 					Polygon poly = new Polygon();
 					for (Node n : way.getNodeList()) {
 						poly.addPoint(getPx(n.getLongitude()), getPy(n
@@ -557,8 +557,8 @@ public class MapPanel extends JPanel implements Printable {
 						&& l.visible
 						&& !l.area
 						&& visibleElements.isMarked(way)
-						&& l.fgColor != null
-						&& (!showStreetsOnly || way.getWayType() != SegmentType.NOWAY)) {
+						&& (l.fgColor != null)
+						&& (!showStreetsOnly || (way.getWayType() != SegmentType.NOWAY))) {
 					Polygon poly = new Polygon();
 					for (Node n : way.getNodeList()) {
 						poly.addPoint(getPx(n.getLongitude()), getPy(n
@@ -569,6 +569,17 @@ public class MapPanel extends JPanel implements Printable {
 					g.drawPolyline(poly.xpoints, poly.ypoints, poly.npoints);
 				}
 			}
+		}
+
+		// draw town/village names
+		for (Node n : graph.getNodeVertices()) {
+			if ((n.getTags() == null) || !n.getTags().containsKey("place")
+					|| !n.getTags().containsKey("name")) {
+				continue;
+			}
+			g.setColor(Color.black);
+			g.drawString(n.getTags().get("name"), getPx(n.getLongitude()),
+					getPy(n.getLatitude()));
 		}
 
 		// long stop = System.currentTimeMillis();
@@ -602,15 +613,13 @@ public class MapPanel extends JPanel implements Printable {
 		case Dijkstra:
 			fastestRouteCalculator = new DijkstraRouteCalculator(graph);
 			shortestRouteCalculator = new DijkstraRouteCalculator(graph);
-			mostConvenientRouteCalculator = null; // new
-			// DijkstraRouteCalculator(graph);
+			mostConvenientRouteCalculator = new DijkstraRouteCalculator(graph);
 			System.out.println("Choosen Dijkstra routing algorithm.");
 			break;
 		case AStar:
 			fastestRouteCalculator = new AStarRouteCalculator(graph);
 			shortestRouteCalculator = new AStarRouteCalculator(graph);
-			mostConvenientRouteCalculator = null; // new
-			// AStarRouteCalculator(graph);
+			mostConvenientRouteCalculator = new AStarRouteCalculator(graph);
 			System.out.println("Choosen A* routing algorithm.");
 			break;
 		default:
@@ -696,7 +705,7 @@ public class MapPanel extends JPanel implements Printable {
 				}
 
 				LayoutInfo l = graph.getLayoutInfo(way);
-				if (l == null || !l.enabled || !l.visible) {
+				if ((l == null) || !l.enabled || !l.visible) {
 					continue;
 				}
 
@@ -771,10 +780,10 @@ public class MapPanel extends JPanel implements Printable {
 					g.setStroke(fillerStroke);
 					g.drawLine(waypoint.x, waypoint.y, waypoint.x, waypoint.y);
 				}
-				if (showWayIds && zoomLevel.getValue() >= 30) {
+				if (showWayIds && (zoomLevel.getValue() >= 30)) {
 					g.setColor(LABEL_COLOR);
 					String name = AnnotatedOsmGraph.getTag(way, "name");
-					if (name == null || name.length() == 0) {
+					if ((name == null) || (name.length() == 0)) {
 						name = Long.toString(way.getOsmId());
 					}
 					g.drawString(name, waypoint.x + 12
@@ -804,7 +813,7 @@ public class MapPanel extends JPanel implements Printable {
 				g.setColor(NODE_COLOR);
 				g.drawLine(alpha.x, alpha.y, alpha.x, alpha.y);
 				g.drawLine(omega.x, omega.y, omega.x, omega.y);
-				if (showNodeIds && zoomLevel.getValue() >= 35) {
+				if (showNodeIds && (zoomLevel.getValue() >= 35)) {
 					g.setColor(LABEL_COLOR);
 					g.drawString(Long.toString(source.getOsmId()), alpha.x + 12
 							* outlineStroke.getLineWidth() / 20, alpha.y
@@ -820,7 +829,7 @@ public class MapPanel extends JPanel implements Printable {
 					g.drawLine(omega.x, omega.y, omega.x, omega.y);
 				}
 
-				if (showLength && zoomLevel.getValue() >= 30) {
+				if (showLength && (zoomLevel.getValue() >= 30)) {
 					// draw length
 					AffineTransform t = g.getTransform();
 					int dy = omega.y - alpha.y;
@@ -997,7 +1006,7 @@ public class MapPanel extends JPanel implements Printable {
 	 * @see #formatPos
 	 */
 	public static String formatLongitude(double lon) {
-		assert lon >= -180.0 && lon <= 180.0;
+		assert (lon >= -180.0) && (lon <= 180.0);
 		return formatPos(lon, 'E', 'W');
 	}
 
@@ -1010,7 +1019,7 @@ public class MapPanel extends JPanel implements Printable {
 	 * @see #formatPos
 	 */
 	public static String formatLatitude(double lat) {
-		assert lat >= -90.0 && lat <= 90.0;
+		assert (lat >= -90.0) && (lat <= 90.0);
 		return formatPos(lat, 'N', 'S');
 	}
 
@@ -1167,7 +1176,7 @@ public class MapPanel extends JPanel implements Printable {
 		if (b != showRoutes) {
 			showRoutes = b;
 			if (isVisible()
-					&& (fastestRoute != null || shortestRoute != null || mostConvenientRoute != null)) {
+					&& ((fastestRoute != null) || (shortestRoute != null) || (mostConvenientRoute != null))) {
 				repaint();
 			}
 		}

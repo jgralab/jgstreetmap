@@ -69,11 +69,11 @@ public class ResultPanel extends JPanel {
 		}
 	}
 
-	public void printLabel(String str, Color c) {
+	public void printLabel(String str, Color backgroundColor) {
 		JLabel l = new JLabel(str);
 		l.setForeground(Color.BLACK);
 		l.setOpaque(true);
-		l.setBackground(Color.lightGray);
+		l.setBackground(backgroundColor);
 		textPane.insertComponent(l);
 		println();
 	}
