@@ -21,7 +21,6 @@ import java.awt.print.PrinterException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.swing.BoundedRangeModel;
 import javax.swing.DefaultBoundedRangeModel;
@@ -256,7 +255,7 @@ public class MapPanel extends JPanel implements Printable {
 					|| !tags.containsKey("name")) {
 				continue;
 			}
-			townMap.put(tags.get("name"), n);
+			townMap.put(tags.get("name").toLowerCase(), n);
 		}
 		System.out.println("Initialized town map with " + townMap.size()
 				+ " towns.");
@@ -596,10 +595,10 @@ public class MapPanel extends JPanel implements Printable {
 
 		// draw town/village names
 		if (showTowns) {
-			for (Entry<String, Node> e : townMap.entrySet()) {
+			for (Node n : townMap.values()) {
 				g.setColor(Color.black);
-				g.drawString(e.getKey(), getPx(e.getValue().getLongitude()),
-						getPy(e.getValue().getLatitude()));
+				g.drawString(n.getTags().get("name"), getPx(n.getLongitude()),
+						getPy(n.getLatitude()));
 			}
 		}
 

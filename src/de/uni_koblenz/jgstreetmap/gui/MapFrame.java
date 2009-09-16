@@ -191,7 +191,7 @@ public class MapFrame extends JFrame {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				mapPanel.centerTown(searchTextField.getText());
+				mapPanel.centerTown(searchTextField.getText().toLowerCase());
 			}
 		});
 		detailPanel.validate();
