@@ -233,7 +233,7 @@ public class LayoutInfo {
 
 		t = AnnotatedOsmGraph.getTag(way, "waterway");
 		if (t != null) {
-			return way.isClosed() ? WATER_AREA : WATER_WAY;
+			return way.is_closed() ? WATER_AREA : WATER_WAY;
 		}
 
 		t = AnnotatedOsmGraph.getTag(way, "cycleway");
@@ -270,7 +270,7 @@ public class LayoutInfo {
 		t = AnnotatedOsmGraph.getTag(way, "natural");
 		if (t != null) {
 			if (t.equals("water")) {
-				return way.isClosed() ? WATER_AREA : WATER_WAY;
+				return way.is_closed() ? WATER_AREA : WATER_WAY;
 			} else if (t.equals("wood")) {
 				return FOREST;
 			} else if (t.equals("land")) {

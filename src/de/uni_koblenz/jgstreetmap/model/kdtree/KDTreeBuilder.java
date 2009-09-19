@@ -23,7 +23,7 @@ public class KDTreeBuilder {
 			g.deleteKDTree();
 		}
 		KDTree kdTree = g.createKDTree();
-		kdTree.setLevels(maxLevels);
+		kdTree.set_levels(maxLevels);
 		kdTree.addRoot(constructkdTreeY(g, nodeList, 0));
 	}
 
@@ -37,7 +37,7 @@ public class KDTreeBuilder {
 		// exist or the list of nodes which would be splitted contains only one
 		// node,
 		// NodeSet is assigned to YKey as the child of YKey
-		if ((depth == g.getKDTree().getLevels()) || (nodeList.size() <= 1)) {
+		if ((depth == g.getKDTree().get_levels()) || (nodeList.size() <= 1)) {
 			NodeSet set = g.createNodeSet();
 			yk.addSet(set);
 			for (Node n : nodeList) {
@@ -45,8 +45,8 @@ public class KDTreeBuilder {
 			}
 		} else {
 			double keyValue = nodeList.get(nodeList.size() / 2 - 1)
-					.getLatitude();
-			yk.setKeyValue(keyValue);
+					.get_latitude();
+			yk.set_keyValue(keyValue);
 			// List of nodes is split into two lists, the nodes contained in
 			// leftList
 			// will be part of the left subtree, the nodes left in nodeList will
@@ -55,7 +55,7 @@ public class KDTreeBuilder {
 
 			LinkedList<Node> leftList = new LinkedList<Node>();
 			Node n = nodeList.peek();
-			while (n.getLatitude() <= keyValue) {
+			while (n.get_latitude() <= keyValue) {
 				leftList.add(nodeList.poll());
 				n = nodeList.peek();
 			}
@@ -71,7 +71,7 @@ public class KDTreeBuilder {
 		Collections.sort(nodeList, new XComparator());
 		XKey xk = g.createXKey();
 
-		if ((depth == g.getKDTree().getLevels()) || (nodeList.size() <= 1)) {
+		if ((depth == g.getKDTree().get_levels()) || (nodeList.size() <= 1)) {
 			NodeSet set = g.createNodeSet();
 			xk.addSet(set);
 			for (Node n : nodeList) {
@@ -79,12 +79,12 @@ public class KDTreeBuilder {
 			}
 		} else {
 			double keyValue = nodeList.get(nodeList.size() / 2 - 1)
-					.getLongitude();
+					.get_longitude();
 
-			xk.setKeyValue(keyValue);
+			xk.set_keyValue(keyValue);
 			LinkedList<Node> leftList = new LinkedList<Node>();
 			Node n = nodeList.peek();
-			while (n.getLongitude() <= keyValue) {
+			while (n.get_longitude() <= keyValue) {
 				leftList.add(nodeList.poll());
 				n = nodeList.peek();
 			}

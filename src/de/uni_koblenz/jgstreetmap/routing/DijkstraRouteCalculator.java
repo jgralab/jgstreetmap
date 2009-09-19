@@ -85,9 +85,9 @@ public class DijkstraRouteCalculator extends RouteCalculator {
 
 			// follow each traverseable edge
 			for (Segment currentSegment : currentVertex.getSegmentIncidences()) {
-				if (relevantTypes.contains(currentSegment.getWayType())
+				if (relevantTypes.contains(currentSegment.get_wayType())
 						&& (currentSegment.isNormal() || !currentSegment
-								.isOneway())) {
+								.is_oneway())) {
 
 					Node nextVertex = (Node) currentSegment.getThat();
 

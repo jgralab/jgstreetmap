@@ -18,7 +18,7 @@ import de.uni_koblenz.jgstreetmap.osmschema.routing.SegmentType;
 
 /**
  * @author Tassilo Horn
- *
+ * 
  */
 public class AStarRouteCalculator extends RouteCalculator {
 	GraphMarker<AStarMark> marker;
@@ -84,9 +84,9 @@ public class AStarRouteCalculator extends RouteCalculator {
 			mark.done = true;
 
 			for (Segment currentSegment : currentVertex.getSegmentIncidences()) {
-				if (relevantTypes.contains(currentSegment.getWayType())
+				if (relevantTypes.contains(currentSegment.get_wayType())
 						&& (currentSegment.isNormal() || !currentSegment
-								.isOneway())) {
+								.is_oneway())) {
 					Node nextVertex = (Node) currentSegment.getThat();
 					double newDist = mark.distance
 							+ rate(currentSegment, r, mark.parentSegment);
@@ -143,10 +143,10 @@ public class AStarRouteCalculator extends RouteCalculator {
 			return 0;
 		}
 
-		double sLat = start.getLatitude() * Math.PI / 180;
-		double sLong = start.getLongitude() * Math.PI / 180;
-		double tLat = target.getLatitude() * Math.PI / 180;
-		double tLong = target.getLongitude() * Math.PI / 180;
+		double sLat = start.get_latitude() * Math.PI / 180;
+		double sLong = start.get_longitude() * Math.PI / 180;
+		double tLat = target.get_latitude() * Math.PI / 180;
+		double tLong = target.get_longitude() * Math.PI / 180;
 		double earthRadius = 6378.3 * 1000;
 
 		double dist = Math.acos(Math.sin(sLat) * Math.sin(tLat)

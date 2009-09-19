@@ -47,7 +47,7 @@ public class Segmentator {
 		for (Vertex current : vertices) {
 			amount++;
 			currentWay = (Way) current;
-			if (!currentWay.getWayType().equals(SegmentType.NOWAY)) {
+			if (!currentWay.get_wayType().equals(SegmentType.NOWAY)) {
 				added++;
 				output.add(currentWay);
 			}
@@ -100,12 +100,12 @@ public class Segmentator {
 			currentWay = (Way) current;
 			currentValue = AnnotatedOsmGraph.getTag(currentWay, "highway");
 			if (currentValue != null) {
-				currentWay.setWayType(computeSegmentType(currentValue));
+				currentWay.set_wayType(computeSegmentType(currentValue));
 			} else if (AnnotatedOsmGraph.getTag(currentWay, "cycleway") != null) {
-				currentWay.setWayType(SegmentType.CYCLEWAY);
+				currentWay.set_wayType(SegmentType.CYCLEWAY);
 
 			} else {
-				currentWay.setWayType(SegmentType.NOWAY);
+				currentWay.set_wayType(SegmentType.NOWAY);
 			}
 		}
 	}
@@ -113,19 +113,19 @@ public class Segmentator {
 	private static void createSegment(OsmGraph theGraph, Node source,
 			Node target, Way currentWay, boolean oneway) {
 		Segment newSegment = theGraph.createSegment(source, target);
-		newSegment.setLength(distance(source, target));
-		newSegment.setOneway(oneway);
-		newSegment.setWayType(currentWay.getWayType());
-		newSegment.setWayId(currentWay.getOsmId());
+		newSegment.set_length(distance(source, target));
+		newSegment.set_oneway(oneway);
+		newSegment.set_wayType(currentWay.get_wayType());
+		newSegment.set_wayId(currentWay.get_osmId());
 	}
 
 	public static double distance(Node n1, Node n2) {
-		return distance(n1.getLatitude(), n1.getLongitude(), n2.getLatitude(),
-				n2.getLongitude());
+		return distance(n1.get_latitude(), n1.get_longitude(), n2.get_latitude(),
+				n2.get_longitude());
 	}
 
 	public static double distance(double lat, double lon, Node n) {
-		return distance(lat, lon, n.getLatitude(), n.getLongitude());
+		return distance(lat, lon, n.get_latitude(), n.get_longitude());
 	}
 
 	public static double distance(double lat1, double lon1, double lat2,
@@ -141,7 +141,7 @@ public class Segmentator {
 	public static boolean isIntersection(Node currentNode) {
 		int relevantWayAmount = 0;
 		for (Way currentWay : currentNode.getWayList()) {
-			if (currentWay.getWayType() != SegmentType.NOWAY) {
+			if (currentWay.get_wayType() != SegmentType.NOWAY) {
 				relevantWayAmount++;
 			}
 		}
@@ -151,7 +151,7 @@ public class Segmentator {
 
 	private static boolean isOneway(Way w) {
 		String oneway = AnnotatedOsmGraph.getTag(w, "oneway");
-		return (oneway != null && w.getWayType() != SegmentType.NOWAY && (oneway
+		return (oneway != null && w.get_wayType() != SegmentType.NOWAY && (oneway
 				.equalsIgnoreCase("yes") || oneway.equalsIgnoreCase("true")));
 	}
 

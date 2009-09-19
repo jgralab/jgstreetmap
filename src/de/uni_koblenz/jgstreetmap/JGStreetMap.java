@@ -28,6 +28,7 @@ public class JGStreetMap {
 	private static long total;
 	private static long used;
 
+	@SuppressWarnings("unused")
 	private static void printMemory(String headline) {
 		long newMax = Runtime.getRuntime().maxMemory();
 		long newFree = Runtime.getRuntime().freeMemory();

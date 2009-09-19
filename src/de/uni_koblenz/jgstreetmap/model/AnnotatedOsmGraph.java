@@ -41,7 +41,7 @@ public class AnnotatedOsmGraph extends OsmGraphImpl {
 	@Override
 	public void loadingCompleted() {
 		for (OsmPrimitive o : getOsmPrimitiveVertices()) {
-			osmIdMap.put(o.getOsmId(), o);
+			osmIdMap.put(o.get_osmId(), o);
 		}
 		for (Way way : getWayVertices()) {
 			LayoutInfo l = LayoutInfo.computeInfo(way);
@@ -95,7 +95,7 @@ public class AnnotatedOsmGraph extends OsmGraphImpl {
 	}
 
 	public static String getTag(OsmPrimitive o, String key) {
-		Map<String, String> tags = o.getTags();
+		Map<String, String> tags = o.get_tags();
 		if (tags != null) {
 			return tags.get(key);
 		}

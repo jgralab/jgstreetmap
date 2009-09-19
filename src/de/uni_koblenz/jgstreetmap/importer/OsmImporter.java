@@ -131,11 +131,11 @@ public class OsmImporter extends DefaultHandler {
 			++nodeCount;
 			Node n = graph.createNode();
 			long id = Long.parseLong(atts.getValue("id"));
-			n.setOsmId(id);
-			n.setLatitude(Double.parseDouble(atts.getValue("lat")));
-			n.setLongitude(Double.parseDouble(atts.getValue("lon")));
-			n.setTimestamp(parseTimestamp(atts.getValue("timestamp")));
-			n.setUser(atts.getValue("user"));
+			n.set_osmId(id);
+			n.set_latitude(Double.parseDouble(atts.getValue("lat")));
+			n.set_longitude(Double.parseDouble(atts.getValue("lon")));
+			n.set_timestamp(parseTimestamp(atts.getValue("timestamp")));
+			n.set_user(atts.getValue("user"));
 			currentPrimitive = n;
 			osmIdMap.put(id, n);
 
@@ -143,9 +143,9 @@ public class OsmImporter extends DefaultHandler {
 			state = State.WAY;
 			Way w = graph.createWay();
 			long id = Long.parseLong(atts.getValue("id"));
-			w.setOsmId(id);
-			w.setTimestamp(parseTimestamp(atts.getValue("timestamp")));
-			w.setUser(atts.getValue("user"));
+			w.set_osmId(id);
+			w.set_timestamp(parseTimestamp(atts.getValue("timestamp")));
+			w.set_user(atts.getValue("user"));
 			currentPrimitive = w;
 			osmIdMap.put(id, w);
 
@@ -153,8 +153,8 @@ public class OsmImporter extends DefaultHandler {
 			state = State.RELATION;
 			Relation r = graph.createRelation();
 			long id = Long.parseLong(atts.getValue("id"));
-			r.setOsmId(id);
-			r.setTimestamp(parseTimestamp(atts.getValue("timestamp")));
+			r.set_osmId(id);
+			r.set_timestamp(parseTimestamp(atts.getValue("timestamp")));
 			currentPrimitive = r;
 			osmIdMap.put(id, r);
 
@@ -200,8 +200,8 @@ public class OsmImporter extends DefaultHandler {
 			if (p != null) {
 				HasMember m = graph.createHasMember(
 						(Relation) currentPrimitive, p);
-				m.setMemberType(type);
-				m.setMemberRole(atts.getValue("role"));
+				m.set_memberType(type);
+				m.set_memberRole(atts.getValue("role"));
 			}
 
 		} else if (state == State.INIT && name.equals("osm")) {
@@ -236,11 +236,11 @@ public class OsmImporter extends DefaultHandler {
 			throws SAXException {
 		if (name.equals("node") || name.equals("way")
 				|| name.equals("relation")) {
-			currentPrimitive.setTags(currentTagMap);
+			currentPrimitive.set_tags(currentTagMap);
 			if (state == State.WAY) {
 				Way w = (Way) currentPrimitive;
 				List<? extends Node> nl = w.getNodeList();
-				w.setClosed(nl.size() >= 2
+				w.set_closed(nl.size() >= 2
 						&& nl.get(0) == nl.get(nl.size() - 1));
 			}
 			currentPrimitive = null;

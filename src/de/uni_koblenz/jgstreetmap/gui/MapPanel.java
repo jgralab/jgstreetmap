@@ -250,7 +250,7 @@ public class MapPanel extends JPanel implements Printable {
 
 	private void initializeTownMap() {
 		for (Node n : graph.getNodeVertices()) {
-			Map<String, String> tags = n.getTags();
+			Map<String, String> tags = n.get_tags();
 			if ((tags == null) || !tags.containsKey("place")
 					|| !tags.containsKey("name")) {
 				continue;
@@ -296,7 +296,7 @@ public class MapPanel extends JPanel implements Printable {
 			}
 		}
 		if (!foundName) {
-			resultPanel.print("  Node " + n.getOsmId());
+			resultPanel.print("  Node " + n.get_osmId());
 		}
 		resultPanel.println();
 	}
@@ -510,12 +510,12 @@ public class MapPanel extends JPanel implements Printable {
 		Segment lastSeg = null;
 		for (Segment s : result.getRoute()) {
 			Node n = (Node) s.getThis();
-			poly.addPoint(getPx(n.getLongitude()), getPy(n.getLatitude()));
+			poly.addPoint(getPx(n.get_longitude()), getPy(n.get_latitude()));
 			lastSeg = s;
 		}
 		if (lastSeg != null) {
 			Node n = (Node) lastSeg.getThat();
-			poly.addPoint(getPx(n.getLongitude()), getPy(n.getLatitude()));
+			poly.addPoint(getPx(n.get_longitude()), getPy(n.get_latitude()));
 		}
 		g.setStroke(l.bgStroke);
 		g.setColor(l.bgColor);
@@ -541,8 +541,8 @@ public class MapPanel extends JPanel implements Printable {
 						&& visibleElements.isMarked(way)) {
 					Polygon poly = new Polygon();
 					for (Node n : way.getNodeList()) {
-						poly.addPoint(getPx(n.getLongitude()), getPy(n
-								.getLatitude()));
+						poly.addPoint(getPx(n.get_longitude()), getPy(n
+								.get_latitude()));
 					}
 					g.setColor(l.fgColor);
 					g.fillPolygon(poly.xpoints, poly.ypoints, poly.npoints);
@@ -560,11 +560,11 @@ public class MapPanel extends JPanel implements Printable {
 						&& !l.area
 						&& (l.bgColor != null)
 						&& visibleElements.isMarked(way)
-						&& (!showStreetsOnly || (way.getWayType() != SegmentType.NOWAY))) {
+						&& (!showStreetsOnly || (way.get_wayType() != SegmentType.NOWAY))) {
 					Polygon poly = new Polygon();
 					for (Node n : way.getNodeList()) {
-						poly.addPoint(getPx(n.getLongitude()), getPy(n
-								.getLatitude()));
+						poly.addPoint(getPx(n.get_longitude()), getPy(n
+								.get_latitude()));
 					}
 					g.setStroke(l.bgStroke);
 					g.setColor(l.bgColor);
@@ -580,11 +580,11 @@ public class MapPanel extends JPanel implements Printable {
 						&& !l.area
 						&& visibleElements.isMarked(way)
 						&& (l.fgColor != null)
-						&& (!showStreetsOnly || (way.getWayType() != SegmentType.NOWAY))) {
+						&& (!showStreetsOnly || (way.get_wayType() != SegmentType.NOWAY))) {
 					Polygon poly = new Polygon();
 					for (Node n : way.getNodeList()) {
-						poly.addPoint(getPx(n.getLongitude()), getPy(n
-								.getLatitude()));
+						poly.addPoint(getPx(n.get_longitude()), getPy(n
+								.get_latitude()));
 					}
 					g.setStroke(l.fgStroke);
 					g.setColor(l.fgColor);
@@ -597,8 +597,8 @@ public class MapPanel extends JPanel implements Printable {
 		if (showTowns) {
 			for (Node n : townMap.values()) {
 				g.setColor(Color.black);
-				g.drawString(n.getTags().get("name"), getPx(n.getLongitude()),
-						getPy(n.getLatitude()));
+				g.drawString(n.get_tags().get("name"),
+						getPx(n.get_longitude()), getPy(n.get_latitude()));
 			}
 		}
 
@@ -609,19 +609,19 @@ public class MapPanel extends JPanel implements Printable {
 	private boolean intersects(Node a, Node b) {
 		// test if the rectangle defined by the segment a-b
 		// has a non-empty intersection with the display area
-		double maxLat = Math.max(a.getLatitude(), b.getLatitude());
+		double maxLat = Math.max(a.get_latitude(), b.get_latitude());
 		if (maxLat < latS) {
 			return false;
 		}
-		double minLat = Math.min(a.getLatitude(), b.getLatitude());
+		double minLat = Math.min(a.get_latitude(), b.get_latitude());
 		if (minLat > latN) {
 			return false;
 		}
-		double maxLon = Math.max(a.getLongitude(), b.getLongitude());
+		double maxLon = Math.max(a.get_longitude(), b.get_longitude());
 		if (maxLon < lonW) {
 			return false;
 		}
-		double minLon = Math.min(a.getLongitude(), b.getLongitude());
+		double minLon = Math.min(a.get_longitude(), b.get_longitude());
 		if (minLon > lonE) {
 			return false;
 		}
@@ -736,14 +736,14 @@ public class MapPanel extends JPanel implements Printable {
 
 				// determine begin and end position of the current way
 				Node n = (Node) e.getOmega();
-				alpha.x = getPx(n.getLongitude());
-				alpha.y = getPy(n.getLatitude());
+				alpha.x = getPx(n.get_longitude());
+				alpha.y = getPy(n.get_latitude());
 				while (e != null) {
 					n = (Node) e.getOmega();
 					e = e.getNextHasNode();
 				}
-				omega.x = getPx(n.getLongitude());
-				omega.y = getPy(n.getLatitude());
+				omega.x = getPx(n.get_longitude());
+				omega.y = getPy(n.get_latitude());
 
 				// determine compute the location of the node representing
 				// the way by computing a point on the perpendicular in the
@@ -771,8 +771,8 @@ public class MapPanel extends JPanel implements Printable {
 				e = way.getFirstHasNode();
 				while (e != null) {
 					n = (Node) e.getOmega();
-					int y = getPy(n.getLatitude());
-					int x = getPx(n.getLongitude());
+					int y = getPy(n.get_latitude());
+					int x = getPx(n.get_longitude());
 
 					// Edges from way position to member nodes
 					node.x = x;
@@ -804,7 +804,7 @@ public class MapPanel extends JPanel implements Printable {
 					g.setColor(LABEL_COLOR);
 					String name = AnnotatedOsmGraph.getTag(way, "name");
 					if ((name == null) || (name.length() == 0)) {
-						name = Long.toString(way.getOsmId());
+						name = Long.toString(way.get_osmId());
 					}
 					g.drawString(name, waypoint.x + 12
 							* outlineStroke.getLineWidth() / 20, waypoint.y
@@ -820,13 +820,13 @@ public class MapPanel extends JPanel implements Printable {
 				Node source = (Node) s.getAlpha();
 				Node target = (Node) s.getOmega();
 
-				alpha.x = getPx(source.getLongitude());
-				alpha.y = getPy(source.getLatitude());
-				omega.x = getPx(target.getLongitude());
-				omega.y = getPy(target.getLatitude());
+				alpha.x = getPx(source.get_longitude());
+				alpha.y = getPy(source.get_latitude());
+				omega.x = getPx(target.get_longitude());
+				omega.y = getPy(target.get_latitude());
 
 				// paint the edge connecting source and target of a segment
-				drawEdge(g, alpha, omega, diameter, edgeStroke, s.isOneway());
+				drawEdge(g, alpha, omega, diameter, edgeStroke, s.is_oneway());
 
 				// draw alpha and omega nodes
 				g.setStroke(outlineStroke);
@@ -835,11 +835,11 @@ public class MapPanel extends JPanel implements Printable {
 				g.drawLine(omega.x, omega.y, omega.x, omega.y);
 				if (showNodeIds && (zoomLevel.getValue() >= 35)) {
 					g.setColor(LABEL_COLOR);
-					g.drawString(Long.toString(source.getOsmId()), alpha.x + 12
-							* outlineStroke.getLineWidth() / 20, alpha.y
+					g.drawString(Long.toString(source.get_osmId()), alpha.x
+							+ 12 * outlineStroke.getLineWidth() / 20, alpha.y
 							+ getFont().getSize() / 2);
-					g.drawString(Long.toString(target.getOsmId()), omega.x + 12
-							* outlineStroke.getLineWidth() / 20, omega.y
+					g.drawString(Long.toString(target.get_osmId()), omega.x
+							+ 12 * outlineStroke.getLineWidth() / 20, omega.y
 							+ getFont().getSize() / 2);
 				}
 				if (zoomLevel.getValue() >= 20) {
@@ -859,7 +859,7 @@ public class MapPanel extends JPanel implements Printable {
 					g.rotate(theta);
 					g.setColor(LABEL_COLOR);
 					long len = Math.round(Math.sqrt(dy * dy + dx * dx));
-					long d = Math.round(s.getLength());
+					long d = Math.round(s.get_length());
 					String lbl = d + "m";
 					// String lbl =
 					// Double.toString(Math.round(theta*100.0)/100.0);
@@ -1248,7 +1248,7 @@ public class MapPanel extends JPanel implements Printable {
 		if (n == null) {
 			return;
 		}
-		setCenter(n.getLatitude(), n.getLongitude());
+		setCenter(n.get_latitude(), n.get_longitude());
 	}
 
 	public boolean isShowingTowns() {

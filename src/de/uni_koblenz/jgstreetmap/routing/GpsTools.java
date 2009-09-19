@@ -77,8 +77,8 @@ public class GpsTools {
 		Node start, end;
 		start = (Node) s.getThis();
 		end = (Node) s.getThat();
-		return createVectorFromGPS(start.getLatitude(), end.getLatitude(),
-				start.getLongitude(), end.getLongitude());
+		return createVectorFromGPS(start.get_latitude(), end.get_latitude(),
+				start.get_longitude(), end.get_longitude());
 	}
 
 	public static int getAngleBetweenSegments(Segment s1, Segment s2) {
@@ -109,10 +109,10 @@ public class GpsTools {
 		D2Vector v1 = createVectorFromSegment(prev);
 		D2Vector v2 = createVectorFromSegment(next);
 		double lat1, lat2, lon1, lon2;
-		lat1 = start.getLatitude() + v1.y;
-		lon1 = start.getLongitude() + v1.x;
-		lat2 = current.getLatitude() + v2.y;
-		lon2 = current.getLongitude() + v2.x;
+		lat1 = start.get_latitude() + v1.y;
+		lon1 = start.get_longitude() + v1.x;
+		lat2 = current.get_latitude() + v2.y;
+		lon2 = current.get_longitude() + v2.x;
 		double dist1 = Segmentator.distance(lat1, lon1, start);
 		double dist2 = Segmentator.distance(lat2, lon2, start);
 		return dist2 < dist1;

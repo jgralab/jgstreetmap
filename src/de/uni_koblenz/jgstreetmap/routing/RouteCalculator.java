@@ -40,7 +40,7 @@ public abstract class RouteCalculator {
 	public abstract RoutingResult getRoute(Node target, EdgeRating r);
 
 	protected double computeFactor(Segment s) {
-		switch (s.getWayType()) {
+		switch (s.get_wayType()) {
 		case CYCLEWAY:
 			return 3.6 / speeds.cycle;
 		case MOTORWAY:
@@ -130,9 +130,9 @@ public abstract class RouteCalculator {
 	protected double rate(Segment s, EdgeRating r, Segment previous) {
 		switch (r) {
 		case LENGTH:
-			return s.getLength();
+			return s.get_length();
 		case TIME:
-			return s.getLength() * computeFactor(s);
+			return s.get_length() * computeFactor(s);
 		case CONVENIENCE:
 			// TODO comment here
 			// if (previous != null) {
@@ -147,10 +147,10 @@ public abstract class RouteCalculator {
 			// return 0;
 			// }
 			if (previous != null) {
-				return (previous.getWayId() == s.getWayId()) ? s.getLength()
-						: s.getLength() + INCONVENIENCEVALUE;
+				return (previous.get_wayId() == s.get_wayId()) ? s.get_length()
+						: s.get_length() + INCONVENIENCEVALUE;
 			}
-			return s.getLength();
+			return s.get_length();
 		default:
 			return Double.MAX_VALUE;
 		}
