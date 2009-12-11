@@ -84,6 +84,7 @@
 		<echo>../common/build.xml generateschema - executing TgSchema2Java</echo>
 		<ant dir="${common.dir}" antfile="build.xml" target="generateschema">
 			<property name="subprojectname" value="" />
+			<property name="generateschema.opts" value="-so" />
 			<property name="schemafile" value="OsmSchema.tg" />
 		</ant>
 		<echo>generateschema finished</echo>
