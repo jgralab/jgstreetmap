@@ -10,7 +10,7 @@ import java.util.PriorityQueue;
 import java.util.Stack;
 import java.util.TreeSet;
 
-import de.uni_koblenz.jgralab.GraphMarker;
+import de.uni_koblenz.jgralab.graphmarker.GraphMarker;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmGraph;
 import de.uni_koblenz.jgstreetmap.osmschema.map.Node;
 import de.uni_koblenz.jgstreetmap.osmschema.routing.Segment;
