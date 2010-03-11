@@ -24,7 +24,7 @@ public class AStarRouteCalculator extends RouteCalculator {
 	GraphMarker<AStarMark> marker;
 	PriorityQueue<Node> queue;
 
-	private class AStarMark {
+	private static class AStarMark {
 		/** indicates that AStar is done with the vertex */
 		boolean done;
 

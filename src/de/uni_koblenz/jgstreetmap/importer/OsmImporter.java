@@ -239,7 +239,7 @@ public class OsmImporter extends DefaultHandler {
 			currentPrimitive.set_tags(currentTagMap);
 			if (state == State.WAY) {
 				Way w = (Way) currentPrimitive;
-				List<? extends Node> nl = w.getNodeList();
+				List<? extends Node> nl = w.get_nodes();
 				w.set_closed(nl.size() >= 2
 						&& nl.get(0) == nl.get(nl.size() - 1));
 			}

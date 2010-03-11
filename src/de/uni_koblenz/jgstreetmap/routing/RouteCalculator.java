@@ -9,7 +9,7 @@ import de.uni_koblenz.jgstreetmap.osmschema.routing.Segment;
 import de.uni_koblenz.jgstreetmap.osmschema.routing.SegmentType;
 
 public abstract class RouteCalculator {
-	public class Speed {
+	public static class Speed {
 		public double cycle = 15;
 		public double motorway = 100;
 		public double countryroad = 60;

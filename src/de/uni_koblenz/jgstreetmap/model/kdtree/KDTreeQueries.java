@@ -35,7 +35,7 @@ public class KDTreeQueries {
 		for (Node n : l) {
 			result.add(new Neighbour(n, Segmentator.distance(lat, lon, n)));
 		}
-		Collections.sort(result);
+		Collections.sort(result, Neighbour.getComparator());
 		return result;
 	}
 
@@ -224,7 +224,7 @@ public class KDTreeQueries {
 			double lat, double lon) {
 		double dist;
 		Node n;
-		List<? extends Node> nodes = set.getElementList();
+		List<? extends Node> nodes = set.get_elements();
 		dist = getDistance(nodes.get(0), lat, lon);
 		n = nodes.get(0);
 		double curdist;

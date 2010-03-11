@@ -103,10 +103,9 @@ public class SwingProgressFunction implements ProgressFunction, ActionListener {
 	}
 
 	private void setTimeText() {
-		lbl
-				.setText(totalElements + " elements, "
-						+ ((System.currentTimeMillis() - startTime) / 100)
-						/ 10.0 + "s");
+		lbl.setText(totalElements + " elements, "
+				+ ((System.currentTimeMillis() - startTime) / 100.0) / 10.0
+				+ "s");
 	}
 
 	/*
@@ -125,7 +124,8 @@ public class SwingProgressFunction implements ProgressFunction, ActionListener {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+	 * @see
+	 * java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
 	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {

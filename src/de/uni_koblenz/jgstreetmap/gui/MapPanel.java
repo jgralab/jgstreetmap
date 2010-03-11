@@ -97,9 +97,9 @@ public class MapPanel extends JPanel implements Printable {
 	private boolean showNodeIds = false;
 	private boolean showTowns = true;
 
-	private RouteCalculator fastestRouteCalculator;
-	private RouteCalculator shortestRouteCalculator;
-	private RouteCalculator mostConvenientRouteCalculator;
+	private transient RouteCalculator fastestRouteCalculator;
+	private transient RouteCalculator shortestRouteCalculator;
+	private transient RouteCalculator mostConvenientRouteCalculator;
 	private boolean showRoutes = true;
 	private RoutingResult fastestRoute = null;
 	private RoutingResult shortestRoute = null;
@@ -279,7 +279,7 @@ public class MapPanel extends JPanel implements Printable {
 		}
 		resultPanel.printLabel(label + ":", Color.white);
 		boolean foundName = false;
-		for (Way w : n.getWayList()) {
+		for (Way w : n.get_ways()) {
 			String name = AnnotatedOsmGraph.getTag(w, "name");
 			if (name != null) {
 				name = name.trim();
@@ -370,8 +370,8 @@ public class MapPanel extends JPanel implements Printable {
 	}
 
 	private Way getWay(Segment s) {
-		List<? extends Way> alphaWays = ((Node) s.getAlpha()).getWayList();
-		List<? extends Way> omegaWays = ((Node) s.getOmega()).getWayList();
+		List<? extends Way> alphaWays = ((Node) s.getAlpha()).get_ways();
+		List<? extends Way> omegaWays = ((Node) s.getOmega()).get_ways();
 		for (Way w : alphaWays) {
 			for (Way v : omegaWays) {
 				if (v == w) {
@@ -540,7 +540,7 @@ public class MapPanel extends JPanel implements Printable {
 				if (l.enabled && l.visible && l.area
 						&& visibleElements.isMarked(way)) {
 					Polygon poly = new Polygon();
-					for (Node n : way.getNodeList()) {
+					for (Node n : way.get_nodes()) {
 						poly.addPoint(getPx(n.get_longitude()), getPy(n
 								.get_latitude()));
 					}
@@ -562,7 +562,7 @@ public class MapPanel extends JPanel implements Printable {
 						&& visibleElements.isMarked(way)
 						&& (!showStreetsOnly || (way.get_wayType() != SegmentType.NOWAY))) {
 					Polygon poly = new Polygon();
-					for (Node n : way.getNodeList()) {
+					for (Node n : way.get_nodes()) {
 						poly.addPoint(getPx(n.get_longitude()), getPy(n
 								.get_latitude()));
 					}
@@ -582,7 +582,7 @@ public class MapPanel extends JPanel implements Printable {
 						&& (l.fgColor != null)
 						&& (!showStreetsOnly || (way.get_wayType() != SegmentType.NOWAY))) {
 					Polygon poly = new Polygon();
-					for (Node n : way.getNodeList()) {
+					for (Node n : way.get_nodes()) {
 						poly.addPoint(getPx(n.get_longitude()), getPy(n
 								.get_latitude()));
 					}
@@ -866,12 +866,11 @@ public class MapPanel extends JPanel implements Printable {
 					int textWidth = g.getFontMetrics().stringWidth(lbl);
 					if (Math.abs(theta) >= Math.PI / 2) {
 						g.rotate(Math.PI);
-						g.translate(-(len + textWidth) / 2, -getFont()
+						g.translate(-(len + textWidth) / 2.0, -getFont()
 								.getSize());
 					} else {
-						g
-								.translate((len - textWidth) / 2, -getFont()
-										.getSize());
+						g.translate((len - textWidth) / 2.0, -getFont()
+								.getSize());
 					}
 					g.drawString(lbl, 0, 0);
 					g.setTransform(t);

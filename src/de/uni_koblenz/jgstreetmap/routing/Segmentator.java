@@ -120,8 +120,8 @@ public class Segmentator {
 	}
 
 	public static double distance(Node n1, Node n2) {
-		return distance(n1.get_latitude(), n1.get_longitude(), n2.get_latitude(),
-				n2.get_longitude());
+		return distance(n1.get_latitude(), n1.get_longitude(), n2
+				.get_latitude(), n2.get_longitude());
 	}
 
 	public static double distance(double lat, double lon, Node n) {
@@ -140,7 +140,7 @@ public class Segmentator {
 
 	public static boolean isIntersection(Node currentNode) {
 		int relevantWayAmount = 0;
-		for (Way currentWay : currentNode.getWayList()) {
+		for (Way currentWay : currentNode.get_ways()) {
 			if (currentWay.get_wayType() != SegmentType.NOWAY) {
 				relevantWayAmount++;
 			}
@@ -205,7 +205,7 @@ public class Segmentator {
 
 	private static int segmentateWay(OsmGraph theGraph, Way currentWay) {
 		int out = 0;
-		Iterator<? extends Node> iter = currentWay.getNodeList().iterator();
+		Iterator<? extends Node> iter = currentWay.get_nodes().iterator();
 		Node source, target;
 		if (iter.hasNext()) {
 			boolean oneway = isOneway(currentWay);

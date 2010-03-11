@@ -24,7 +24,7 @@ public class KDTreeBuilder {
 		}
 		KDTree kdTree = g.createKDTree();
 		kdTree.set_levels(maxLevels);
-		kdTree.addRoot(constructkdTreeY(g, nodeList, 0));
+		kdTree.add_root(constructkdTreeY(g, nodeList, 0));
 	}
 
 	public static YKey constructkdTreeY(AnnotatedOsmGraph g,
@@ -39,9 +39,9 @@ public class KDTreeBuilder {
 		// NodeSet is assigned to YKey as the child of YKey
 		if ((depth == g.getKDTree().get_levels()) || (nodeList.size() <= 1)) {
 			NodeSet set = g.createNodeSet();
-			yk.addSet(set);
+			yk.add_nodeset(set);
 			for (Node n : nodeList) {
-				set.addElement(n);
+				set.add_elements(n);
 			}
 		} else {
 			double keyValue = nodeList.get(nodeList.size() / 2 - 1)
@@ -60,8 +60,8 @@ public class KDTreeBuilder {
 				n = nodeList.peek();
 			}
 			// construct next level, which consists of XKeys
-			yk.addChild(constructkdTreeX(g, leftList, depth + 1));
-			yk.addChild(constructkdTreeX(g, nodeList, depth + 1));
+			yk.add_children(constructkdTreeX(g, leftList, depth + 1));
+			yk.add_children(constructkdTreeX(g, nodeList, depth + 1));
 		}
 		return yk;
 	}
@@ -73,9 +73,9 @@ public class KDTreeBuilder {
 
 		if ((depth == g.getKDTree().get_levels()) || (nodeList.size() <= 1)) {
 			NodeSet set = g.createNodeSet();
-			xk.addSet(set);
+			xk.add_nodeset(set);
 			for (Node n : nodeList) {
-				set.addElement(n);
+				set.add_elements(n);
 			}
 		} else {
 			double keyValue = nodeList.get(nodeList.size() / 2 - 1)
@@ -88,8 +88,8 @@ public class KDTreeBuilder {
 				leftList.add(nodeList.poll());
 				n = nodeList.peek();
 			}
-			xk.addChild(constructkdTreeY(g, leftList, depth + 1));
-			xk.addChild(constructkdTreeY(g, nodeList, depth + 1));
+			xk.add_children(constructkdTreeY(g, leftList, depth + 1));
+			xk.add_children(constructkdTreeY(g, nodeList, depth + 1));
 		}
 		return xk;
 	}

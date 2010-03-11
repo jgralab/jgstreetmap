@@ -2,6 +2,7 @@ package de.uni_koblenz.jgstreetmap.model;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -121,11 +122,11 @@ public class AnnotatedOsmGraph extends OsmGraphImpl {
 					ns.delete();
 				} else {
 					if (current instanceof XKey) {
-						for (Key k : ((XKey) current).getChildList()) {
+						for (Key k : ((XKey) current).get_children()) {
 							s.push(k);
 						}
 					} else {
-						for (Key k : ((YKey) current).getChildList()) {
+						for (Key k : ((YKey) current).get_children()) {
 							s.push(k);
 						}
 					}
@@ -149,7 +150,7 @@ public class AnnotatedOsmGraph extends OsmGraphImpl {
 		return kdTree;
 	}
 
-	public static class Neighbour implements Comparable<Neighbour> {
+	public static class Neighbour {
 		private Node node;
 		private double distance;
 
@@ -158,18 +159,21 @@ public class AnnotatedOsmGraph extends OsmGraphImpl {
 			distance = d;
 		}
 
-		@Override
-		public int compareTo(Neighbour o) {
-			return (distance < o.distance) ? -1 : (distance > o.distance) ? 1
-					: 0;
-		}
-
 		public Node getNode() {
 			return node;
 		}
 
 		public double getDistance() {
 			return distance;
+		}
+
+		public static Comparator<Neighbour> getComparator() {
+			return new Comparator<Neighbour>() {
+				@Override
+				public int compare(Neighbour o1, Neighbour o2) {
+					return (int) Math.signum(o1.distance - o2.distance);
+				}
+			};
 		}
 	}
 
@@ -181,8 +185,7 @@ public class AnnotatedOsmGraph extends OsmGraphImpl {
 				l.add(new Neighbour(n, dist));
 			}
 		}
-		Collections.sort(l);
+		Collections.sort(l, Neighbour.getComparator());
 		return l;
 	}
-
 }

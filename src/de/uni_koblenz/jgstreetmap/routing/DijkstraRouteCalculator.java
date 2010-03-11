@@ -15,7 +15,7 @@ import de.uni_koblenz.jgstreetmap.osmschema.routing.SegmentType;
 
 public class DijkstraRouteCalculator extends RouteCalculator {
 
-	private class DijkstraMarker {
+	private static class DijkstraMarker {
 
 		/** indicates that Dijkstra is done with the vertex */
 		boolean done;
