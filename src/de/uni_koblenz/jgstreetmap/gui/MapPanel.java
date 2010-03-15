@@ -370,10 +370,8 @@ public class MapPanel extends JPanel implements Printable {
 	}
 
 	private Way getWay(Segment s) {
-		List<? extends Way> alphaWays = ((Node) s.getAlpha()).get_ways();
-		List<? extends Way> omegaWays = ((Node) s.getOmega()).get_ways();
-		for (Way w : alphaWays) {
-			for (Way v : omegaWays) {
+		for (Way w : ((Node) s.getAlpha()).get_ways()) {
+			for (Way v : ((Node) s.getOmega()).get_ways()) {
 				if (v == w) {
 					return w;
 				}

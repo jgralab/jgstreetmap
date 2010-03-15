@@ -222,19 +222,15 @@ public class KDTreeQueries {
 
 	public static Node nearestNode(AnnotatedOsmGraph g, NodeSet set,
 			double lat, double lon) {
-		double dist;
-		Node n;
-		List<? extends Node> nodes = set.get_elements();
-		dist = getDistance(nodes.get(0), lat, lon);
-		n = nodes.get(0);
-		double curdist;
-		for (int i = 1; i < nodes.size(); i++) {
-			curdist = getDistance(nodes.get(i), lat, lon);
-			if (curdist < dist) {
+		double dist = 0.0;
+		Node nearest = null;
+		for (Node n : set.get_elements()) {
+			double curdist = getDistance(n, lat, lon);
+			if (nearest == null || curdist < dist) {
 				dist = curdist;
-				n = nodes.get(i);
+				nearest = n;
 			}
 		}
-		return n;
+		return nearest;
 	}
 }

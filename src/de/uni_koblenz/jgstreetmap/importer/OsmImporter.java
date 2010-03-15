@@ -5,7 +5,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 
 import org.xml.sax.Attributes;
@@ -239,9 +238,17 @@ public class OsmImporter extends DefaultHandler {
 			currentPrimitive.set_tags(currentTagMap);
 			if (state == State.WAY) {
 				Way w = (Way) currentPrimitive;
-				List<? extends Node> nl = w.get_nodes();
-				w.set_closed(nl.size() >= 2
-						&& nl.get(0) == nl.get(nl.size() - 1));
+				Node first = null;
+				Node last = null;
+				int count = 0;
+				for (Node n : w.get_nodes()) {
+					++count;
+					if (first == null) {
+						first = n;
+					}
+					last = n;
+				}
+				w.set_closed(count >= 2 && first == last);
 			}
 			currentPrimitive = null;
 			currentTagMap = null;
