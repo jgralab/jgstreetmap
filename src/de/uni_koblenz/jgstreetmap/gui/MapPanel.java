@@ -81,8 +81,9 @@ public class MapPanel extends JPanel implements Printable {
 	private boolean mouseDragged; // true if mouse was dragged
 	private boolean mouseSetStartNode;
 
-	private RenderingHints antialiasOn; // anti-aliased painting hints
-	private RenderingHints antialiasOff; // simple painting hints
+	// simple painting hints (can be disabled with the disable-aa system
+	// property)
+	private RenderingHints antialias;
 
 	BooleanGraphMarker visibleElements; // marks elements to be painted
 
@@ -127,13 +128,17 @@ public class MapPanel extends JPanel implements Printable {
 		startNode = null;
 		// (Node) graph.getOsmPrimitiveById(30432771);
 
-		antialiasOff = new RenderingHints(RenderingHints.KEY_ANTIALIASING,
-				RenderingHints.VALUE_ANTIALIAS_OFF);
-
-		antialiasOn = new RenderingHints(RenderingHints.KEY_ANTIALIASING,
-				RenderingHints.VALUE_ANTIALIAS_ON);
-		antialiasOn.put(RenderingHints.KEY_RENDERING,
-				RenderingHints.VALUE_RENDER_QUALITY);
+		if (System.getProperty("disable-aa") == null) {
+			System.out.println("Antialiasing enabled!");
+			antialias = new RenderingHints(RenderingHints.KEY_ANTIALIASING,
+					RenderingHints.VALUE_ANTIALIAS_ON);
+			antialias.put(RenderingHints.KEY_RENDERING,
+					RenderingHints.VALUE_RENDER_QUALITY);
+		} else {
+			System.out.println("Antialiasing disabled!");
+			antialias = new RenderingHints(RenderingHints.KEY_ANTIALIASING,
+					RenderingHints.VALUE_ANTIALIAS_OFF);
+		}
 
 		setMinimumSize(new Dimension(200, 150));
 		setPreferredSize(new Dimension(1000, 750));
@@ -488,7 +493,7 @@ public class MapPanel extends JPanel implements Printable {
 		}
 
 		// draw center cross
-		g2.setRenderingHints(antialiasOff);
+		g2.setRenderingHints(antialias);
 		g2.setStroke(new BasicStroke(1.0f, BasicStroke.JOIN_BEVEL,
 				BasicStroke.CAP_BUTT));
 		int x = getPx(lonC);
@@ -529,7 +534,7 @@ public class MapPanel extends JPanel implements Printable {
 	private void paintMap(Graphics2D g) {
 		// long start = System.currentTimeMillis();
 
-		g.setRenderingHints(antialiasOn);
+		g.setRenderingHints(antialias);
 
 		// draw areas
 		for (List<Way> lst : graph.getOrderedWayVertices().values()) {
@@ -698,7 +703,7 @@ public class MapPanel extends JPanel implements Printable {
 			return;
 		}
 		long start = System.currentTimeMillis();
-		g.setRenderingHints(antialiasOn);
+		g.setRenderingHints(antialias);
 
 		double diameter = Math.max(1.0, 10.0 * scaleLat / 1852.0);
 		double width = 0.25 * diameter;
@@ -911,7 +916,7 @@ public class MapPanel extends JPanel implements Printable {
 	 *            graphics context for paint operations
 	 */
 	private void paintFrame(Graphics2D g) {
-		g.setRenderingHints(antialiasOn);
+		g.setRenderingHints(antialias);
 		g.setClip(0, 0, getWidth(), getHeight());
 		// draw background of frame
 		g.setColor(FRAME_BG_COLOR);
