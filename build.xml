@@ -12,7 +12,7 @@
 
 	</path>
 
-	<target name="build" depends="clean,compile" />
+	<target name="build" depends="clean,jar" />
 
 	<target name="generategraph">
 		<java classname="de.uni_koblenz.jgstreetmap.importer.OsmImporter" classpathref="classpath" fork="true" maxmemory="2G" dir="./">
