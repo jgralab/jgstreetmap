@@ -24,7 +24,7 @@
 
 	<!-- convertschema -->
 	<!-- convert xmi schema into tg schema -->
-	<target name="convertschema">
+	<target name="oldconvertschema">
 		<java jar="${common.dir}/lib/saxon/saxon9.jar" fork="true">
 			<arg line="-s:OsmSchema.xmi -xsl:../jgralab/src/de/uni_koblenz/jgralab/utilities/xmi2tgschema/XMI2TGSchema.xsl -o:OsmSchema.tg tool=ea schemaName=de.uni_koblenz.jgstreetmap.osmschema.OsmSchema" />
 		</java>
