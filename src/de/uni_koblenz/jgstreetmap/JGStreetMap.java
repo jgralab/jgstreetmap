@@ -12,10 +12,14 @@ public class JGStreetMap {
 	public static void main(String[] args) {
 		try {
 			String graphFile = (args.length > 0) ? args[0] : "OsmGraph.tg.gz";
-			OsmSchema.instance().getGraphFactory().setGraphImplementationClass(
-					OsmGraph.class, AnnotatedOsmGraph.class);
-			OsmGraph graph = OsmSchema.instance().loadOsmGraph(graphFile,
-					new SwingProgressFunction("jgStreetMap", "Loading Map..."));
+			OsmSchema.instance().getGraphFactory()
+					.setGraphSavememImplementationClass(OsmGraph.class,
+							AnnotatedOsmGraph.class);
+			OsmGraph graph = OsmSchema.instance()
+					.loadOsmGraphWithSavememSupport(
+							graphFile,
+							new SwingProgressFunction("jgStreetMap",
+									"Loading Map..."));
 			new MapFrame((AnnotatedOsmGraph) graph);
 		} catch (GraphIOException e) {
 			e.printStackTrace();

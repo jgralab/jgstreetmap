@@ -5,10 +5,12 @@
 	<property name="projectname" value="jgstreetmap" />
 	<property name="main" value="JGStreetMap" />
 
-	<import file="../common/common.xml" />
+	<property name="schema.implementationMode" value="savemem" />
 
-	<property name="schema.file" value="${project.dir}/OsmSchema.tg" />
+	<import file="../common/common.xml" />
 	
+	<property name="schema.file" value="${project.dir}/OsmSchema.tg" />
+
 	<path id="classpathExtension">
 
 	</path>

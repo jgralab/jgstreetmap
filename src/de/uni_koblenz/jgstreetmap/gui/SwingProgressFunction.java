@@ -103,9 +103,10 @@ public class SwingProgressFunction implements ProgressFunction, ActionListener {
 	}
 
 	private void setTimeText() {
-		lbl.setText(totalElements + " elements, "
-				+ ((System.currentTimeMillis() - startTime) / 100.0) / 10.0
-				+ "s");
+		lbl
+				.setText(totalElements + " elements, "
+						+ ((System.currentTimeMillis() - startTime) / 100)
+						/ 10.0 + "s");
 	}
 
 	/*

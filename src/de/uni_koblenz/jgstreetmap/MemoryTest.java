@@ -10,13 +10,15 @@ public class MemoryTest {
 
 	public static void main(String[] args) {
 		try {
-			String graphFile = (args.length > 0) ? args[0] : "OsmGraph.tg";
+			String graphFile = (args.length > 0) ? args[0] : "OsmGraph.tg.gz";
 			printMemory("After start");
-			OsmSchema.instance().getGraphFactory().setGraphImplementationClass(
-					OsmGraph.class, AnnotatedOsmGraph.class);
+			OsmSchema.instance().getGraphFactory()
+					.setGraphSavememImplementationClass(OsmGraph.class,
+							AnnotatedOsmGraph.class);
 			printMemory("After setting GraphFactory");
-			OsmGraph graph = OsmSchema.instance().loadOsmGraph(graphFile,
-					new ProgressFunctionImpl());
+			OsmGraph graph = OsmSchema.instance()
+					.loadOsmGraphWithSavememSupport(graphFile,
+							new ProgressFunctionImpl());
 			printMemory("After loading Graph");
 			System.err.println("V: " + graph.getVCount());
 			System.err.println("E: " + graph.getECount());
