@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 
+import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -21,6 +22,7 @@ public class ResultPanel extends JPanel {
 	private SimpleAttributeSet defaultAttributeSet;
 
 	public ResultPanel() {
+		setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
 		textPane = new JTextPane() {
 			private static final long serialVersionUID = 1L;
 
@@ -31,13 +33,14 @@ public class ResultPanel extends JPanel {
 		};
 		setLayout(new BorderLayout());
 		JScrollPane scp = new JScrollPane(textPane);
+		scp.setBorder(BorderFactory.createTitledBorder("Results"));
 		scp.setMinimumSize(new Dimension(200, 150));
 		scp.setPreferredSize(new Dimension(200, 150));
 		scp
 				.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
 		// textPane.setEditable(false);
-		scp.setBackground(textPane.getBackground());
 		add(scp, BorderLayout.CENTER);
+		add(new JLabel(" "), BorderLayout.SOUTH);
 
 		defaultAttributeSet = new SimpleAttributeSet();
 		StyleConstants.setFontFamily(defaultAttributeSet, "Monospaced");

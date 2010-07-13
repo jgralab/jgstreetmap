@@ -196,7 +196,9 @@ public class MapPanel extends JPanel implements Printable {
 				if (mouseDragged) {
 					double deltaLat = getLat(e.getY()) - lat;
 					double deltaLon = getLon(e.getX()) - lon;
-					setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+					setCursor(Cursor
+							.getPredefinedCursor(mouseSetStartNode ? Cursor.CROSSHAIR_CURSOR
+									: Cursor.DEFAULT_CURSOR));
 					setCenter(latC - deltaLat, lonC - deltaLon);
 				} else {
 					// long start = System.currentTimeMillis();

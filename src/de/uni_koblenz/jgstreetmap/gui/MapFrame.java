@@ -3,12 +3,12 @@ package de.uni_koblenz.jgstreetmap.gui;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
 
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -17,10 +17,10 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -79,15 +79,20 @@ public class MapFrame extends JFrame {
 
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
+		buttonPanel.setBorder(new EmptyBorder(4, 4, 4, 4));
 		getContentPane().add(buttonPanel, BorderLayout.WEST);
 
-		JPanel detailPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-		getContentPane().add(new JScrollPane(detailPanel), BorderLayout.SOUTH);
-
-		detailPanel.add(new JLabel("Visible details:"));
+		// ---------------------
+		// VISIBLE DETAILS PANEL
+		// ---------------------
+		JPanel pnl = new JPanel();
+		pnl.setAlignmentX(0.5f);
+		pnl.setLayout(new BoxLayout(pnl, BoxLayout.Y_AXIS));
+		pnl.setBorder(BorderFactory.createTitledBorder("Visible details"));
+		buttonPanel.add(pnl);
 
 		showMapButton = new JCheckBox("Map", mapPanel.isShowingMap());
-		detailPanel.add(showMapButton);
+		pnl.add(showMapButton);
 		showMapButton.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -98,7 +103,7 @@ public class MapFrame extends JFrame {
 
 		showNatureButton = new JCheckBox("Streets only", mapPanel
 				.isShowingStreetsOnly());
-		detailPanel.add(showNatureButton);
+		pnl.add(showNatureButton);
 		showNatureButton.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -107,7 +112,7 @@ public class MapFrame extends JFrame {
 		});
 
 		showGraphButton = new JCheckBox("Graph", mapPanel.isShowingGraph());
-		detailPanel.add(showGraphButton);
+		pnl.add(showGraphButton);
 		showGraphButton.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -117,7 +122,7 @@ public class MapFrame extends JFrame {
 
 		showWaysInGraphButton = new JCheckBox("OSM Ways", mapPanel
 				.isShowingWaysInGraph());
-		detailPanel.add(showWaysInGraphButton);
+		pnl.add(showWaysInGraphButton);
 		showWaysInGraphButton.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -127,7 +132,7 @@ public class MapFrame extends JFrame {
 
 		showWayIdsButton = new JCheckBox("Way names", mapPanel
 				.isShowingWayIds());
-		detailPanel.add(showWayIdsButton);
+		pnl.add(showWayIdsButton);
 		showWayIdsButton.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -137,7 +142,7 @@ public class MapFrame extends JFrame {
 
 		showNodeIdsButton = new JCheckBox("Node IDs", mapPanel
 				.isShowingNodeIds());
-		detailPanel.add(showNodeIdsButton);
+		pnl.add(showNodeIdsButton);
 		showNodeIdsButton.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -146,7 +151,7 @@ public class MapFrame extends JFrame {
 		});
 
 		showLengthButton = new JCheckBox("Length", mapPanel.isShowingLength());
-		detailPanel.add(showLengthButton);
+		pnl.add(showLengthButton);
 		showLengthButton.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -155,7 +160,7 @@ public class MapFrame extends JFrame {
 		});
 
 		showRoutesButton = new JCheckBox("Routes", mapPanel.isShowingRoutes());
-		detailPanel.add(showRoutesButton);
+		pnl.add(showRoutesButton);
 		showRoutesButton.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -164,7 +169,7 @@ public class MapFrame extends JFrame {
 		});
 
 		showTownsButton = new JCheckBox("Towns", mapPanel.isShowingTowns());
-		detailPanel.add(showTownsButton);
+		pnl.add(showTownsButton);
 		showTownsButton.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -172,8 +177,19 @@ public class MapFrame extends JFrame {
 			}
 		});
 
+		Dimension d8x8 = new Dimension(8, 8);
+		buttonPanel.add(new Box.Filler(d8x8, d8x8, d8x8));
+
+		// ---------------------
+		// ROUTING PANEL
+		// ---------------------
+		pnl = new JPanel();
+		pnl.setLayout(new BoxLayout(pnl, BoxLayout.Y_AXIS));
+		pnl.setBorder(BorderFactory.createTitledBorder("Routing"));
+		buttonPanel.add(pnl);
+
 		algorithmComboBox = new JComboBox(routingAlgorithms);
-		detailPanel.add(algorithmComboBox);
+		pnl.add(algorithmComboBox);
 		algorithmComboBox.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -183,10 +199,35 @@ public class MapFrame extends JFrame {
 			}
 		});
 
-		searchTextField = new JTextField(20);
+		startButton = new JButton("Set start");
+		startButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+		startButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				mapPanel.setMouseStartNode();
+			}
+		});
+		pnl.add(startButton);
+
+		buttonPanel.add(new Box.Filler(d8x8, d8x8, d8x8));
+
+		// ---------------------
+		// SEARCH/ZOOM PANEL
+		// ---------------------
+		pnl = new JPanel();
+		pnl.setLayout(new BoxLayout(pnl, BoxLayout.Y_AXIS));
+		pnl.setBorder(BorderFactory.createTitledBorder("Map"));
+		buttonPanel.add(pnl);
+
+		JLabel lbl = new JLabel("Locate town");
+		lbl.setAlignmentX(Component.CENTER_ALIGNMENT);
+		pnl.add(lbl);
+
+		searchTextField = new JTextField();
+		searchTextField.setAlignmentX(Component.CENTER_ALIGNMENT);
 		searchTextField
 				.setToolTipText("Enter a name of a town and hit return.");
-		detailPanel.add(searchTextField);
+		pnl.add(searchTextField);
 		searchTextField.addActionListener(new ActionListener() {
 
 			@Override
@@ -194,14 +235,10 @@ public class MapFrame extends JFrame {
 				mapPanel.centerTown(searchTextField.getText().toLowerCase());
 			}
 		});
-		detailPanel.validate();
 
-		buttonPanel.add(new Box.Filler(new Dimension(5, 0),
-				new Dimension(5, 50), new Dimension(5, Short.MAX_VALUE)));
-
-		JLabel lbl = new JLabel("Zoom");
+		lbl = new JLabel("Zoom");
 		lbl.setAlignmentX(Component.CENTER_ALIGNMENT);
-		buttonPanel.add(lbl);
+		pnl.add(lbl);
 
 		zoomInButton = new JButton("+");
 		zoomInButton.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -213,12 +250,12 @@ public class MapFrame extends JFrame {
 								MapPanel.ZOOM_MAX));
 			}
 		});
-		buttonPanel.add(zoomInButton);
+		pnl.add(zoomInButton);
 
 		zoomSlider = new JSlider(SwingConstants.VERTICAL);
 		zoomSlider.setModel(mapPanel.getZoomLevelModel());
 		zoomSlider.setAlignmentX(Component.CENTER_ALIGNMENT);
-		buttonPanel.add(zoomSlider);
+		pnl.add(zoomSlider);
 
 		zoomOutButton = new JButton("-");
 		zoomOutButton.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -230,19 +267,17 @@ public class MapFrame extends JFrame {
 								MapPanel.ZOOM_MIN));
 			}
 		});
-		buttonPanel.add(zoomOutButton);
-		buttonPanel.add(new Box.Filler(new Dimension(5, 0),
-				new Dimension(5, 50), new Dimension(5, Short.MAX_VALUE)));
+		pnl.add(zoomOutButton);
 
-		startButton = new JButton("Set start");
-		startButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-		startButton.addActionListener(new ActionListener() {
+		zahnButton = new JButton("\"Zahn\"");
+		zahnButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+		zahnButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				mapPanel.setMouseStartNode();
+				mapPanel.setDefaultPosition();
 			}
 		});
-		buttonPanel.add(startButton);
+		pnl.add(zahnButton);
 
 		printButton = new JButton("Print");
 		printButton.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -260,17 +295,7 @@ public class MapFrame extends JFrame {
 				}
 			}
 		});
-		buttonPanel.add(printButton);
-
-		zahnButton = new JButton("\"Zahn\"");
-		zahnButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-		zahnButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				mapPanel.setDefaultPosition();
-			}
-		});
-		buttonPanel.add(zahnButton);
+		pnl.add(printButton);
 
 		pack();
 		setVisible(true);

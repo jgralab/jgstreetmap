@@ -21,6 +21,9 @@ public class KDTreeQueries {
 
 	public static List<Neighbour> neighboursKD(AnnotatedOsmGraph g, double lat,
 			double lon, double maxrange) {
+		if (!g.hasKDTree()) {
+			return null;
+		}
 		double height = maxrange / (GpsTools.MINUTEMETER * 60);
 		double width = maxrange
 				/ (GpsTools.MINUTEMETER * 60 * Math.cos(Math.toRadians(lat)));
