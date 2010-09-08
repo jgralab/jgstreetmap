@@ -1,8 +1,8 @@
 package de.uni_koblenz.jgstreetmap;
 
 import de.uni_koblenz.jgralab.GraphIOException;
+import de.uni_koblenz.jgralab.impl.SwingProgressFunction;
 import de.uni_koblenz.jgstreetmap.gui.MapFrame;
-import de.uni_koblenz.jgstreetmap.gui.SwingProgressFunction;
 import de.uni_koblenz.jgstreetmap.model.AnnotatedOsmGraph;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmGraph;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmSchema;
