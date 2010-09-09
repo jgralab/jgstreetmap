@@ -12,7 +12,9 @@ public class JGStreetMap {
 	public static void main(String[] args) {
 		try {
 			String graphFile = (args.length > 0) ? args[0] : "OsmGraph.tg.gz";
-			OsmSchema.instance().getGraphFactory()
+			OsmSchema
+					.instance()
+					.getGraphFactory()
 					.setGraphSavememImplementationClass(OsmGraph.class,
 							AnnotatedOsmGraph.class);
 			OsmGraph graph = OsmSchema.instance()

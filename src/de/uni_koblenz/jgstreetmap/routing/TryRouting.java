@@ -1,7 +1,7 @@
 package de.uni_koblenz.jgstreetmap.routing;
 
 import de.uni_koblenz.jgralab.GraphIOException;
-import de.uni_koblenz.jgralab.impl.ProgressFunctionImpl;
+import de.uni_koblenz.jgralab.impl.ConsoleProgressFunction;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmGraph;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmSchema;
 import de.uni_koblenz.jgstreetmap.osmschema.routing.Segment;
@@ -18,7 +18,7 @@ public class TryRouting {
 		try {
 			System.out.println("Loading graph...");
 			theGraph = OsmSchema.instance().loadOsmGraph(sourceGraphFilename,
-					new ProgressFunctionImpl());
+					new ConsoleProgressFunction());
 		} catch (GraphIOException e) {
 			throw new RuntimeException("Graph could not be loaded.");
 		}

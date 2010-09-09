@@ -11,7 +11,7 @@ import java.util.List;
 import de.uni_koblenz.jgralab.GraphIO;
 import de.uni_koblenz.jgralab.GraphIOException;
 import de.uni_koblenz.jgralab.Vertex;
-import de.uni_koblenz.jgralab.impl.ProgressFunctionImpl;
+import de.uni_koblenz.jgralab.impl.ConsoleProgressFunction;
 import de.uni_koblenz.jgstreetmap.model.AnnotatedOsmGraph;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmGraph;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmSchema;
@@ -164,12 +164,12 @@ public class Segmentator {
 		try {
 			System.out.println("Loading graph...");
 			theGraph = OsmSchema.instance().loadOsmGraph(sourceGraphFilename,
-					new ProgressFunctionImpl());
+					new ConsoleProgressFunction());
 			segmentateGraph(theGraph);
 
 			System.out.println("Storing the graph...");
 			GraphIO.saveGraphToFile(targetGraphFilename, theGraph,
-					new ProgressFunctionImpl());
+					new ConsoleProgressFunction());
 
 		} catch (GraphIOException e) {
 			e.printStackTrace();

@@ -13,7 +13,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import de.uni_koblenz.jgralab.GraphIO;
 import de.uni_koblenz.jgralab.GraphIOException;
-import de.uni_koblenz.jgralab.impl.ProgressFunctionImpl;
+import de.uni_koblenz.jgralab.impl.ConsoleProgressFunction;
 import de.uni_koblenz.jgstreetmap.model.AnnotatedOsmGraph;
 import de.uni_koblenz.jgstreetmap.model.kdtree.KDTreeBuilder;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmGraph;
@@ -106,7 +106,7 @@ public class OsmImporter extends DefaultHandler {
 		graph.defragment();
 		try {
 			GraphIO.saveGraphToFile("OsmGraph.tg", graph,
-					new ProgressFunctionImpl());
+					new ConsoleProgressFunction());
 		} catch (GraphIOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
