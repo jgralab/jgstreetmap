@@ -8,15 +8,18 @@ import de.uni_koblenz.jgstreetmap.osmschema.OsmGraph;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmSchema;
 
 public class JGStreetMap {
+	static {
+		OsmSchema
+				.instance()
+				.getGraphFactory()
+				.setGraphSavememImplementationClass(OsmGraph.class,
+						AnnotatedOsmGraph.class);
+	}
 
 	public static void main(String[] args) {
 		try {
 			String graphFile = (args.length > 0) ? args[0] : "OsmGraph.tg.gz";
-			OsmSchema
-					.instance()
-					.getGraphFactory()
-					.setGraphSavememImplementationClass(OsmGraph.class,
-							AnnotatedOsmGraph.class);
+
 			OsmGraph graph = OsmSchema.instance()
 					.loadOsmGraphWithSavememSupport(
 							graphFile,

@@ -5,7 +5,7 @@
 	<property name="projectname" value="jgstreetmap" />
 	<property name="main" value="JGStreetMap" />
 
-	<property name="schema.implementationMode" value="standard,savemem" />
+	<property name="schema.implementationMode" value="savemem" />
 
 	<import file="../common/common.xml" />
 	

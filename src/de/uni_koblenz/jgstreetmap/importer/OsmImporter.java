@@ -30,6 +30,14 @@ public class OsmImporter extends DefaultHandler {
 		INIT, OSM, NODE, WAY, RELATION
 	};
 
+	static {
+		OsmSchema
+				.instance()
+				.getGraphFactory()
+				.setGraphSavememImplementationClass(OsmGraph.class,
+						AnnotatedOsmGraph.class);
+	}
+
 	private State state;
 	private long startTime;
 	private Map<Long, OsmPrimitive> osmIdMap;
@@ -41,8 +49,10 @@ public class OsmImporter extends DefaultHandler {
 	private static final int MAX_SET_MEMBERS = 512;
 	private MinimalSAXParser parser;
 	private HashSet<String> usedTags;
+	private String outFile;
 
-	public OsmImporter() {
+	public OsmImporter(String outTgFile) {
+		outFile = outTgFile;
 		dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 		usedTags = new HashSet<String>(10);
 		// Only these tags which are needed for visualizing the map and routing
@@ -60,12 +70,21 @@ public class OsmImporter extends DefaultHandler {
 	}
 
 	public static void main(String[] args) {
-		String filename = (args.length > 0) ? args[0] : "map.osm.xml";
+		if (args.length != 2) {
+			System.err.println("Usage: OsmImporter <map.osm.xml> <out.tg>");
+			System.exit(1);
+		}
+
+		String filename = args[0];
+		String out = args[1];
 		System.out.println("OSM to TGraph");
 		System.out.println("=============");
-		OsmSchema.instance().getGraphFactory().setGraphImplementationClass(
-				OsmGraph.class, AnnotatedOsmGraph.class);
-		new OsmImporter().importOsm(filename);
+		OsmSchema
+				.instance()
+				.getGraphFactory()
+				.setGraphImplementationClass(OsmGraph.class,
+						AnnotatedOsmGraph.class);
+		new OsmImporter(out).importOsm(filename);
 	}
 
 	public void importOsm(String fileName) {
@@ -85,8 +104,8 @@ public class OsmImporter extends DefaultHandler {
 	public void startDocument() throws SAXException {
 		System.out.println("Converting...");
 		startTime = System.currentTimeMillis();
-		graph = (AnnotatedOsmGraph) OsmSchema.instance().createOsmGraph(16000,
-				16000);
+		graph = (AnnotatedOsmGraph) OsmSchema.instance()
+				.createOsmGraphWithSavememSupport();
 		osmIdMap = new HashMap<Long, OsmPrimitive>();
 		graph.createKDTree();
 		nodeCount = 0;
@@ -105,7 +124,7 @@ public class OsmImporter extends DefaultHandler {
 		KDTreeBuilder.buildTree(graph, levels);
 		graph.defragment();
 		try {
-			GraphIO.saveGraphToFile("OsmGraph.tg", graph,
+			GraphIO.saveGraphToFile(outFile, graph,
 					new ConsoleProgressFunction());
 		} catch (GraphIOException e) {
 			// TODO Auto-generated catch block
@@ -125,7 +144,7 @@ public class OsmImporter extends DefaultHandler {
 		// System.out.println("\t" + atts.getQName(i) + "='"
 		// + atts.getValue(i) + "'");
 		// }
-		if (state == State.OSM && name.equals("node")) {
+		if ((state == State.OSM) && name.equals("node")) {
 			state = State.NODE;
 			++nodeCount;
 			Node n = graph.createNode();
@@ -138,7 +157,7 @@ public class OsmImporter extends DefaultHandler {
 			currentPrimitive = n;
 			osmIdMap.put(id, n);
 
-		} else if (state == State.OSM && name.equals("way")) {
+		} else if ((state == State.OSM) && name.equals("way")) {
 			state = State.WAY;
 			Way w = graph.createWay();
 			long id = Long.parseLong(atts.getValue("id"));
@@ -148,7 +167,7 @@ public class OsmImporter extends DefaultHandler {
 			currentPrimitive = w;
 			osmIdMap.put(id, w);
 
-		} else if (state == State.OSM && name.equals("relation")) {
+		} else if ((state == State.OSM) && name.equals("relation")) {
 			state = State.RELATION;
 			Relation r = graph.createRelation();
 			long id = Long.parseLong(atts.getValue("id"));
@@ -157,7 +176,7 @@ public class OsmImporter extends DefaultHandler {
 			currentPrimitive = r;
 			osmIdMap.put(id, r);
 
-		} else if (state == State.WAY && name.equals("nd")) {
+		} else if ((state == State.WAY) && name.equals("nd")) {
 			long ref = Long.parseLong(atts.getValue("ref"));
 			try {
 				Node n = (Node) osmIdMap.get(ref);
@@ -172,7 +191,7 @@ public class OsmImporter extends DefaultHandler {
 				e.printStackTrace();
 			}
 
-		} else if (state != State.INIT && state != State.OSM
+		} else if ((state != State.INIT) && (state != State.OSM)
 				&& name.equals("tag")) {
 			if (currentTagMap == null) {
 				currentTagMap = new HashMap<String, String>();
@@ -189,7 +208,7 @@ public class OsmImporter extends DefaultHandler {
 			v = v.replaceAll("&amp;", "&");
 			currentTagMap.put(key, v);
 
-		} else if (state == State.RELATION && name.equals("member")) {
+		} else if ((state == State.RELATION) && name.equals("member")) {
 			String type = atts.getValue("type");
 			long ref = Long.parseLong(atts.getValue("ref"));
 			OsmPrimitive p = osmIdMap.get(ref);
@@ -203,7 +222,7 @@ public class OsmImporter extends DefaultHandler {
 				m.set_memberRole(atts.getValue("role"));
 			}
 
-		} else if (state == State.INIT && name.equals("osm")) {
+		} else if ((state == State.INIT) && name.equals("osm")) {
 			state = State.OSM;
 			currentPrimitive = null;
 			currentTagMap = null;
@@ -215,7 +234,7 @@ public class OsmImporter extends DefaultHandler {
 	}
 
 	private long parseTimestamp(String timestamp) {
-		if (timestamp == null || timestamp.length() != 25) {
+		if ((timestamp == null) || (timestamp.length() != 25)) {
 			return -1;
 		}
 		ParsePosition p = new ParsePosition(0);
@@ -248,7 +267,7 @@ public class OsmImporter extends DefaultHandler {
 					}
 					last = n;
 				}
-				w.set_closed(count >= 2 && first == last);
+				w.set_closed((count >= 2) && (first == last));
 			}
 			currentPrimitive = null;
 			currentTagMap = null;
