@@ -311,15 +311,7 @@ public class MapPanel extends JPanel implements Printable {
 	private void printRoute(RoutingResult result, RouteCalculator calculator,
 			EdgeRating rating) {
 		List<Segment> route = result.getRoute();
-		if (route == null) {
-			return;
-		}
-		double length = calculator.calculateCompleteWeight(route,
-				EdgeRating.LENGTH) / 1000.0;
-		double time = calculator
-				.calculateCompleteWeight(route, EdgeRating.TIME) / 3600;
-		// double degree = calculator.calculateCompleteWeight(route,
-		// EdgeRating.CONVENIENCE);
+
 		resultPanel.println();
 		switch (rating) {
 		case TIME:
@@ -336,12 +328,20 @@ public class MapPanel extends JPanel implements Printable {
 			break;
 		}
 
-		resultPanel.println("  Calculation time: "
-				+ result.getRouteCalculationTime() / 1000d + " seconds");
 		if ((route == null) || (route.size() < 1)) {
-			resultPanel.println("not found :-(");
+			resultPanel.println("No route found :-(");
 			return;
 		}
+
+		double length = calculator.calculateCompleteWeight(route,
+				EdgeRating.LENGTH) / 1000.0;
+		double time = calculator
+				.calculateCompleteWeight(route, EdgeRating.TIME) / 3600;
+		// double degree = calculator.calculateCompleteWeight(route,
+		// EdgeRating.CONVENIENCE);
+		resultPanel.println("  Calculation time: "
+				+ result.getRouteCalculationTime() / 1000d + " seconds");
+
 		resultPanel.println("  Length: " + Math.round(length * 100.0) / 100.0
 				+ "km");
 
@@ -350,6 +350,8 @@ public class MapPanel extends JPanel implements Printable {
 		long sec = Math.round((time - (hrs + min / 60d)) * 60 * 60);
 		resultPanel.println("  Time  : " + hrs + " h " + min + " min " + sec
 				+ " sec");
+		resultPanel.println();
+
 		// resultPanel.println(" Degree : " + degree);
 		Way lastWay = null;
 		String lastName = null;
