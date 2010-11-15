@@ -30,8 +30,8 @@ import javax.swing.event.ChangeListener;
 
 import de.uni_koblenz.jgralab.graphmarker.BooleanGraphMarker;
 import de.uni_koblenz.jgstreetmap.model.AnnotatedOsmGraph;
-import de.uni_koblenz.jgstreetmap.model.LayoutInfo;
 import de.uni_koblenz.jgstreetmap.model.AnnotatedOsmGraph.Neighbour;
+import de.uni_koblenz.jgstreetmap.model.LayoutInfo;
 import de.uni_koblenz.jgstreetmap.model.kdtree.KDTreeQueries;
 import de.uni_koblenz.jgstreetmap.osmschema.map.HasNode;
 import de.uni_koblenz.jgstreetmap.osmschema.map.Node;
@@ -41,9 +41,9 @@ import de.uni_koblenz.jgstreetmap.osmschema.routing.SegmentType;
 import de.uni_koblenz.jgstreetmap.routing.AStarRouteCalculator;
 import de.uni_koblenz.jgstreetmap.routing.DijkstraRouteCalculator;
 import de.uni_koblenz.jgstreetmap.routing.RouteCalculator;
-import de.uni_koblenz.jgstreetmap.routing.RoutingResult;
 import de.uni_koblenz.jgstreetmap.routing.RouteCalculator.EdgeRating;
 import de.uni_koblenz.jgstreetmap.routing.RouteCalculator.RoutingRestriction;
+import de.uni_koblenz.jgstreetmap.routing.RoutingResult;
 
 public class MapPanel extends JPanel implements Printable {
 	private static final long serialVersionUID = 1L;
@@ -546,8 +546,8 @@ public class MapPanel extends JPanel implements Printable {
 						&& visibleElements.isMarked(way)) {
 					Polygon poly = new Polygon();
 					for (Node n : way.get_nodes()) {
-						poly.addPoint(getPx(n.get_longitude()), getPy(n
-								.get_latitude()));
+						poly.addPoint(getPx(n.get_longitude()),
+								getPy(n.get_latitude()));
 					}
 					g.setColor(l.fgColor);
 					g.fillPolygon(poly.xpoints, poly.ypoints, poly.npoints);
@@ -568,8 +568,8 @@ public class MapPanel extends JPanel implements Printable {
 						&& (!showStreetsOnly || (way.get_wayType() != SegmentType.NOWAY))) {
 					Polygon poly = new Polygon();
 					for (Node n : way.get_nodes()) {
-						poly.addPoint(getPx(n.get_longitude()), getPy(n
-								.get_latitude()));
+						poly.addPoint(getPx(n.get_longitude()),
+								getPy(n.get_latitude()));
 					}
 					g.setStroke(l.bgStroke);
 					g.setColor(l.bgColor);
@@ -588,8 +588,8 @@ public class MapPanel extends JPanel implements Printable {
 						&& (!showStreetsOnly || (way.get_wayType() != SegmentType.NOWAY))) {
 					Polygon poly = new Polygon();
 					for (Node n : way.get_nodes()) {
-						poly.addPoint(getPx(n.get_longitude()), getPy(n
-								.get_latitude()));
+						poly.addPoint(getPx(n.get_longitude()),
+								getPy(n.get_latitude()));
 					}
 					g.setStroke(l.fgStroke);
 					g.setColor(l.fgColor);
@@ -666,7 +666,7 @@ public class MapPanel extends JPanel implements Printable {
 		visibleElements.clear();
 		if (showWaysInGraph || showMap) {
 			WAY: for (Way w : graph.getWayVertices()) {
-				HasNode e = w.getFirstHasNode();
+				HasNode e = w.getFirstHasNodeIncidence();
 				if (e == null) {
 					continue;
 				}
@@ -734,7 +734,7 @@ public class MapPanel extends JPanel implements Printable {
 					continue;
 				}
 
-				HasNode e = way.getFirstHasNode();
+				HasNode e = way.getFirstHasNodeIncidence();
 				if (e == null) {
 					continue;
 				}
@@ -764,8 +764,8 @@ public class MapPanel extends JPanel implements Printable {
 				g.rotate(theta);
 				g.translate(len, 0);
 				g.rotate(Math.PI / 2.0);
-				len = Math.max(50.0 * scaleLat / 1852, Math.min(
-						200.0 * scaleLat / 1852, len));
+				len = Math.max(50.0 * scaleLat / 1852,
+						Math.min(200.0 * scaleLat / 1852, len));
 				Point2D.Double dst = new Point2D.Double(len, 0);
 				g.getTransform().transform(dst, dst);
 				waypoint.x = (int) dst.x;
@@ -773,7 +773,7 @@ public class MapPanel extends JPanel implements Printable {
 				g.setTransform(t);
 
 				// draw graph edges
-				e = way.getFirstHasNode();
+				e = way.getFirstHasNodeIncidence();
 				while (e != null) {
 					n = (Node) e.getOmega();
 					int y = getPy(n.get_latitude());
@@ -811,9 +811,10 @@ public class MapPanel extends JPanel implements Printable {
 					if ((name == null) || (name.length() == 0)) {
 						name = Long.toString(way.get_osmId());
 					}
-					g.drawString(name, waypoint.x + 12
-							* outlineStroke.getLineWidth() / 20, waypoint.y
-							+ getFont().getSize() / 2);
+					g.drawString(
+							name,
+							waypoint.x + 12 * outlineStroke.getLineWidth() / 20,
+							waypoint.y + getFont().getSize() / 2);
 				}
 			}
 		} else {
@@ -1008,9 +1009,7 @@ public class MapPanel extends JPanel implements Printable {
 
 		s = formatLatitude(latS);
 		g2.setTransform(t);
-		g2
-				.rotate(-Math.PI / 2, g.getFont().getSize(), getHeight()
-						- FRAMEWIDTH);
+		g2.rotate(-Math.PI / 2, g.getFont().getSize(), getHeight() - FRAMEWIDTH);
 		g2.drawString(s, g.getFont().getSize(), getHeight() - FRAMEWIDTH);
 		g2.setTransform(t);
 
@@ -1239,9 +1238,8 @@ public class MapPanel extends JPanel implements Printable {
 		}
 		Graphics2D g2 = (Graphics2D) graphics;
 		g2.translate(pf.getImageableX(), pf.getImageableY());
-		double scale = Math.min(pf.getImageableWidth() / getWidth(), pf
-				.getImageableHeight()
-				/ getHeight());
+		double scale = Math.min(pf.getImageableWidth() / getWidth(),
+				pf.getImageableHeight() / getHeight());
 		g2.scale(scale, scale);
 		paint(g2);
 		return PAGE_EXISTS;

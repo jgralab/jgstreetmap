@@ -67,8 +67,8 @@ public class AnnotatedOsmGraph extends OsmGraphImpl {
 				m.put(n, 1);
 			}
 		}
-		for (de.uni_koblenz.jgralab.Edge e = getFirstEdgeInGraph(); e != null; e = e
-				.getNextEdgeInGraph()) {
+		for (de.uni_koblenz.jgralab.Edge e = getFirstEdge(); e != null; e = e
+				.getNextEdge()) {
 			String n = "E " + e.getM1Class().getSimpleName();
 			if (m.containsKey(n)) {
 				m.put(n, m.get(n) + 1);
@@ -112,12 +112,13 @@ public class AnnotatedOsmGraph extends OsmGraphImpl {
 			return;
 		}
 		Stack<Key> s = new Stack<Key>();
-		HasRoot e = kdTree.getFirstHasRoot();
+		HasRoot e = kdTree.getFirstHasRootIncidence();
 		if (e != null) {
 			s.push((Key) e.getThat());
 			while (!s.empty()) {
 				Key current = s.pop();
-				NodeSet ns = (NodeSet) current.getFirstHasSet().getThat();
+				NodeSet ns = (NodeSet) current.getFirstHasSetIncidence()
+						.getThat();
 				if (ns != null) {
 					ns.delete();
 				} else {
@@ -181,7 +182,7 @@ public class AnnotatedOsmGraph extends OsmGraphImpl {
 		List<Neighbour> l = new ArrayList<Neighbour>();
 		for (Node n : getNodeVertices()) {
 			double dist = Segmentator.distance(lat, lon, n);
-			if ((dist < maxDistance) && (n.getFirstSegment() != null)) {
+			if ((dist < maxDistance) && (n.getFirstSegmentIncidence() != null)) {
 				l.add(new Neighbour(n, dist));
 			}
 		}

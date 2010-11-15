@@ -33,7 +33,7 @@ public class KDTreeQueries {
 		double blat = lat + height;
 		List<Node> l = new ArrayList<Node>();
 		rangeQuery(g, l, tlon, tlat, blon, blat, (Key) g.getKDTree()
-				.getFirstHasRoot().getThat());
+				.getFirstHasRootIncidence().getThat());
 		List<Neighbour> result = new ArrayList<Neighbour>(l.size());
 		for (Node n : l) {
 			result.add(new Neighbour(n, Segmentator.distance(lat, lon, n)));
@@ -75,11 +75,12 @@ public class KDTreeQueries {
 
 		// System.out.println("Query Y " + keyVal);
 
-		HasXChild leftChild = key.getFirstHasXChild();
+		HasXChild leftChild = key.getFirstHasXChildIncidence();
 		if (leftChild == null) {
 			// the only child of key is a NodeSet
 			rangeQuery(g, l, topLeftLong, topLeftLat, bottomRightLong,
-					bottomRightLat, (NodeSet) key.getFirstHasSet().getThat());
+					bottomRightLat, (NodeSet) key.getFirstHasSetIncidence()
+							.getThat());
 		} else {
 			HasXChild rightChild = leftChild.getNextHasXChild();
 			assert rightChild != null;
@@ -112,10 +113,11 @@ public class KDTreeQueries {
 
 		// System.out.println("Query X " + keyVal);
 
-		HasYChild leftChild = key.getFirstHasYChild();
+		HasYChild leftChild = key.getFirstHasYChildIncidence();
 		if (leftChild == null) {
 			rangeQuery(g, l, topLeftLong, topLeftLat, bottomRightLong,
-					bottomRightLat, (NodeSet) key.getFirstHasSet().getThat());
+					bottomRightLat, (NodeSet) key.getFirstHasSetIncidence()
+							.getThat());
 		} else {
 			HasYChild rightChild = leftChild.getNextHasYChild();
 			assert rightChild != null;
@@ -173,11 +175,11 @@ public class KDTreeQueries {
 			++c;
 			// System.out.println(" (" + n.get_latitude() + ", "
 			// + n.get_longitude() + ")");
-			if (n.get_latitude() >= topLeftLat
-					&& n.get_latitude() <= bottomRightLat
-					&& n.get_longitude() <= bottomRightLong
-					&& n.get_longitude() >= topLeftLong
-					&& n.getFirstSegment() != null) {
+			if ((n.get_latitude() >= topLeftLat)
+					&& (n.get_latitude() <= bottomRightLat)
+					&& (n.get_longitude() <= bottomRightLong)
+					&& (n.get_longitude() >= topLeftLong)
+					&& (n.getFirstSegmentIncidence() != null)) {
 				l.add(n);
 			}
 		}
@@ -186,7 +188,7 @@ public class KDTreeQueries {
 
 	public static Node nearestNodeStart(AnnotatedOsmGraph g, double lat,
 			double lon) {
-		Key key = (Key) g.getKDTree().getFirstHasRoot().getThat();
+		Key key = (Key) g.getKDTree().getFirstHasRootIncidence().getThat();
 		if ((key instanceof XKey) || (key instanceof YKey)) {
 			return nearestNode(g, key, lat, lon);
 		} else {
@@ -199,7 +201,7 @@ public class KDTreeQueries {
 			double lon) {
 		double keyVal = key.get_keyValue();
 		if (key instanceof XKey) {
-			HasXChild leftChild = ((XKey) key).getFirstHasXChild();
+			HasXChild leftChild = ((XKey) key).getFirstHasXChildIncidence();
 			if (lon <= keyVal) {
 				return nearestNode(g, (XKey) leftChild.getThat(), lat, lon);
 			} else {
@@ -207,7 +209,7 @@ public class KDTreeQueries {
 						.getThat(), lat, lon);
 			}
 		} else {
-			HasYChild leftChild = ((YKey) key).getFirstHasYChild();
+			HasYChild leftChild = ((YKey) key).getFirstHasYChildIncidence();
 			if (lat <= keyVal) {
 				return nearestNode(g, (YKey) leftChild.getThat(), lat, lon);
 			} else {
@@ -229,7 +231,7 @@ public class KDTreeQueries {
 		Node nearest = null;
 		for (Node n : set.get_elements()) {
 			double curdist = getDistance(n, lat, lon);
-			if (nearest == null || curdist < dist) {
+			if ((nearest == null) || (curdist < dist)) {
 				dist = curdist;
 				nearest = n;
 			}
