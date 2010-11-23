@@ -8,13 +8,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import de.uni_koblenz.jgralab.GraphIO;
-import de.uni_koblenz.jgralab.GraphIOException;
 import de.uni_koblenz.jgralab.Vertex;
-import de.uni_koblenz.jgralab.impl.ConsoleProgressFunction;
 import de.uni_koblenz.jgstreetmap.model.AnnotatedOsmGraph;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmGraph;
-import de.uni_koblenz.jgstreetmap.osmschema.OsmSchema;
 import de.uni_koblenz.jgstreetmap.osmschema.map.Node;
 import de.uni_koblenz.jgstreetmap.osmschema.map.Way;
 import de.uni_koblenz.jgstreetmap.osmschema.routing.Segment;
@@ -36,8 +32,6 @@ import de.uni_koblenz.jgstreetmap.osmschema.routing.SegmentType;
  *   the segment.
  */
 public class Segmentator {
-
-	private static OsmGraph theGraph;
 
 	private static List<Way> computeRelevantWays(Iterable<Vertex> vertices) {
 		List<Way> output = new LinkedList<Way>();
@@ -167,30 +161,6 @@ public class Segmentator {
 		String oneway = AnnotatedOsmGraph.getTag(w, "oneway");
 		return (oneway != null && w.get_wayType() != SegmentType.NOWAY && (oneway
 				.equalsIgnoreCase("yes") || oneway.equalsIgnoreCase("true")));
-	}
-
-	public static void main(String[] args) {
-		String sourceGraphFilename = (args.length > 0) ? args[0]
-				: "OsmGraph.tg";
-		String targetGraphFilename = (args.length > 1) ? args[1]
-				: "OsmGraphRouting.tg";
-		theGraph = null;
-		try {
-			System.out.println("Loading graph...");
-			theGraph = OsmSchema.instance().loadOsmGraph(sourceGraphFilename,
-					new ConsoleProgressFunction());
-			segmentateGraph(theGraph);
-
-			System.out.println("Storing the graph...");
-			GraphIO.saveGraphToFile(targetGraphFilename, theGraph,
-					new ConsoleProgressFunction());
-
-		} catch (GraphIOException e) {
-			e.printStackTrace();
-		}
-
-		System.out.println("finito");
-
 	}
 
 	private static int segmentate(OsmGraph theGraph, List<Way> relevantWays) {

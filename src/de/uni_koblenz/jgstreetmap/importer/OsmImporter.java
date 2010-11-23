@@ -7,10 +7,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionGroup;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import de.uni_koblenz.ist.utilities.option_handler.OptionHandler;
 import de.uni_koblenz.jgralab.GraphIO;
 import de.uni_koblenz.jgralab.GraphIOException;
 import de.uni_koblenz.jgralab.impl.ConsoleProgressFunction;
@@ -36,6 +40,8 @@ public class OsmImporter extends DefaultHandler {
 						AnnotatedOsmGraph.class);
 	}
 
+	private static final int DEFAULT_SET_MEMBERS = 512;
+
 	private State state;
 	private long startTime;
 	// private Map<Long, OsmPrimitive> osmIdMap;
@@ -47,13 +53,19 @@ public class OsmImporter extends DefaultHandler {
 	private OsmPrimitive currentPrimitive;
 	private Map<String, String> currentTagMap;
 	private int nodeCount;
-	private static final int MAX_SET_MEMBERS = 512;
 	private MinimalSAXParser parser;
 	private HashSet<String> usedTags;
-	private String outFile;
 
-	public OsmImporter(String outTgFile) {
-		outFile = outTgFile;
+	private String inFile;
+	private String outFile;
+	private int levels, members;
+
+	public OsmImporter(String inFile, String outFile) {
+		this.inFile = inFile;
+		this.outFile = outFile;
+		levels = -1;
+		members = DEFAULT_SET_MEMBERS;
+
 		dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 		usedTags = new HashSet<String>(10);
 		// Only these tags which are needed for visualizing the map and routing
@@ -70,31 +82,99 @@ public class OsmImporter extends DefaultHandler {
 		usedTags.add("name");
 	}
 
-	public static void main(String[] args) {
-		if (args.length != 2) {
-			System.err.println("Usage: OsmImporter <map.osm.xml> <out.tg>");
-			System.exit(1);
-		}
+	private static CommandLine processCommandLineOptions(String[] args) {
+		String toolString = "java " + OsmImporter.class.getName();
+		String versionString = "1.1";
+		OptionHandler oh = new OptionHandler(toolString, versionString);
 
-		String filename = args[0];
-		String out = args[1];
-		System.out.println("OSM to TGraph");
-		System.out.println("=============");
-		OsmSchema.instance().getGraphFactory().setGraphImplementationClass(
-				OsmGraph.class, AnnotatedOsmGraph.class);
-		new OsmImporter(out).importOsm(filename);
+		Option output = new Option("o", "output", true,
+				"(required): output TG file");
+		output.setRequired(true);
+		output.setArgName("file");
+		oh.addOption(output);
+
+		Option input = new Option("i", "input", true,
+				"(required): input OSM xml file");
+		input.setRequired(true);
+		input.setArgName("file");
+		oh.addOption(input);
+
+		Option levels = new Option("l", "levels", true,
+				"(optional): number of levels in the KD tree (cannot be set with option m)");
+		levels.setRequired(false);
+		levels.setArgName("number");
+		oh.addOption(levels);
+
+		Option members = new Option(
+				"m",
+				"members",
+				true,
+				"(optional): maximum number of members in KD tree leafs (cannot be set with option l)");
+		members.setRequired(false);
+		members.setArgName("number");
+		oh.addOption(members);
+
+		OptionGroup kdLevel = new OptionGroup();
+		kdLevel.addOption(members);
+		kdLevel.addOption(levels);
+		oh.addOptionGroup(kdLevel);
+
+		return oh.parse(args);
 	}
 
-	public void importOsm(String fileName) {
+	public static void main(String[] args) {
+		CommandLine cl = processCommandLineOptions(args);
+		String inFile = cl.getOptionValue("i");
+		String outFile = cl.getOptionValue("o");
+
+		OsmImporter importer = new OsmImporter(inFile, outFile);
+
+		if (cl.hasOption("l")) {
+			int levels = Integer.parseInt(cl.getOptionValue("l"));
+			importer.setLevels(levels);
+		}
+		if (cl.hasOption("m")) {
+			int members = Integer.parseInt(cl.getOptionValue("m"));
+			importer.setMembers(members);
+		}
+
+		importer.importOsm();
+
+		System.out.println("OSM to TGraph");
+		System.out.println("=============");
+		// OsmSchema.instance().getGraphFactory().setGraphImplementationClass(
+		// OsmGraph.class, AnnotatedOsmGraph.class);
+		// new OsmImporter(filename, out).importOsm();
+	}
+
+	public void importOsm() {
 		parser = new MinimalSAXParser();
 		try {
 			state = State.INIT;
 			currentPrimitive = null;
 			currentTagMap = null;
-			parser.parse(fileName, this);
+			parser.parse(inFile, this);
 		} catch (SAXException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+	}
+
+	public void setLevels(int levels) {
+		if (levels > 0) {
+			members = -1;
+			this.levels = levels;
+		} else {
+			throw new RuntimeException("\"levels\" may not be negative.");
+		}
+	}
+
+	public void setMembers(int members) {
+		if (members > 0) {
+			levels = -1;
+			this.members = members;
+		} else {
+			throw new RuntimeException("\"members\" may not be negative.");
 		}
 	}
 
@@ -132,10 +212,13 @@ public class OsmImporter extends DefaultHandler {
 	private void postProcess() {
 		Segmentator.segmentateGraph(graph);
 		int n = nodeCount;
-		int levels = 1;
-		while (n > MAX_SET_MEMBERS) {
-			n /= 2;
-			++levels;
+		if (levels < 0) {
+			levels = 1;
+			assert members > 0;
+			while (n > members) {
+				n /= 2;
+				++levels;
+			}
 		}
 		System.out.println("Building KDTree with " + levels + " levels...");
 		KDTreeBuilder.buildTree(graph, levels);
