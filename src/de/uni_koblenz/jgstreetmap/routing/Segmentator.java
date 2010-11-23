@@ -62,33 +62,47 @@ public class Segmentator {
 		} else if (highwayValue.startsWith("primary")
 				|| highwayValue.startsWith("trunk")) {
 			return SegmentType.PRIMARY;
-		} else if (highwayValue.startsWith("secondary")) {
+		} else if (highwayValue.startsWith("secondary")
+				|| highwayValue.equals("road")) {
 			return SegmentType.SECONDARY;
 		} else if (highwayValue.equals("tertiary")) {
 			return SegmentType.TERTIARY;
 		} else if (highwayValue.equals("residential")
+				|| highwayValue.equals("residental")
 				|| highwayValue.equals("living_street")
+				|| highwayValue.equals("turning_circle")
 				|| highwayValue.equals("minor")) {
 			return SegmentType.RESIDENTIAL;
 		} else if (highwayValue.startsWith("foot")
 				|| highwayValue.equals("bridleway")
 				|| highwayValue.equals("pedestrian")
-				|| highwayValue.equals("steps") || highwayValue.equals("track")
-				|| highwayValue.equals("trak") || highwayValue.equals("tr")) {
+				|| highwayValue.equals("path") || highwayValue.equals("steps")
+				|| highwayValue.equals("stepway")
+				|| highwayValue.contains("track")
+				|| highwayValue.equals("trak") || highwayValue.equals("tr")
+				|| highwayValue.equals("elevator")
+				|| highwayValue.equals("boardwalk")) {
 			return SegmentType.FOOTWAY;
 		} else if (highwayValue.startsWith("cycle")) {
 			return SegmentType.CYCLEWAY;
 		} else if (highwayValue.equals("unsurfaced")
 				|| highwayValue.equals("unsealed")) {
 			return SegmentType.UNSURFACED;
-		} else if (highwayValue.equals("construction")) {
+		} else if (highwayValue.equals("construction")
+				|| highwayValue.equals("no") || highwayValue.equals("planned")
+				|| highwayValue.equals("proposed")
+				|| highwayValue.equals("raceway")
+				|| highwayValue.equals("buslane")
+				|| highwayValue.equals("bus_stop")
+				|| highwayValue.equals("bus_guideway")
+				|| highwayValue.equals("unknown")) {
 			return SegmentType.NOWAY;
 		} else if (highwayValue.equals("unclassified")) {
 			return SegmentType.TERTIARY;
-		} else if (highwayValue.equals("service")) {
+		} else if (highwayValue.startsWith("service")) {
 			return SegmentType.SERVICE;
 		} else {
-			System.out.println("Unknown highway tag'" + highwayValue);
+			System.out.println("Unknown highway tag'" + highwayValue + "'!");
 			return SegmentType.NOWAY;
 		}
 	}
