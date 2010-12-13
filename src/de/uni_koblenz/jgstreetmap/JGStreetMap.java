@@ -1,5 +1,9 @@
 package de.uni_koblenz.jgstreetmap;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Option;
+
+import de.uni_koblenz.ist.utilities.option_handler.OptionHandler;
 import de.uni_koblenz.jgralab.GraphIOException;
 import de.uni_koblenz.jgralab.impl.SwingProgressFunction;
 import de.uni_koblenz.jgstreetmap.gui.MapFrame;
@@ -9,23 +13,40 @@ import de.uni_koblenz.jgstreetmap.osmschema.OsmSchema;
 
 public class JGStreetMap {
 	static {
-		OsmSchema
-				.instance()
-				.getGraphFactory()
+		OsmSchema.instance().getGraphFactory()
 				.setGraphSavememImplementationClass(OsmGraph.class,
 						AnnotatedOsmGraph.class);
 	}
 
+	private static CommandLine processCommandLineOptions(String[] args) {
+		String toolString = "java " + JGStreetMap.class.getName();
+		String versionString = "1.1";
+		OptionHandler oh = new OptionHandler(toolString, versionString);
+
+		Option input = new Option("i", "input", true,
+				"(required): input OSM graph file");
+		input.setRequired(true);
+		input.setArgName("file");
+		oh.addOption(input);
+
+		Option enableAntiAliasing = new Option("a", "antialiasing", false,
+				"(optional): if set, anti aliasing is enabled when rendering the map.");
+		enableAntiAliasing.setRequired(false);
+		oh.addOption(enableAntiAliasing);
+		return oh.parse(args);
+	}
+
 	public static void main(String[] args) {
 		try {
-			String graphFile = (args.length > 0) ? args[0] : "OsmGraph.tg.gz";
-
+			CommandLine cl = processCommandLineOptions(args);
+			String graphFile = cl.getOptionValue("i");
+			boolean withAntiAliazing = cl.hasOption("a");
 			OsmGraph graph = OsmSchema.instance()
 					.loadOsmGraphWithSavememSupport(
 							graphFile,
 							new SwingProgressFunction("jgStreetMap",
 									"Loading Map..."));
-			new MapFrame((AnnotatedOsmGraph) graph);
+			new MapFrame((AnnotatedOsmGraph) graph, withAntiAliazing);
 		} catch (GraphIOException e) {
 			e.printStackTrace();
 			System.exit(1);

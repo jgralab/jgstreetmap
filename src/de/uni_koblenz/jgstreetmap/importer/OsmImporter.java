@@ -59,12 +59,14 @@ public class OsmImporter extends DefaultHandler {
 	private String inFile;
 	private String outFile;
 	private int levels, members;
+	private boolean buildKD;
 
 	public OsmImporter(String inFile, String outFile) {
 		this.inFile = inFile;
 		this.outFile = outFile;
 		levels = -1;
 		members = DEFAULT_SET_MEMBERS;
+		buildKD = true;
 
 		dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 		usedTags = new HashSet<String>(10);
@@ -114,9 +116,18 @@ public class OsmImporter extends DefaultHandler {
 		members.setArgName("number");
 		oh.addOption(members);
 
+		Option disableKD = new Option(
+				"N",
+				"no-kd",
+				false,
+				"(optional): disables the creation of a KD-Tree entirely (cannot be set with options l or m)");
+		disableKD.setRequired(false);
+		oh.addOption(disableKD);
+
 		OptionGroup kdLevel = new OptionGroup();
 		kdLevel.addOption(members);
 		kdLevel.addOption(levels);
+		kdLevel.addOption(disableKD);
 		oh.addOptionGroup(kdLevel);
 
 		return oh.parse(args);
@@ -136,6 +147,10 @@ public class OsmImporter extends DefaultHandler {
 		if (cl.hasOption("m")) {
 			int members = Integer.parseInt(cl.getOptionValue("m"));
 			importer.setMembers(members);
+		}
+		if (cl.hasOption("N")) {
+			importer.setBuildKD(false);
+			System.out.println("Disabling KD tree creation...");
 		}
 
 		importer.importOsm();
@@ -184,7 +199,6 @@ public class OsmImporter extends DefaultHandler {
 		startTime = System.currentTimeMillis();
 		graph = (AnnotatedOsmGraph) OsmSchema.instance()
 				.createOsmGraphWithSavememSupport();
-		// osmIdMap = new HashMap<Long, OsmPrimitive>();
 		nodeMap = new HashMap<Long, Node>();
 		wayMap = new HashMap<Long, Way>();
 		relationMap = new HashMap<Long, Relation>();
@@ -211,17 +225,20 @@ public class OsmImporter extends DefaultHandler {
 
 	private void postProcess() {
 		Segmentator.segmentateGraph(graph);
-		int n = nodeCount;
-		if (levels < 0) {
-			levels = 1;
-			assert members > 0;
-			while (n > members) {
-				n /= 2;
-				++levels;
+		if (buildKD) {
+			int n = nodeCount;
+			if (levels < 0) {
+				levels = 1;
+				assert members > 0;
+				while (n > members) {
+					n /= 2;
+					++levels;
+				}
 			}
+
+			System.out.println("Building KDTree with " + levels + " levels...");
+			KDTreeBuilder.buildTree(graph, levels);
 		}
-		System.out.println("Building KDTree with " + levels + " levels...");
-		KDTreeBuilder.buildTree(graph, levels);
 	}
 
 	private void addToMap(long id, Node value) {
@@ -325,7 +342,7 @@ public class OsmImporter extends DefaultHandler {
 			currentTagMap.put(key, v);
 
 		} else if ((state == State.RELATION) && name.equals("member")) {
-			String type = atts.getValue("type");
+			String type = atts.getValue("type").trim();
 			String role = atts.getValue("role");
 			long ref = Long.parseLong(atts.getValue("ref"));
 			OsmPrimitive p = type.equals("node") ? getNode(ref) : type
@@ -397,5 +414,9 @@ public class OsmImporter extends DefaultHandler {
 			currentTagMap = null;
 			state = State.OSM;
 		}
+	}
+
+	public void setBuildKD(boolean buildKD) {
+		this.buildKD = buildKD;
 	}
 }

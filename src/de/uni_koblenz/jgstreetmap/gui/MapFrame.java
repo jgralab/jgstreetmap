@@ -66,13 +66,13 @@ public class MapFrame extends JFrame {
 
 	// private OsmGraph graph;
 
-	public MapFrame(AnnotatedOsmGraph graph) {
+	public MapFrame(AnnotatedOsmGraph graph, boolean withAntiAliasing) {
 		super("jgStreetMap");
 		// this.graph = graph;
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		getContentPane().setLayout(new BorderLayout());
 		resultPanel = new ResultPanel();
-		mapPanel = new MapPanel(graph, resultPanel);
+		mapPanel = new MapPanel(graph, resultPanel, withAntiAliasing);
 
 		getContentPane().add(mapPanel, BorderLayout.CENTER);
 		getContentPane().add(resultPanel, BorderLayout.EAST);
