@@ -104,7 +104,9 @@ public class DijkstraRouteCalculator extends RouteCalculator {
 						n.distance = newDistance;
 						n.parentSegment = currentSegment;
 						if (!n.done) {
+							// TODO This call is O(n) and makes the algorithm damn slow!
 							queue.remove(nextVertex);
+							
 							queue.offer(nextVertex);
 						}
 					}
