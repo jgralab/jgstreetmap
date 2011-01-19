@@ -60,6 +60,7 @@ public class OsmImporter extends DefaultHandler {
 	private String outFile;
 	private int levels, members;
 	private boolean buildKD;
+	private boolean createSegments;
 
 	public OsmImporter(String inFile, String outFile) {
 		this.inFile = inFile;
@@ -67,6 +68,7 @@ public class OsmImporter extends DefaultHandler {
 		levels = -1;
 		members = DEFAULT_SET_MEMBERS;
 		buildKD = true;
+		createSegments = true;
 
 		dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 		usedTags = new HashSet<String>(10);
@@ -130,6 +132,10 @@ public class OsmImporter extends DefaultHandler {
 		kdLevel.addOption(disableKD);
 		oh.addOptionGroup(kdLevel);
 
+		Option disableSegments = new Option("S", "no-segments", false,
+				"(optional): disables the creation of segments");
+		disableSegments.setRequired(false);
+		oh.addOption(disableSegments);
 		return oh.parse(args);
 	}
 
@@ -151,6 +157,10 @@ public class OsmImporter extends DefaultHandler {
 		if (cl.hasOption("N")) {
 			importer.setBuildKD(false);
 			System.out.println("Disabling KD tree creation...");
+		}
+		if (cl.hasOption("S")) {
+			importer.setCreateSegments(false);
+			System.out.println("Disabling the creation of segments...");
 		}
 
 		importer.importOsm();
@@ -224,7 +234,9 @@ public class OsmImporter extends DefaultHandler {
 	}
 
 	private void postProcess() {
-		Segmentator.segmentateGraph(graph);
+		if (createSegments) {
+			Segmentator.segmentateGraph(graph);
+		}
 		if (buildKD) {
 			int n = nodeCount;
 			if (levels < 0) {
@@ -368,6 +380,8 @@ public class OsmImporter extends DefaultHandler {
 			currentPrimitive = null;
 			currentTagMap = null;
 
+		} else if (name.equals("bounds")) {
+			System.err.println("Warning: ignoring tag \"bounds\"");
 		} else {
 			throw new RuntimeException("Yee! Found element '" + name
 					+ "' in state " + state + " which I can't handle :-(");
@@ -418,5 +432,9 @@ public class OsmImporter extends DefaultHandler {
 
 	public void setBuildKD(boolean buildKD) {
 		this.buildKD = buildKD;
+	}
+
+	public void setCreateSegments(boolean createSegments) {
+		this.createSegments = createSegments;
 	}
 }
