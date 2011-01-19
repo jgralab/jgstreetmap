@@ -212,7 +212,7 @@ public class OsmImporter extends DefaultHandler {
 		nodeMap = new HashMap<Long, Node>();
 		wayMap = new HashMap<Long, Way>();
 		relationMap = new HashMap<Long, Relation>();
-		graph.createKDTree();
+		// graph.createKDTree();
 		nodeCount = 0;
 	}
 
