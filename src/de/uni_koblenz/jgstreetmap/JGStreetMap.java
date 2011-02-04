@@ -13,7 +13,9 @@ import de.uni_koblenz.jgstreetmap.osmschema.OsmSchema;
 
 public class JGStreetMap {
 	static {
-		OsmSchema.instance().getGraphFactory()
+		OsmSchema
+				.instance()
+				.getGraphFactory()
 				.setGraphSavememImplementationClass(OsmGraph.class,
 						AnnotatedOsmGraph.class);
 	}
@@ -41,6 +43,21 @@ public class JGStreetMap {
 			CommandLine cl = processCommandLineOptions(args);
 			String graphFile = cl.getOptionValue("i");
 			boolean withAntiAliazing = cl.hasOption("a");
+
+			// try {
+			// for (LookAndFeelInfo info : UIManager
+			// .getInstalledLookAndFeels()) {
+			// if ("Nimbus".equals(info.getName())) {
+			// UIManager.setLookAndFeel(info.getClassName());
+			// break;
+			// }
+			// }
+			// } catch (Exception e) {
+			// // If Nimbus is not available, you can set the GUI to another
+			// // look
+			// // and feel.
+			// }
+
 			OsmGraph graph = OsmSchema.instance()
 					.loadOsmGraphWithSavememSupport(
 							graphFile,

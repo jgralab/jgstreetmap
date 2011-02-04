@@ -10,13 +10,12 @@ import de.uni_koblenz.jgralab.GraphElement;
 import de.uni_koblenz.jgralab.GraphIOException;
 import de.uni_koblenz.jgralab.Vertex;
 import de.uni_koblenz.jgralab.algolib.algorithms.AlgorithmTerminatedException;
-import de.uni_koblenz.jgralab.algolib.algorithms.weighted_shortest_paths.DijkstraAlgorithm;
+import de.uni_koblenz.jgralab.algolib.algorithms.shortest_paths.DijkstraAlgorithm;
 import de.uni_koblenz.jgralab.algolib.functions.BooleanFunction;
 import de.uni_koblenz.jgralab.algolib.functions.DoubleFunction;
 import de.uni_koblenz.jgralab.algolib.functions.adapters.MethodCallToBooleanFunctionAdapter;
 import de.uni_koblenz.jgralab.algolib.functions.adapters.MethodCallToDoubleFunctionAdapter;
 import de.uni_koblenz.jgralab.algolib.visitors.GraphVisitorAdapter;
-import de.uni_koblenz.jgralab.graphmarker.BitSetGraphMarker;
 import de.uni_koblenz.jgralab.graphmarker.BitSetVertexMarker;
 import de.uni_koblenz.jgralab.impl.ConsoleProgressFunction;
 import de.uni_koblenz.jgralabtest.algolib.nonjunit.Stopwatch;
@@ -26,8 +25,8 @@ import de.uni_koblenz.jgstreetmap.osmschema.map.Node;
 import de.uni_koblenz.jgstreetmap.osmschema.routing.Segment;
 import de.uni_koblenz.jgstreetmap.osmschema.routing.SegmentType;
 import de.uni_koblenz.jgstreetmap.routing.DijkstraRouteCalculator;
-import de.uni_koblenz.jgstreetmap.routing.RoutingResult;
 import de.uni_koblenz.jgstreetmap.routing.RouteCalculator.EdgeRating;
+import de.uni_koblenz.jgstreetmap.routing.RoutingResult;
 
 public class TryDijkstra {
 
@@ -52,12 +51,12 @@ public class TryDijkstra {
 		BitSetVertexMarker relevantNodes = new BitSetVertexMarker(graph);
 		for (Edge e : graph.edges()) {
 			segments += e instanceof Segment ? 1 : 0;
-			if(subgraph.get(e) && navigable.get(e)){
+			if (subgraph.get(e) && navigable.get(e)) {
 				rsegments++;
 				relevantNodes.mark(e.getThis());
 				relevantNodes.mark(e.getThat());
 			}
-			
+
 		}
 		System.out.println("Edges: " + graph.getECount());
 		System.out.println("Segments: " + segments);
@@ -265,7 +264,7 @@ public class TryDijkstra {
 			System.out.println();
 			System.out.println("Last run:");
 			long duration = sw.getDuration();
-			double length = dijkstra.getWeightedDistance().get(target);
+			double length = dijkstra.getDistance().get(target);
 			System.out.println("Result length: " + length + " m.");
 			System.out.println("Duration: " + duration + " msecs.");
 		} else {

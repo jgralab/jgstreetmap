@@ -10,7 +10,6 @@ import java.util.TreeSet;
 import de.uni_koblenz.jgralab.graphmarker.ArrayVertexMarker;
 import de.uni_koblenz.jgralab.graphmarker.BitSetVertexMarker;
 import de.uni_koblenz.jgralab.graphmarker.DoubleVertexMarker;
-import de.uni_koblenz.jgralab.graphmarker.GraphMarker;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmGraph;
 import de.uni_koblenz.jgstreetmap.osmschema.map.Node;
 import de.uni_koblenz.jgstreetmap.osmschema.routing.Segment;
@@ -89,8 +88,8 @@ public class ModifiedDijkstraRouteCalculator2 extends RouteCalculator {
 		if (queue == null) {
 			queue = new PriorityQueue<Node>(128, new Comparator<Node>() {
 				public int compare(Node a, Node b) {
-					return Double.compare(distance.getMark(a), distance
-							.getMark(b));
+					return Double.compare(distance.getMark(a),
+							distance.getMark(b));
 				}
 			});
 		} else {
@@ -116,8 +115,8 @@ public class ModifiedDijkstraRouteCalculator2 extends RouteCalculator {
 					Node nextVertex = (Node) currentSegment.getThat();
 
 					double newDistance = distance.getMark(currentVertex)
-							+ rate(currentSegment, rating, parentSegment
-									.get(currentVertex));
+							+ rate(currentSegment, rating,
+									parentSegment.get(currentVertex));
 					// if the new path is shorter than the distance stored
 					// at the other end, this new value is stored
 					// DijkstraMarker n = dijkstraMarker.getMark(nextVertex);
