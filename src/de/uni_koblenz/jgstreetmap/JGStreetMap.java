@@ -16,7 +16,7 @@ public class JGStreetMap {
 		OsmSchema
 				.instance()
 				.getGraphFactory()
-				.setGraphSavememImplementationClass(OsmGraph.class,
+				.setGraphImplementationClass(OsmGraph.class,
 						AnnotatedOsmGraph.class);
 	}
 
@@ -58,11 +58,8 @@ public class JGStreetMap {
 			// // and feel.
 			// }
 
-			OsmGraph graph = OsmSchema.instance()
-					.loadOsmGraphWithSavememSupport(
-							graphFile,
-							new SwingProgressFunction("jgStreetMap",
-									"Loading Map..."));
+			OsmGraph graph = OsmSchema.instance().loadOsmGraph(graphFile,
+					new SwingProgressFunction("jgStreetMap", "Loading Map..."));
 			new MapFrame((AnnotatedOsmGraph) graph, withAntiAliazing);
 		} catch (GraphIOException e) {
 			e.printStackTrace();

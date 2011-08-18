@@ -5,7 +5,7 @@
 	<property name="projectname" value="jgstreetmap" />
 	<property name="main" value="JGStreetMap" />
 
-	<property name="schema.implementationMode" value="savemem" />
+	<property name="schema.implementationMode" value="standard" />
 
 	<import file="../common/common.xml" />
 	
@@ -21,13 +21,5 @@
 		</java>
 		<gzip src="OsmGraph.tg" destfile="OsmGraph.tg.gz" />
 		<delete file="OsmGraph.tg" />
-	</target>
-
-	<!-- convertschema -->
-	<!-- convert xmi schema into tg schema -->
-	<target name="oldconvertschema">
-		<java jar="${common.dir}/lib/saxon/saxon9.jar" fork="true">
-			<arg line="-s:OsmSchema.xmi -xsl:../jgralab/src/de/uni_koblenz/jgralab/utilities/xmi2tgschema/XMI2TGSchema.xsl -o:OsmSchema.tg tool=ea schemaName=de.uni_koblenz.jgstreetmap.osmschema.OsmSchema" />
-		</java>
 	</target>
 </project>

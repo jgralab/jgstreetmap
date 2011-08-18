@@ -14,7 +14,7 @@ import java.util.TreeSet;
 
 import de.uni_koblenz.jgralab.Vertex;
 import de.uni_koblenz.jgralab.graphmarker.GraphMarker;
-import de.uni_koblenz.jgstreetmap.osmschema.impl.savemem.OsmGraphImpl;
+import de.uni_koblenz.jgstreetmap.osmschema.impl.std.OsmGraphImpl;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.HasRoot;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.KDTree;
 import de.uni_koblenz.jgstreetmap.osmschema.kdtree.Key;

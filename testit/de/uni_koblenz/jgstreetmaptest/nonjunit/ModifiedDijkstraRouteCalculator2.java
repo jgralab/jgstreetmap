@@ -19,38 +19,17 @@ import de.uni_koblenz.jgstreetmap.routing.RoutingResult;
 
 public class ModifiedDijkstraRouteCalculator2 extends RouteCalculator {
 
-	private static class DijkstraMarker {
-
-		/** indicates that Dijkstra is done with the vertex */
-		boolean done;
-
-		/** * records the distance to the start vertex */
-		double distance;
-
-		/** stores the predecessor in the path from the start vertex */
-		Segment parentSegment;
-
-		DijkstraMarker(double d, Segment s) {
-			distance = d;
-			parentSegment = s;
-		}
-	}
-
-	// protected GraphMarker<DijkstraMarker> dijkstraMarker;
 	protected BitSetVertexMarker done;
 	protected DoubleVertexMarker distance;
 	protected ArrayVertexMarker<Segment> parentSegment;
 
 	PriorityQueue<Node> queue;
 
-	// protected RoutingRestriction rest;
-
 	protected boolean routesCalculated;
 
 	protected boolean startChanged;
 
 	public ModifiedDijkstraRouteCalculator2(OsmGraph g) {
-		// dijkstraMarker = null;
 		done = null;
 		distance = null;
 		parentSegment = null;
@@ -103,7 +82,6 @@ public class ModifiedDijkstraRouteCalculator2 extends RouteCalculator {
 			// retrieve vertex with smallest distance and mark as "done"
 			Node currentVertex = queue.poll();
 
-			// DijkstraMarker m = dijkstraMarker.getMark(currentVertex);
 			done.mark(currentVertex);
 
 			// follow each traverseable edge
@@ -119,7 +97,6 @@ public class ModifiedDijkstraRouteCalculator2 extends RouteCalculator {
 									parentSegment.get(currentVertex));
 					// if the new path is shorter than the distance stored
 					// at the other end, this new value is stored
-					// DijkstraMarker n = dijkstraMarker.getMark(nextVertex);
 					if (!distance.isMarked(nextVertex)) {
 						distance.mark(nextVertex, newDistance);
 						parentSegment.mark(nextVertex, currentSegment);
@@ -150,7 +127,6 @@ public class ModifiedDijkstraRouteCalculator2 extends RouteCalculator {
 			calculateShortestRoutes(rating);
 		}
 
-		// DijkstraMarker m = dijkstraMarker.getMark(target);
 		if (parentSegment.getMark(target) == null) {
 			return new RoutingResult(null, System.currentTimeMillis()
 					- startTime);
@@ -160,7 +136,6 @@ public class ModifiedDijkstraRouteCalculator2 extends RouteCalculator {
 		while ((parentSegment.getMark(currentNode) != null)) {
 			routesegments.push(parentSegment.getMark(currentNode));
 			currentNode = (Node) parentSegment.getMark(currentNode).getThis();
-			// m = dijkstraMarker.getMark(m.parentSegment.getThis());
 		}
 
 		List<Segment> out = new ArrayList<Segment>(routesegments.size());

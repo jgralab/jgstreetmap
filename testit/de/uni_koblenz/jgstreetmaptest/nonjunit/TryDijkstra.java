@@ -17,10 +17,7 @@ import de.uni_koblenz.jgralab.algolib.functions.adapters.MethodCallToBooleanFunc
 import de.uni_koblenz.jgralab.algolib.functions.adapters.MethodCallToDoubleFunctionAdapter;
 import de.uni_koblenz.jgralab.algolib.visitors.GraphVisitorAdapter;
 import de.uni_koblenz.jgralab.graphmarker.BitSetVertexMarker;
-import de.uni_koblenz.jgralab.greql2.evaluator.GreqlEvaluator;
-import de.uni_koblenz.jgralab.greql2.jvalue.JValue;
 import de.uni_koblenz.jgralab.impl.ConsoleProgressFunction;
-import de.uni_koblenz.jgralab.utilities.tg2dot.greql2.GreqlEvaluatorFacade;
 import de.uni_koblenz.jgralabtest.algolib.nonjunit.Stopwatch;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmGraph;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmSchema;
@@ -37,7 +34,7 @@ public class TryDijkstra {
 	private static final int MAX_VISITORS = 15;
 	private static final int IGNORE_LEFT = Math.round(RUNS * 0.05f);
 	private static final int IGNORE_RIGHT = Math.round(RUNS / 5f);
-	
+
 	public static void main(String[] args) throws GraphIOException {
 		OsmGraph graph = OsmSchema.instance().loadOsmGraphWithSavememSupport(
 				"OsmGraph.tg.gz", new ConsoleProgressFunction());

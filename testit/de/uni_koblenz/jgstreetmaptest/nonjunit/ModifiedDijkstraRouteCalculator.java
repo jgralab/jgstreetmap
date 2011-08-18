@@ -36,8 +36,6 @@ public class ModifiedDijkstraRouteCalculator extends RouteCalculator {
 	protected GraphMarker<DijkstraMarker> dijkstraMarker;
 	PriorityQueue<Node> queue;
 
-	// protected RoutingRestriction rest;
-
 	protected boolean routesCalculated;
 
 	protected boolean startChanged;

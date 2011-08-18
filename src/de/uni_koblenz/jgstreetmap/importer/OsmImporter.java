@@ -10,6 +10,8 @@ import java.util.Map;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
+import org.pcollections.ArrayPMap;
+import org.pcollections.PMap;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -35,8 +37,10 @@ public class OsmImporter extends DefaultHandler {
 	};
 
 	static {
-		OsmSchema.instance().getGraphFactory()
-				.setGraphSavememImplementationClass(OsmGraph.class,
+		OsmSchema
+				.instance()
+				.getGraphFactory()
+				.setGraphImplementationClass(OsmGraph.class,
 						AnnotatedOsmGraph.class);
 	}
 
@@ -51,7 +55,7 @@ public class OsmImporter extends DefaultHandler {
 	private AnnotatedOsmGraph graph;
 	private SimpleDateFormat dateFormat;
 	private OsmPrimitive currentPrimitive;
-	private Map<String, String> currentTagMap;
+	private PMap<String, String> currentTagMap;
 	private int nodeCount;
 	private MinimalSAXParser parser;
 	private HashSet<String> usedTags;
@@ -207,8 +211,7 @@ public class OsmImporter extends DefaultHandler {
 	public void startDocument() throws SAXException {
 		System.out.println("Converting...");
 		startTime = System.currentTimeMillis();
-		graph = (AnnotatedOsmGraph) OsmSchema.instance()
-				.createOsmGraphWithSavememSupport();
+		graph = (AnnotatedOsmGraph) OsmSchema.instance().createOsmGraph();
 		nodeMap = new HashMap<Long, Node>();
 		wayMap = new HashMap<Long, Way>();
 		relationMap = new HashMap<Long, Relation>();
@@ -339,7 +342,7 @@ public class OsmImporter extends DefaultHandler {
 		} else if ((state != State.INIT) && (state != State.OSM)
 				&& name.equals("tag")) {
 			if (currentTagMap == null) {
-				currentTagMap = new HashMap<String, String>();
+				currentTagMap = ArrayPMap.empty();
 			}
 			String key = atts.getValue("k");
 			if (!usedTags.contains(key)) {
@@ -351,7 +354,7 @@ public class OsmImporter extends DefaultHandler {
 			v = v.replaceAll("&lt;", "<");
 			v = v.replaceAll("&quot;", "\"");
 			v = v.replaceAll("&amp;", "&");
-			currentTagMap.put(key, v);
+			currentTagMap = currentTagMap.plus(key, v);
 
 		} else if ((state == State.RELATION) && name.equals("member")) {
 			String type = atts.getValue("type").trim();
