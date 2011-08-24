@@ -6,6 +6,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/jgralab"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/common"/>
 	<classpathentry kind="lib" path="/common/lib/apache/commons/cli/commons-cli-1.2.jar"/>
-	<classpathentry kind="lib" path="/common/lib/pcollections/pcollections-2.0.1.jar"/>
+	<classpathentry kind="lib" path="/Users/riediger/Documents/workspace-dev/jgralab/lib/pcollections/pcollections-2.1.0-SNAPSHOT.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

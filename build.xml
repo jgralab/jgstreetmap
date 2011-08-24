@@ -11,10 +11,6 @@
 	
 	<property name="schema.file" value="${project.dir}/OsmSchema.tg" />
 
-	<path id="classpathExtension">
-
-	</path>
-
 	<target name="generategraph">
 		<java classname="de.uni_koblenz.jgstreetmap.importer.OsmImporter" classpathref="classpath" fork="true" maxmemory="2G" dir="./">
 			
