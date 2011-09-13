@@ -36,8 +36,8 @@ public class TryDijkstra {
 	private static final int IGNORE_RIGHT = Math.round(RUNS / 5f);
 
 	public static void main(String[] args) throws GraphIOException {
-		OsmGraph graph = OsmSchema.instance().loadOsmGraphWithSavememSupport(
-				"OsmGraph.tg.gz", new ConsoleProgressFunction());
+		OsmGraph graph = OsmSchema.instance().loadOsmGraph("OsmGraph.tg.gz",
+				new ConsoleProgressFunction());
 
 		int nodes = 0;
 		for (Vertex v : graph.vertices()) {
