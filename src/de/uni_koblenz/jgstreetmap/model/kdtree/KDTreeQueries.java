@@ -82,7 +82,7 @@ public class KDTreeQueries {
 					bottomRightLat, (NodeSet) key.getFirstHasSetIncidence()
 							.getThat());
 		} else {
-			HasXChild rightChild = leftChild.getNextHasXChild();
+			HasXChild rightChild = leftChild.getNextHasXChildIncidence();
 			assert rightChild != null;
 			if (keyVal < topLeftLat) {
 				// only the right subtree has to be examined further
@@ -119,7 +119,7 @@ public class KDTreeQueries {
 					bottomRightLat, (NodeSet) key.getFirstHasSetIncidence()
 							.getThat());
 		} else {
-			HasYChild rightChild = leftChild.getNextHasYChild();
+			HasYChild rightChild = leftChild.getNextHasYChildIncidence();
 			assert rightChild != null;
 			if (keyVal < topLeftLong) {
 				// examine only the right subtree
@@ -205,16 +205,16 @@ public class KDTreeQueries {
 			if (lon <= keyVal) {
 				return nearestNode(g, (XKey) leftChild.getThat(), lat, lon);
 			} else {
-				return nearestNode(g, (XKey) leftChild.getNextHasXChild()
-						.getThat(), lat, lon);
+				return nearestNode(g, (XKey) leftChild
+						.getNextHasXChildIncidence().getThat(), lat, lon);
 			}
 		} else {
 			HasYChild leftChild = ((YKey) key).getFirstHasYChildIncidence();
 			if (lat <= keyVal) {
 				return nearestNode(g, (YKey) leftChild.getThat(), lat, lon);
 			} else {
-				return nearestNode(g, (YKey) leftChild.getNextHasYChild()
-						.getThat(), lat, lon);
+				return nearestNode(g, (YKey) leftChild
+						.getNextHasYChildIncidence().getThat(), lat, lon);
 			}
 		}
 	}
