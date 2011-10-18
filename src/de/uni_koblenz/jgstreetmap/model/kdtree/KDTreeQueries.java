@@ -147,7 +147,7 @@ public class KDTreeQueries {
 	 * examines for every Node of the given NodeSet set if the Node is contained
 	 * by the rectangle defined by its vertex at the upper left corner and its
 	 * vertex at the lower right corner
-	 * 
+	 *
 	 * @param g
 	 * @param topLeftLong
 	 *            longitude of the vertex at the upper left corner of the
@@ -167,14 +167,8 @@ public class KDTreeQueries {
 	public static void rangeQuery(AnnotatedOsmGraph g, List<Node> l,
 			double topLeftLong, double topLeftLat, double bottomRightLong,
 			double bottomRightLat, NodeSet set) {
-
-		// System.out.println(set);
-		int c = 0;
 		for (HasElement e : set.getHasElementIncidences()) {
 			Node n = (Node) e.getThat();
-			++c;
-			// System.out.println(" (" + n.get_latitude() + ", "
-			// + n.get_longitude() + ")");
 			if ((n.get_latitude() >= topLeftLat)
 					&& (n.get_latitude() <= bottomRightLat)
 					&& (n.get_longitude() <= bottomRightLong)
@@ -183,7 +177,6 @@ public class KDTreeQueries {
 				l.add(n);
 			}
 		}
-		// System.out.println(c + " Nodes");
 	}
 
 	public static Node nearestNodeStart(AnnotatedOsmGraph g, double lat,
