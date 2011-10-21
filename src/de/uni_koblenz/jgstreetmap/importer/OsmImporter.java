@@ -17,7 +17,6 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import de.uni_koblenz.ist.utilities.option_handler.OptionHandler;
-import de.uni_koblenz.jgralab.GraphIO;
 import de.uni_koblenz.jgralab.GraphIOException;
 import de.uni_koblenz.jgralab.impl.ConsoleProgressFunction;
 import de.uni_koblenz.jgstreetmap.model.AnnotatedOsmGraph;
@@ -224,8 +223,7 @@ public class OsmImporter extends DefaultHandler {
 		postProcess();
 		graph.defragment();
 		try {
-			GraphIO.saveGraphToFile(outFile, graph,
-					new ConsoleProgressFunction());
+			graph.save(outFile, new ConsoleProgressFunction());
 		} catch (GraphIOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
