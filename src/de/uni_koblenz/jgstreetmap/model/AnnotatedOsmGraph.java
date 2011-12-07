@@ -60,7 +60,7 @@ public class AnnotatedOsmGraph extends OsmGraphImpl {
 		// Mengengerüst berechnen
 		Map<String, Integer> m = new HashMap<String, Integer>();
 		for (Vertex v = getFirstVertex(); v != null; v = v.getNextVertex()) {
-			String n = "V " + v.getM1Class().getSimpleName();
+			String n = "V " + v.getSchemaClass().getSimpleName();
 			if (m.containsKey(n)) {
 				m.put(n, m.get(n) + 1);
 			} else {
@@ -69,7 +69,7 @@ public class AnnotatedOsmGraph extends OsmGraphImpl {
 		}
 		for (de.uni_koblenz.jgralab.Edge e = getFirstEdge(); e != null; e = e
 				.getNextEdge()) {
-			String n = "E " + e.getM1Class().getSimpleName();
+			String n = "E " + e.getSchemaClass().getSimpleName();
 			if (m.containsKey(n)) {
 				m.put(n, m.get(n) + 1);
 			} else {

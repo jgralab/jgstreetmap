@@ -64,7 +64,7 @@ public class KDTreeQueries {
 					bottomRightLat, (YKey) key);
 		} else {
 			throw new RuntimeException("Unexpected KD root type "
-					+ key.getM1Class());
+					+ key.getSchemaClass());
 		}
 	}
 
@@ -147,7 +147,7 @@ public class KDTreeQueries {
 	 * examines for every Node of the given NodeSet set if the Node is contained
 	 * by the rectangle defined by its vertex at the upper left corner and its
 	 * vertex at the lower right corner
-	 *
+	 * 
 	 * @param g
 	 * @param topLeftLong
 	 *            longitude of the vertex at the upper left corner of the
@@ -186,7 +186,7 @@ public class KDTreeQueries {
 			return nearestNode(g, key, lat, lon);
 		} else {
 			throw new RuntimeException("Unexpected KD root type "
-					+ key.getM1Class());
+					+ key.getSchemaClass());
 		}
 	}
 

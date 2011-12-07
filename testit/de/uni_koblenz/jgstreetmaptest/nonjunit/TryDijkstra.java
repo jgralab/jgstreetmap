@@ -190,8 +190,8 @@ public class TryDijkstra {
 
 		@Override
 		public boolean get(GraphElement parameter) {
-			return parameter.getM1Class() == Segment.class
-					|| parameter.getM1Class() == Node.class;
+			return parameter.getSchemaClass() == Segment.class
+					|| parameter.getSchemaClass() == Node.class;
 		}
 
 		@Override
@@ -246,8 +246,8 @@ public class TryDijkstra {
 	private static long runOnAlgolibImplementation(OsmGraph graph, Node start,
 			Node target, Stopwatch sw, int visitors, boolean printResult) {
 		sw.reset();
-		DijkstraAlgorithm dijkstra = new DijkstraAlgorithm(graph, subgraph,
-				navigable, edgeWeight).undirected();
+		DijkstraAlgorithm dijkstra = new DijkstraAlgorithm(graph, navigable,
+				edgeWeight).undirected();
 		for (int i = 0; i < visitors; i++) {
 			// System.out.println("Adding visitor...");
 			dijkstra.addVisitor(new GraphVisitorAdapter());
