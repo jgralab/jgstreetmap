@@ -9,17 +9,11 @@ import de.uni_koblenz.jgralab.impl.SwingProgressFunction;
 import de.uni_koblenz.jgstreetmap.gui.MapFrame;
 import de.uni_koblenz.jgstreetmap.model.AnnotatedOsmGraph;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmGraph;
+import de.uni_koblenz.jgstreetmap.osmschema.OsmGraphFactory;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmSchema;
+import de.uni_koblenz.jgstreetmap.osmschema.impl.std.OsmGraphFactoryImpl;
 
 public class JGStreetMap {
-	static {
-		OsmSchema
-				.instance()
-				.getGraphFactory()
-				.setGraphImplementationClass(OsmGraph.class,
-						AnnotatedOsmGraph.class);
-	}
-
 	private static CommandLine processCommandLineOptions(String[] args) {
 		String toolString = "java " + JGStreetMap.class.getName();
 		String versionString = "1.1";
@@ -58,7 +52,10 @@ public class JGStreetMap {
 			// // and feel.
 			// }
 
-			OsmGraph graph = OsmSchema.instance().loadOsmGraph(graphFile,
+			OsmGraphFactory f = new OsmGraphFactoryImpl();
+			f.setGraphImplementationClass(OsmGraph.ATTRIBUTED_ELEMENT_CLASS,
+					AnnotatedOsmGraph.class);
+			OsmGraph graph = OsmSchema.instance().loadOsmGraph(graphFile, f,
 					new SwingProgressFunction("jgStreetMap", "Loading Map..."));
 			new MapFrame((AnnotatedOsmGraph) graph, withAntiAliazing);
 		} catch (GraphIOException e) {

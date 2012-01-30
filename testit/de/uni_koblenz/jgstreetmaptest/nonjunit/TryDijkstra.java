@@ -186,16 +186,16 @@ public class TryDijkstra {
 		return sw.getNanoDuration();
 	}
 
-	private static BooleanFunction<GraphElement> subgraph = new MethodCallToBooleanFunctionAdapter<GraphElement>() {
+	private static BooleanFunction<GraphElement<?, ?>> subgraph = new MethodCallToBooleanFunctionAdapter<GraphElement<?, ?>>() {
 
 		@Override
-		public boolean get(GraphElement parameter) {
+		public boolean get(GraphElement<?, ?> parameter) {
 			return parameter.getSchemaClass() == Segment.class
 					|| parameter.getSchemaClass() == Node.class;
 		}
 
 		@Override
-		public boolean isDefined(GraphElement parameter) {
+		public boolean isDefined(GraphElement<?, ?> parameter) {
 			return true;
 		}
 	};

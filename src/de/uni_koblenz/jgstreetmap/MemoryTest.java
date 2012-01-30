@@ -4,7 +4,9 @@ import de.uni_koblenz.jgralab.GraphIOException;
 import de.uni_koblenz.jgralab.impl.ConsoleProgressFunction;
 import de.uni_koblenz.jgstreetmap.model.AnnotatedOsmGraph;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmGraph;
+import de.uni_koblenz.jgstreetmap.osmschema.OsmGraphFactory;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmSchema;
+import de.uni_koblenz.jgstreetmap.osmschema.impl.std.OsmGraphFactoryImpl;
 
 public class MemoryTest {
 
@@ -12,13 +14,11 @@ public class MemoryTest {
 		try {
 			String graphFile = (args.length > 0) ? args[0] : "OsmGraph.tg.gz";
 			printMemory("After start");
-			OsmSchema
-					.instance()
-					.getGraphFactory()
-					.setGraphImplementationClass(OsmGraph.class,
-							AnnotatedOsmGraph.class);
+			OsmGraphFactory f = new OsmGraphFactoryImpl();
+			f.setGraphImplementationClass(OsmGraph.ATTRIBUTED_ELEMENT_CLASS,
+					AnnotatedOsmGraph.class);
 			printMemory("After setting GraphFactory");
-			OsmGraph graph = OsmSchema.instance().loadOsmGraph(graphFile,
+			OsmGraph graph = OsmSchema.instance().loadOsmGraph(graphFile, f,
 					new ConsoleProgressFunction());
 			printMemory("After loading Graph");
 			System.err.println("V: " + graph.getVCount());

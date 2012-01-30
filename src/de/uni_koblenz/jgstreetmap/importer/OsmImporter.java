@@ -22,7 +22,9 @@ import de.uni_koblenz.jgralab.impl.ConsoleProgressFunction;
 import de.uni_koblenz.jgstreetmap.model.AnnotatedOsmGraph;
 import de.uni_koblenz.jgstreetmap.model.kdtree.KDTreeBuilder;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmGraph;
+import de.uni_koblenz.jgstreetmap.osmschema.OsmGraphFactory;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmSchema;
+import de.uni_koblenz.jgstreetmap.osmschema.impl.std.OsmGraphFactoryImpl;
 import de.uni_koblenz.jgstreetmap.osmschema.map.HasMember;
 import de.uni_koblenz.jgstreetmap.osmschema.map.Node;
 import de.uni_koblenz.jgstreetmap.osmschema.map.OsmPrimitive;
@@ -36,11 +38,6 @@ public class OsmImporter extends DefaultHandler {
 	};
 
 	static {
-		OsmSchema
-				.instance()
-				.getGraphFactory()
-				.setGraphImplementationClass(OsmGraph.class,
-						AnnotatedOsmGraph.class);
 	}
 
 	private static final int DEFAULT_SET_MEMBERS = 512;
@@ -210,7 +207,11 @@ public class OsmImporter extends DefaultHandler {
 	public void startDocument() throws SAXException {
 		System.out.println("Converting...");
 		startTime = System.currentTimeMillis();
-		graph = (AnnotatedOsmGraph) OsmSchema.instance().createOsmGraph();
+		OsmGraphFactory f = new OsmGraphFactoryImpl();
+		f.setGraphImplementationClass(OsmGraph.ATTRIBUTED_ELEMENT_CLASS,
+				AnnotatedOsmGraph.class);
+		graph = (AnnotatedOsmGraph) OsmSchema.instance().createOsmGraph(f);
+		// OsmSchema.instance().createOsmGraph(f);
 		nodeMap = new HashMap<Long, Node>();
 		wayMap = new HashMap<Long, Way>();
 		relationMap = new HashMap<Long, Relation>();
