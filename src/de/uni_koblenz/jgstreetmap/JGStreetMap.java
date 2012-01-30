@@ -53,8 +53,7 @@ public class JGStreetMap {
 			// }
 
 			OsmGraphFactory f = new OsmGraphFactoryImpl();
-			f.setGraphImplementationClass(OsmGraph.ATTRIBUTED_ELEMENT_CLASS,
-					AnnotatedOsmGraph.class);
+			f.setGraphImplementationClass(OsmGraph.GC, AnnotatedOsmGraph.class);
 			OsmGraph graph = OsmSchema.instance().loadOsmGraph(graphFile, f,
 					new SwingProgressFunction("jgStreetMap", "Loading Map..."));
 			new MapFrame((AnnotatedOsmGraph) graph, withAntiAliazing);

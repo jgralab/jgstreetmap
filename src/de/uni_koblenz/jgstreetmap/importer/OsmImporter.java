@@ -208,10 +208,8 @@ public class OsmImporter extends DefaultHandler {
 		System.out.println("Converting...");
 		startTime = System.currentTimeMillis();
 		OsmGraphFactory f = new OsmGraphFactoryImpl();
-		f.setGraphImplementationClass(OsmGraph.ATTRIBUTED_ELEMENT_CLASS,
-				AnnotatedOsmGraph.class);
+		f.setGraphImplementationClass(OsmGraph.GC, AnnotatedOsmGraph.class);
 		graph = (AnnotatedOsmGraph) OsmSchema.instance().createOsmGraph(f);
-		// OsmSchema.instance().createOsmGraph(f);
 		nodeMap = new HashMap<Long, Node>();
 		wayMap = new HashMap<Long, Way>();
 		relationMap = new HashMap<Long, Relation>();

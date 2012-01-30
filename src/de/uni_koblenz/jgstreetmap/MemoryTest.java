@@ -15,8 +15,7 @@ public class MemoryTest {
 			String graphFile = (args.length > 0) ? args[0] : "OsmGraph.tg.gz";
 			printMemory("After start");
 			OsmGraphFactory f = new OsmGraphFactoryImpl();
-			f.setGraphImplementationClass(OsmGraph.ATTRIBUTED_ELEMENT_CLASS,
-					AnnotatedOsmGraph.class);
+			f.setGraphImplementationClass(OsmGraph.GC, AnnotatedOsmGraph.class);
 			printMemory("After setting GraphFactory");
 			OsmGraph graph = OsmSchema.instance().loadOsmGraph(graphFile, f,
 					new ConsoleProgressFunction());
