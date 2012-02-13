@@ -28,6 +28,12 @@ Build `common` first, then `jgralab`, and then `jgstreetmap`.
 All projects contain Eclipse `.project` and `.classpath` files, so that you can
 import them in Eclipse as existing projects.
 
+## Getting an OSM-Graph
+
+You can either download a OSM graph containing Rhineland-Palatinate
+[here](http://userpages.uni-koblenz.de/~ist/OsmRhinelandPalatinate.tg.gz), or
+convert an OSM XML file yourself using the `runimporter.sh` shell script.
+
 ## License
 
 Copyright (C) 2007-2012 The JGraLab Team <ist@uni-koblenz.de>
