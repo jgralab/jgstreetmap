@@ -11,6 +11,7 @@ import java.util.List;
 import de.uni_koblenz.jgralab.Vertex;
 import de.uni_koblenz.jgstreetmap.model.AnnotatedOsmGraph;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmGraph;
+import de.uni_koblenz.jgstreetmap.osmschema.OsmSchema;
 import de.uni_koblenz.jgstreetmap.osmschema.map.Node;
 import de.uni_koblenz.jgstreetmap.osmschema.map.Way;
 import de.uni_koblenz.jgstreetmap.osmschema.routing.Segment;
@@ -128,8 +129,8 @@ public class Segmentator {
 	}
 
 	public static double distance(Node n1, Node n2) {
-		return distance(n1.get_latitude(), n1.get_longitude(), n2
-				.get_latitude(), n2.get_longitude());
+		return distance(n1.get_latitude(), n1.get_longitude(),
+				n2.get_latitude(), n2.get_longitude());
 	}
 
 	public static double distance(double lat, double lon, Node n) {
@@ -173,11 +174,11 @@ public class Segmentator {
 
 	public static void segmentateGraph(OsmGraph theGraph) {
 		System.out.print("Computing tags for the ways...");
-		computeTags(theGraph.vertices(Way.class));
+		computeTags(theGraph.vertices(OsmSchema.instance().vc_map_Way));
 		System.out.println("done");
 		System.out.print("Computing relevant Ways...");
 		List<Way> relevantWays = computeRelevantWays(theGraph
-				.vertices(Way.class));
+				.vertices(OsmSchema.instance().vc_map_Way));
 		System.out.println("done");
 
 		System.out.println("Segmentating Ways...");
