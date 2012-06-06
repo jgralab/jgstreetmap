@@ -11,7 +11,6 @@ import java.util.List;
 import de.uni_koblenz.jgralab.Vertex;
 import de.uni_koblenz.jgstreetmap.model.AnnotatedOsmGraph;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmGraph;
-import de.uni_koblenz.jgstreetmap.osmschema.OsmSchema;
 import de.uni_koblenz.jgstreetmap.osmschema.map.Node;
 import de.uni_koblenz.jgstreetmap.osmschema.map.Way;
 import de.uni_koblenz.jgstreetmap.osmschema.routing.Segment;
@@ -144,7 +143,7 @@ public class Segmentator {
 		double k1 = deltaLat * 60 * GpsTools.MINUTEMETER;
 		double k2 = deltaLon * 60 * GpsTools.MINUTEMETER
 				* cos(toRadians((lat1 + lat2) / 2.0));
-		return sqrt(k1 * k1 + k2 * k2);
+		return sqrt((k1 * k1) + (k2 * k2));
 	}
 
 	public static boolean isIntersection(Node currentNode) {
@@ -160,7 +159,7 @@ public class Segmentator {
 
 	private static boolean isOneway(Way w) {
 		String oneway = AnnotatedOsmGraph.getTag(w, "oneway");
-		return (oneway != null && w.get_wayType() != SegmentType.NOWAY && (oneway
+		return ((oneway != null) && (w.get_wayType() != SegmentType.NOWAY) && (oneway
 				.equalsIgnoreCase("yes") || oneway.equalsIgnoreCase("true")));
 	}
 
@@ -174,13 +173,11 @@ public class Segmentator {
 
 	public static void segmentateGraph(OsmGraph theGraph) {
 		System.out.print("Computing tags for the ways...");
-		computeTags(theGraph.vertices(OsmSchema.instance().vc_map_Way));
+		computeTags(theGraph.vertices(Way.VC));
 		System.out.println("done");
 		System.out.print("Computing relevant Ways...");
-		List<Way> relevantWays = computeRelevantWays(theGraph
-				.vertices(OsmSchema.instance().vc_map_Way));
+		List<Way> relevantWays = computeRelevantWays(theGraph.vertices(Way.VC));
 		System.out.println("done");
-
 		System.out.println("Segmentating Ways...");
 		int c = segmentate(theGraph, relevantWays);
 		System.out.println("done");
