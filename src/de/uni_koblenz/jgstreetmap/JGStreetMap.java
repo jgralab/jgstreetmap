@@ -4,7 +4,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 
 import de.uni_koblenz.ist.utilities.option_handler.OptionHandler;
-import de.uni_koblenz.jgralab.GraphIOException;
+import de.uni_koblenz.jgralab.exception.GraphIOException;
 import de.uni_koblenz.jgralab.impl.SwingProgressFunction;
 import de.uni_koblenz.jgstreetmap.gui.MapFrame;
 import de.uni_koblenz.jgstreetmap.model.AnnotatedOsmGraph;
