@@ -143,7 +143,7 @@ public class Segmentator {
 		double k1 = deltaLat * 60 * GpsTools.MINUTEMETER;
 		double k2 = deltaLon * 60 * GpsTools.MINUTEMETER
 				* cos(toRadians((lat1 + lat2) / 2.0));
-		return sqrt(k1 * k1 + k2 * k2);
+		return sqrt((k1 * k1) + (k2 * k2));
 	}
 
 	public static boolean isIntersection(Node currentNode) {
@@ -159,7 +159,7 @@ public class Segmentator {
 
 	private static boolean isOneway(Way w) {
 		String oneway = AnnotatedOsmGraph.getTag(w, "oneway");
-		return (oneway != null && w.get_wayType() != SegmentType.NOWAY && (oneway
+		return ((oneway != null) && (w.get_wayType() != SegmentType.NOWAY) && (oneway
 				.equalsIgnoreCase("yes") || oneway.equalsIgnoreCase("true")));
 	}
 
@@ -178,7 +178,6 @@ public class Segmentator {
 		System.out.print("Computing relevant Ways...");
 		List<Way> relevantWays = computeRelevantWays(theGraph.vertices(Way.VC));
 		System.out.println("done");
-
 		System.out.println("Segmentating Ways...");
 		int c = segmentate(theGraph, relevantWays);
 		System.out.println("done");
