@@ -1,3 +1,4 @@
 build/
 bin/
 src/de/uni_koblenz/jgstreetmap/osmschema/
+/OsmGraph.tg.gz
