@@ -7,7 +7,7 @@
 
 	<property name="schema.implementationMode" value="standard" />
 
-	<import file="../common/common.xml" />
+	<import file="../jgralab/common.xml" />
 	
 	<property name="schema.file" value="${project.dir}/OsmSchema.tg" />
 
