@@ -2,23 +2,29 @@ package de.uni_koblenz.jgstreetmap;
 
 import de.uni_koblenz.jgralab.exception.GraphIOException;
 import de.uni_koblenz.jgralab.impl.ConsoleProgressFunction;
-import de.uni_koblenz.jgstreetmap.model.AnnotatedOsmGraph;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmGraph;
-import de.uni_koblenz.jgstreetmap.osmschema.OsmGraphFactory;
 import de.uni_koblenz.jgstreetmap.osmschema.OsmSchema;
-import de.uni_koblenz.jgstreetmap.osmschema.impl.std.OsmGraphFactoryImpl;
 
 public class MemoryTest {
 
 	public static void main(String[] args) {
 		try {
-			String graphFile = (args.length > 0) ? args[0] : "OsmGraph.tg.gz";
+			String graphFile = (args.length > 0) ? args[0] : "OsmGraph.tg";
 			printMemory("After start");
-			OsmGraphFactory f = new OsmGraphFactoryImpl();
-			f.setGraphImplementationClass(OsmGraph.GC, AnnotatedOsmGraph.class);
-			printMemory("After setting GraphFactory");
-			OsmGraph graph = OsmSchema.instance().loadOsmGraph(graphFile, f,
+
+			// OsmGraphFactory f = new OsmGraphFactoryImpl();
+			// f.setGraphImplementationClass(OsmGraph.GC,
+			// AnnotatedOsmGraph.class);
+			// printMemory("After setting GraphFactory");
+
+			long start = System.currentTimeMillis();
+			// OsmGraph graph = OsmSchema.instance().loadOsmGraph(graphFile, f,
+			// new ConsoleProgressFunction());
+			OsmGraph graph = OsmSchema.instance().loadOsmGraph(graphFile,
 					new ConsoleProgressFunction());
+			long stop = System.currentTimeMillis();
+			System.out.println("Time to load graph: " + (stop - start) / 1000.0
+					+ "s");
 			printMemory("After loading Graph");
 			System.err.println("V: " + graph.getVCount());
 			System.err.println("E: " + graph.getECount());

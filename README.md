@@ -11,16 +11,13 @@ example, clone both projects into some base folder `jgsrc` so that the
 filesystem structure is like so.
 
     jgsrc/               # your jgralab workspace
-    +-> common/          # the common project
     +-> jgralab/         # the jgralab project
     `-> jgstreetmap      # this project
 
 To build the projects you need to have [Apache Ant](http://ant.apache.org/).
-Build `common` first, then `jgralab`, and then `jgstreetmap`.
+Build `jgralab` first, and then `jgstreetmap`.
 
-    $ cd jgsrc/common/
-    $ ant
-    $ cd ../jgralab/
+    $ cd jgsrc/jgralab/
     $ ant
     $ cd ../jgstreetmap/
     $ ant
@@ -36,7 +33,7 @@ convert an OSM XML file yourself using the `runimporter.sh` shell script.
 
 ## License
 
-Copyright (C) 2007-2012 The JGraLab Team <ist@uni-koblenz.de>
+Copyright (C) 2007-2013 The JGraLab Team <ist@uni-koblenz.de>
 
 Distributed under the General Public License (Version 3), with the following
 additional grant:
